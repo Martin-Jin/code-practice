@@ -1,0 +1,56 @@
+﻿# Question index
+
+| # | Title | Marks | Topic | File |
+|---|---|---|---|---|
+| 1 | Singly linked-list: Insert() | 5 | Linked lists & List ADT | [questions/q01_sll_insert.cpp](questions/q01_sll_insert.cpp) |
+| 2 | Singly linked-list: Remove() | 5 | Linked lists & List ADT | [questions/q02_sll_remove.cpp](questions/q02_sll_remove.cpp) |
+| 3 | Singly linked-list: Head() and Tail() | 3 | Linked lists & List ADT | [questions/q03_sll_head_tail.cpp](questions/q03_sll_head_tail.cpp) |
+| 4 | Singly linked-list: IndexOf() and Contains() | 4 | Linked lists & List ADT | [questions/q04_sll_indexof_contains.cpp](questions/q04_sll_indexof_contains.cpp) |
+| 5 | Singly linked-list: Reverse() | 5 | Linked lists & List ADT | [questions/q05_sll_reverse.cpp](questions/q05_sll_reverse.cpp) |
+| 6 | Singly linked-list: Destructor | 3 | Linked lists & List ADT, dynamic memory | [questions/q06_sll_destructor.cpp](questions/q06_sll_destructor.cpp) |
+| 7 | Singly linked-list: RemoveTail() | 4 | Linked lists & List ADT | [questions/q07_sll_remove_tail.cpp](questions/q07_sll_remove_tail.cpp) |
+| 8 | Singly linked-list: Fix the Insert() function | 4 | Linked lists & List ADT, debugging | [questions/q08_sll_fix_insert.cpp](questions/q08_sll_fix_insert.cpp) |
+| 9 | Singly linked-list: Print() | 3 | Linked lists & List ADT | [questions/q09_sll_print.cpp](questions/q09_sll_print.cpp) |
+| 10 | Templated singly linked-list: Add() and FindKth() | 5 | Linked lists & List ADT (templates) | [questions/q10_sll_template.cpp](questions/q10_sll_template.cpp) |
+| 11 | Array list AIntList: Insert() | 4 | Linked lists & List ADT (array implementation) | [questions/q11_alist_insert.cpp](questions/q11_alist_insert.cpp) |
+| 12 | Array list AIntList: Remove() and FindKth() | 4 | Linked lists & List ADT (array implementation) | [questions/q12_alist_remove.cpp](questions/q12_alist_remove.cpp) |
+| 13 | Stack built on a linked-list: LStack<T> | 4 | Stack and queue | [questions/q13_lstack.cpp](questions/q13_lstack.cpp) |
+| 14 | Stack application: IsBalanced() | 5 | Stack and queue | [questions/q14_balanced_brackets.cpp](questions/q14_balanced_brackets.cpp) |
+| 15 | Stack application: EvaluatePostfix() | 5 | Stack and queue | [questions/q15_postfix.cpp](questions/q15_postfix.cpp) |
+| 16 | Circular queue CQueue: constructor and Enqueue() | 4 | Stack and queue (circular array) | [questions/q16_cqueue_enqueue.cpp](questions/q16_cqueue_enqueue.cpp) |
+| 17 | Circular queue CQueue: Dequeue() and Peek() | 4 | Stack and queue (circular array) | [questions/q17_cqueue_dequeue.cpp](questions/q17_cqueue_dequeue.cpp) |
+| 18 | Fix the buggy circular queue CQueue | 4 | Stack and queue (circular array) | [questions/q18_cqueue_fix.cpp](questions/q18_cqueue_fix.cpp) |
+| 19 | Queue: Hot Potato | 5 | Stacks & queues | [questions/q19_hot_potato.cpp](questions/q19_hot_potato.cpp) |
+| 20 | Binary search tree: Insert() | 6 | Trees & binary search trees | [questions/q20_bst_insert.cpp](questions/q20_bst_insert.cpp) |
+| 21 | Binary search tree: FindMin() and FindMax() | 5 | Trees & binary search trees | [questions/q21_bst_min_max.cpp](questions/q21_bst_min_max.cpp) |
+| 22 | Binary search tree: Height() | 5 | Trees & binary search trees | [questions/q22_bst_height.cpp](questions/q22_bst_height.cpp) |
+| 23 | Binary search tree: CountNodes() and CountLeaves() | 6 | Trees & binary search trees | [questions/q23_bst_count.cpp](questions/q23_bst_count.cpp) |
+| 24 | Binary search tree: Remove() | 8 | Trees & binary search trees | [questions/q24_bst_remove.cpp](questions/q24_bst_remove.cpp) |
+| 25 | Binary tree: IsValidBST() | 7 | Trees & binary search trees | [questions/q25_bst_is_valid.cpp](questions/q25_bst_is_valid.cpp) |
+| 26 | Binary search tree: PrintReverse() | 4 | Trees & binary search trees | [questions/q26_bst_print_reverse.cpp](questions/q26_bst_print_reverse.cpp) |
+| 27 | Strategy pattern: searching | 8 | Strategy design pattern & searching | [questions/q27_strategy_search.cpp](questions/q27_strategy_search.cpp) |
+| 28 | Binary search tree: fix Insert() | 4 | Trees & binary search trees | [questions/q28_bst_fix_insert.cpp](questions/q28_bst_fix_insert.cpp) |
+| 29 | Binary search tree: InOrder() and PreOrder() | 5 | Trees & binary search trees | [questions/q29_bst_traversals.cpp](questions/q29_bst_traversals.cpp) |
+| 30 | Binary search tree: CountInRange() | 5 | Trees & binary search trees | [questions/q30_bst_count_in_range.cpp](questions/q30_bst_count_in_range.cpp) |
+| 31 | Recursion: Factorial() | 3 | Recursion | [questions/q31_factorial.cpp](questions/q31_factorial.cpp) |
+| 32 | Recursion: Fibonacci() | 3 | Recursion | [questions/q32_fibonacci.cpp](questions/q32_fibonacci.cpp) |
+| 33 | Recursion: ReverseString() | 3 | Recursion | [questions/q33_reverse_string.cpp](questions/q33_reverse_string.cpp) |
+| 34 | Recursion: Power() by fast exponentiation | 4 | Recursion | [questions/q34_fast_power.cpp](questions/q34_fast_power.cpp) |
+| 35 | Recursion: fix IsPalindrome() | 4 | Recursion | [questions/q35_fix_palindrome.cpp](questions/q35_fix_palindrome.cpp) |
+| 36 | Recursion: BinarySearchRec() | 5 | Recursion, Algorithms and search | [questions/q36_binary_search_rec.cpp](questions/q36_binary_search_rec.cpp) |
+| 37 | Recursion: Gcd() | 4 | Recursion & algorithms | [questions/q37_gcd.cpp](questions/q37_gcd.cpp) |
+| 38 | Fast Fourier transform: ditfft2() | 8 | Complex arithmetic & FFT | [questions/q38_fft_ditfft2.cpp](questions/q38_fft_ditfft2.cpp) |
+| 39 | AVL tree: GetHeight(), GetBalance(), UpdateHeight() | 3 | AVL trees | [questions/q39_avl_helpers.cpp](questions/q39_avl_helpers.cpp) |
+| 40 | AVL tree: RotateRight() and RotateLeft() | 5 | AVL trees | [questions/q40_avl_rotations.cpp](questions/q40_avl_rotations.cpp) |
+| 41 | AVL tree: Rebalance() | 5 | AVL trees | [questions/q41_avl_rebalance.cpp](questions/q41_avl_rebalance.cpp) |
+| 42 | AVL tree: InsertValue() | 6 | AVL trees | [questions/q42_avl_insert.cpp](questions/q42_avl_insert.cpp) |
+| 43 | AVL tree: fix the buggy RotateRight() | 4 | AVL trees | [questions/q43_avl_fix_rotate.cpp](questions/q43_avl_fix_rotate.cpp) |
+| 44 | Sentinel linear search: SentinelSearch() | 4 | Algorithms & search | [questions/q44_sentinel_search.cpp](questions/q44_sentinel_search.cpp) |
+| 45 | Fix the bugs: BinarySearchCount() | 4 | Algorithms and search (binary search) | [questions/q45_binary_search_fix.cpp](questions/q45_binary_search_fix.cpp) |
+| 46 | Knuth's Algorithm M: FindMax() | 4 | Algorithms and search | [questions/q46_find_max_algorithm_m.cpp](questions/q46_find_max_algorithm_m.cpp) |
+| 47 | Nth roots of unity: NthRoots() | 4 | Complex arithmetic in C++ | [questions/q47_nth_roots.cpp](questions/q47_nth_roots.cpp) |
+| 48 | A single DFT coefficient: DftBin() | 4 | Fourier transform and DFT | [questions/q48_dft_bin.cpp](questions/q48_dft_bin.cpp) |
+| 49 | Naive DFT: NaiveDft() | 5 | Fourier transform and DFT | [questions/q49_naive_dft.cpp](questions/q49_naive_dft.cpp) |
+| 50 | Fix the bugs: ditfft2() | 4 | Fast Fourier transform | [questions/q50_fft_fix.cpp](questions/q50_fft_fix.cpp) |
+
+Marks are estimates (3 = quick, 8 = long); the real CodeRunner questions were worth 2-5.

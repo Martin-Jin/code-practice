@@ -1,0 +1,8 @@
+CLAUDE.md
+CLAUDE.local.md
+CLAUDE.template.md
+.claude/
+build*/
+*.exe
+scratch*
+deleted/
