@@ -1,0 +1,37 @@
+{
+  // Mimic the CodeRunner answer box: no autocomplete or editor assistance.
+  "editor.quickSuggestions": { "other": false, "comments": false, "strings": false },
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.tabCompletion": "off",
+  "editor.wordBasedSuggestions": "off",
+  "editor.snippetSuggestions": "none",
+  "editor.parameterHints.enabled": false,
+  "editor.hover.enabled": "off",
+  "editor.inlineSuggest.enabled": false,
+  "editor.lightbulb.enabled": "off",
+  "editor.formatOnType": false,
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.autoClosingBrackets": "never",
+  "editor.autoClosingQuotes": "never",
+  "editor.autoClosingOvertype": "never",
+  "editor.autoSurround": "never",
+  "editor.autoIndent": "none",
+  "editor.occurrencesHighlight": "off",
+  "editor.codeActionsOnSave": {},
+  "github.copilot.enable": { "*": false },
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "disabled",
+  "C_Cpp.errorSquiggles": "disabled",
+  "C_Cpp.formatting": "disabled",
+  "C_Cpp.codeAnalysis.runAutomatically": false,
+  "clangd.arguments": ["--completion-style=bundled", "--header-insertion=never"],
+  "[cpp]": {
+    "editor.quickSuggestions": { "other": false, "comments": false, "strings": false },
+    "editor.suggestOnTriggerCharacters": false,
+    "editor.autoClosingBrackets": "never",
+    "editor.autoClosingQuotes": "never"
+  }
+}
