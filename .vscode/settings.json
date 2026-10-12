@@ -1,5 +1,5 @@
 {
-  // Mimic the CodeRunner answer box: no autocomplete or editor assistance.
+  // Mimic the CodeRunner answer box: no suggestions, but keep bracket/quote auto-closing and C++ auto-formatting.
   "editor.quickSuggestions": { "other": false, "comments": false, "strings": false },
   "editor.suggestOnTriggerCharacters": false,
   "editor.acceptSuggestionOnEnter": "off",
@@ -11,27 +11,29 @@
   "editor.hover.enabled": "off",
   "editor.inlineSuggest.enabled": false,
   "editor.lightbulb.enabled": "off",
-  "editor.formatOnType": false,
+  "editor.formatOnType": true,
   "editor.formatOnSave": false,
   "editor.formatOnPaste": false,
-  "editor.autoClosingBrackets": "never",
-  "editor.autoClosingQuotes": "never",
-  "editor.autoClosingOvertype": "never",
+  "editor.autoClosingBrackets": "always",
+  "editor.autoClosingQuotes": "always",
+  "editor.autoClosingOvertype": "always",
   "editor.autoSurround": "never",
-  "editor.autoIndent": "none",
+  "editor.autoIndent": "full",
   "editor.occurrencesHighlight": "off",
   "editor.codeActionsOnSave": {},
   "github.copilot.enable": { "*": false },
-  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.intelliSenseEngine": "default",
   "C_Cpp.autocomplete": "disabled",
   "C_Cpp.errorSquiggles": "disabled",
-  "C_Cpp.formatting": "disabled",
+  "C_Cpp.formatting": "default",
+  "C_Cpp.clang_format_fallbackStyle": "Google",
   "C_Cpp.codeAnalysis.runAutomatically": false,
   "clangd.arguments": ["--completion-style=bundled", "--header-insertion=never"],
   "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.quickSuggestions": { "other": false, "comments": false, "strings": false },
     "editor.suggestOnTriggerCharacters": false,
-    "editor.autoClosingBrackets": "never",
-    "editor.autoClosingQuotes": "never"
+    "editor.autoClosingBrackets": "always",
+    "editor.autoClosingQuotes": "always"
   }
 }
