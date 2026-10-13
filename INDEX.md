@@ -4,13 +4,13 @@
 |---|---|---|---|---|
 | 1 | Singly linked-list: Insert() | 5 | Linked lists & List ADT | [questions/q01_sll_insert.cpp](questions/q01_sll_insert.cpp) |
 | 2 | Singly linked-list: Remove() | 5 | Linked lists & List ADT | [questions/q02_sll_remove.cpp](questions/q02_sll_remove.cpp) |
-| 3 | Singly linked-list: Head() and Tail() | 3 | Linked lists & List ADT | [questions/q03_sll_head_tail.cpp](questions/q03_sll_head_tail.cpp) |
+| 3 | Singly linked-list: InsertSorted() | 4 | Linked lists & List ADT | [questions/q03_sll_insert_sorted.cpp](questions/q03_sll_insert_sorted.cpp) |
 | 4 | Singly linked-list: IndexOf() and Contains() | 4 | Linked lists & List ADT | [questions/q04_sll_indexof_contains.cpp](questions/q04_sll_indexof_contains.cpp) |
 | 5 | Singly linked-list: Reverse() | 5 | Linked lists & List ADT | [questions/q05_sll_reverse.cpp](questions/q05_sll_reverse.cpp) |
 | 6 | Singly linked-list: Destructor | 3 | Linked lists & List ADT, dynamic memory | [questions/q06_sll_destructor.cpp](questions/q06_sll_destructor.cpp) |
 | 7 | Singly linked-list: RemoveTail() | 4 | Linked lists & List ADT | [questions/q07_sll_remove_tail.cpp](questions/q07_sll_remove_tail.cpp) |
 | 8 | Singly linked-list: Fix the Insert() function | 4 | Linked lists & List ADT, debugging | [questions/q08_sll_fix_insert.cpp](questions/q08_sll_fix_insert.cpp) |
-| 9 | Singly linked-list: Print() | 3 | Linked lists & List ADT | [questions/q09_sll_print.cpp](questions/q09_sll_print.cpp) |
+| 9 | Singly linked-list: PrintReverse() | 4 | Linked lists & List ADT, recursion | [questions/q09_sll_print_reverse.cpp](questions/q09_sll_print_reverse.cpp) |
 | 10 | Templated singly linked-list: Add() and FindKth() | 5 | Linked lists & List ADT (templates) | [questions/q10_sll_template.cpp](questions/q10_sll_template.cpp) |
 | 11 | Array list AIntList: Insert() | 4 | Linked lists & List ADT (array implementation) | [questions/q11_alist_insert.cpp](questions/q11_alist_insert.cpp) |
 | 12 | Array list AIntList: Remove() and FindKth() | 4 | Linked lists & List ADT (array implementation) | [questions/q12_alist_remove.cpp](questions/q12_alist_remove.cpp) |
@@ -32,9 +32,9 @@
 | 28 | Binary search tree: fix Insert() | 4 | Trees & binary search trees | [questions/q28_bst_fix_insert.cpp](questions/q28_bst_fix_insert.cpp) |
 | 29 | Binary search tree: InOrder() and PreOrder() | 5 | Trees & binary search trees | [questions/q29_bst_traversals.cpp](questions/q29_bst_traversals.cpp) |
 | 30 | Binary search tree: CountInRange() | 5 | Trees & binary search trees | [questions/q30_bst_count_in_range.cpp](questions/q30_bst_count_in_range.cpp) |
-| 31 | Recursion: Factorial() | 3 | Recursion | [questions/q31_factorial.cpp](questions/q31_factorial.cpp) |
-| 32 | Recursion: Fibonacci() | 3 | Recursion | [questions/q32_fibonacci.cpp](questions/q32_fibonacci.cpp) |
-| 33 | Recursion: ReverseString() | 3 | Recursion | [questions/q33_reverse_string.cpp](questions/q33_reverse_string.cpp) |
+| 31 | Recursion: Tower of Hanoi | 5 | Recursion | [questions/q31_hanoi.cpp](questions/q31_hanoi.cpp) |
+| 32 | Recursion: CountSubsets() | 5 | Recursion | [questions/q32_subset_sum.cpp](questions/q32_subset_sum.cpp) |
+| 33 | Recursion: PrintPermutations() | 5 | Recursion | [questions/q33_permutations.cpp](questions/q33_permutations.cpp) |
 | 34 | Recursion: Power() by fast exponentiation | 4 | Recursion | [questions/q34_fast_power.cpp](questions/q34_fast_power.cpp) |
 | 35 | Recursion: fix IsPalindrome() | 4 | Recursion | [questions/q35_fix_palindrome.cpp](questions/q35_fix_palindrome.cpp) |
 | 36 | Recursion: BinarySearchRec() | 5 | Recursion, Algorithms and search | [questions/q36_binary_search_rec.cpp](questions/q36_binary_search_rec.cpp) |
