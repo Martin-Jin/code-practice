@@ -1,6 +1,6 @@
-# MECHENG270 Part 2 practice questions
+﻿# MECHENG270 Part 2 practice questions
 
-50 CodeRunner-style C++ practice questions for MECHENG270 Part 2: linked lists, stacks and queues, binary search trees, recursion, AVL trees, searching, complex arithmetic, DFT/FFT and the Strategy pattern.
+84 CodeRunner-style C++ practice questions for MECHENG270 Part 2: linked lists, stacks and queues, binary search trees, recursion, AVL trees, searching, complex arithmetic, DFT/FFT, the Strategy pattern, iterators, sorting algorithms, expression trees and Big O.
 
 Each question is one file with its own tests. You pick which question to run by changing one number.
 
@@ -8,11 +8,11 @@ Each question is one file with its own tests. You pick which question to run by 
 
 | File / folder | What it is for |
 |---|---|
-| [INDEX.md](INDEX.md) | All 50 questions with title, marks and topic. Start here to pick one. |
+| [INDEX.md](INDEX.md) | All 84 questions with title, marks and topic. Start here to pick one. |
 | `questions/` | One file per question: the task, the provided code, your answer area and the tests. |
 | `main.cpp` | The runner. You change one number in it to choose a question. |
 | `framework/` | The small test framework. You never need to edit it. |
-| `solutions/` | Reference solutions. **Spoilers** — only look after you've tried. |
+| `solutions/` | Reference solutions. **Spoilers** â€” only look after you've tried. |
 | `CMakeLists.txt` | The CMake build file. |
 
 ## One-time setup
@@ -32,7 +32,7 @@ Open `main.cpp` and change the number:
 constexpr int kQuestion = 7;
 ```
 
-- `1` to `50` runs that one question.
+- `1` to `84` runs that one question.
 - `0` runs every question and prints a summary.
 
 ### Step 2: Write your answer
@@ -116,7 +116,7 @@ cmake --build .
 
 ## Check the reference solutions (optional)
 
-To build with the reference solutions instead of your answers (all 332 tests should pass), run from inside `build`:
+To build with the reference solutions instead of your answers (all 559 tests should pass), run from inside `build`:
 
 ```
 cmake -DUSE_SOLUTIONS=ON ..

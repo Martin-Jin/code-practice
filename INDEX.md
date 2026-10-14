@@ -52,5 +52,40 @@
 | 48 | A single DFT coefficient: DftBin() | 4 | Fourier transform and DFT | [questions/q48_dft_bin.cpp](questions/q48_dft_bin.cpp) |
 | 49 | Naive DFT: NaiveDft() | 5 | Fourier transform and DFT | [questions/q49_naive_dft.cpp](questions/q49_naive_dft.cpp) |
 | 50 | Fix the bugs: ditfft2() | 4 | Fast Fourier transform | [questions/q50_fft_fix.cpp](questions/q50_fft_fix.cpp) |
+| 51 | Join any container with an iterator loop | 4 | Iterators | [questions/q51_iter_join.cpp](questions/q51_iter_join.cpp) |
+| 52 | Reverse copy with reverse iterators | 4 | Iterators | [questions/q52_iter_reverse_copy.cpp](questions/q52_iter_reverse_copy.cpp) |
+| 53 | Mirror swap with two iterators | 5 | Iterators | [questions/q53_iter_mirror_swap.cpp](questions/q53_iter_mirror_swap.cpp) |
+| 54 | Write your own find with iterators | 5 | Iterators | [questions/q54_iter_find_first.cpp](questions/q54_iter_find_first.cpp) |
+| 55 | Fix the iterator bugs | 5 | Iterators | [questions/q55_iter_fix_bugs.cpp](questions/q55_iter_fix_bugs.cpp) |
+| 56 | K-th element from the end of a list | 5 | Iterators | [questions/q56_iter_kth_from_end.cpp](questions/q56_iter_kth_from_end.cpp) |
+| 57 | Selection sort with comparison count | 5 | Sorting algorithms | [questions/q57_selection_sort.cpp](questions/q57_selection_sort.cpp) |
+| 58 | Insertion sort with comparison count | 5 | Sorting algorithms | [questions/q58_insertion_sort.cpp](questions/q58_insertion_sort.cpp) |
+| 59 | Fix the bug: insertion sort | 4 | Sorting algorithms | [questions/q59_fix_insertion_sort.cpp](questions/q59_fix_insertion_sort.cpp) |
+| 60 | Merging two sorted runs | 5 | Sorting algorithms | [questions/q60_merge_runs.cpp](questions/q60_merge_runs.cpp) |
+| 61 | Recursive merge sort | 4 | Sorting algorithms | [questions/q61_merge_sort.cpp](questions/q61_merge_sort.cpp) |
+| 62 | Quicksort partition (Lomuto) | 5 | Sorting algorithms | [questions/q62_partition_span.cpp](questions/q62_partition_span.cpp) |
+| 63 | Recursive quicksort | 4 | Sorting algorithms | [questions/q63_quick_sort.cpp](questions/q63_quick_sort.cpp) |
+| 64 | Stable sort of records | 5 | Sorting algorithms | [questions/q64_stable_sort.cpp](questions/q64_stable_sort.cpp) |
+| 65 | Sorting versus repeated linear search | 3 | Sorting algorithms | [questions/q65_sort_break_even.cpp](questions/q65_sort_break_even.cpp) |
+| 66 | Counting inversions | 4 | Sorting algorithms | [questions/q66_count_inversions.cpp](questions/q66_count_inversions.cpp) |
+| 67 | Expression trees: BuildFromPostfix() | 6 | Expression trees | [questions/q67_expr_build_postfix.cpp](questions/q67_expr_build_postfix.cpp) |
+| 68 | Expression trees: Eval() | 6 | Expression trees | [questions/q68_expr_eval.cpp](questions/q68_expr_eval.cpp) |
+| 69 | Expression trees: ToPrefix() and ToPostfix() | 4 | Expression trees | [questions/q69_expr_prefix_postfix.cpp](questions/q69_expr_prefix_postfix.cpp) |
+| 70 | Expression trees: ToInfix() | 8 | Expression trees | [questions/q70_expr_to_infix.cpp](questions/q70_expr_to_infix.cpp) |
+| 71 | Expression trees: InfixToPostfix() | 8 | Expression trees | [questions/q71_expr_shunting_yard.cpp](questions/q71_expr_shunting_yard.cpp) |
+| 72 | Expression trees: Fix the bug in ToInfix() | 5 | Expression trees | [questions/q72_expr_fix_to_infix.cpp](questions/q72_expr_fix_to_infix.cpp) |
+| 73 | Expression trees: Destroy() | 3 | Expression trees | [questions/q73_expr_destroy.cpp](questions/q73_expr_destroy.cpp) |
+| 74 | Expression trees: CountOperators() and Height() | 4 | Expression trees | [questions/q74_expr_count_height.cpp](questions/q74_expr_count_height.cpp) |
+| 75 | Expression trees: EvaluateInfix() | 5 | Expression trees | [questions/q75_expr_evaluate_infix.cpp](questions/q75_expr_evaluate_infix.cpp) |
+| 76 | Expression trees: Tokenize() | 4 | Expression trees | [questions/q76_expr_tokenize.cpp](questions/q76_expr_tokenize.cpp) |
+| 77 | Sum 1..N in constant time | 3 | Big O and source analysis | [questions/q77_sum_closed_form.cpp](questions/q77_sum_closed_form.cpp) |
+| 78 | Duplicate detection in O(N log N) | 5 | Big O and source analysis | [questions/q78_has_duplicate.cpp](questions/q78_has_duplicate.cpp) |
+| 79 | Counting operations | 4 | Big O and source analysis | [questions/q79_operation_counting.cpp](questions/q79_operation_counting.cpp) |
+| 80 | Big O of code fragments | 5 | Big O and source analysis | [questions/q80_classify_fragments.cpp](questions/q80_classify_fragments.cpp) |
+| 81 | Proving T(N) = O(N^2) | 4 | Big O and source analysis | [questions/q81_bigo_constants.cpp](questions/q81_bigo_constants.cpp) |
+| 82 | Timing an algorithm | 4 | Big O and source analysis | [questions/q82_time_micros.cpp](questions/q82_time_micros.cpp) |
+| 83 | Fix the overflow in closed-form sums | 4 | Big O and source analysis | [questions/q83_fix_closed_form_overflow.cpp](questions/q83_fix_closed_form_overflow.cpp) |
+| 84 | Many lookups with binary search | 5 | Big O and source analysis | [questions/q84_contains_all.cpp](questions/q84_contains_all.cpp) |
 
 Marks are estimates (3 = quick, 8 = long); the real CodeRunner questions were worth 2-5.
+Q51-Q84 cover the extra topics in the vault (iterators, sorting, expression trees, Big O).
