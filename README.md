@@ -12,7 +12,7 @@ Each question is one file with its own tests. You pick which question to run by 
 | `questions/` | One file per question: the task, the provided code, your answer area and the tests. |
 | `main.cpp` | The runner. You change one number in it to choose a question. |
 | `framework/` | The small test framework. You never need to edit it. |
-| `solutions/` | Reference solutions. **Spoilers** â€” only look after you've tried. |
+| `solutions/` | Reference solutions. **Spoilers**: only look after you've tried. |
 | `CMakeLists.txt` | The CMake build file. |
 
 ## One-time setup
