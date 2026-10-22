@@ -27,4 +27,9 @@ cmake --build $dir
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 & "./$dir/practice.exe"
-Write-Host "`nExit code: $LASTEXITCODE (a crash shows as a large or negative number)"
+$code = $LASTEXITCODE
+if ($code -lt 0 -or $code -gt 255) {
+  Write-Host "`nProgram crashed (exit code $code)" -ForegroundColor Red
+} else {
+  Write-Host "`nExit code: $code"
+}

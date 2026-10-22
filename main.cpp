@@ -2,7 +2,7 @@
 //  MECHENG270 practice questions - test runner
 //
 //  Change kQuestion to pick which question to test:
-//      1..84  -> run just that question
+//      1..86  -> run just that question
 //      0      -> run every question (summary at the end)
 //
 //  Then build & run (see README.md). Each question lives in

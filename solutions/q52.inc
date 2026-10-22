@@ -1,7 +1,8 @@
-vector<int> ReverseCopy(const vector<int>& v) {
-  vector<int> result;
-  for (auto it = v.rbegin(); it != v.rend(); ++it) {
-    result.push_back(*it);
-  }
-  return result;
+double TimeMicros(const function<void()>& f, int repeats) {
+  if (repeats <= 0) return 0.0;
+  auto start = chrono::steady_clock::now();
+  for (int i = 0; i < repeats; ++i) f();
+  auto end = chrono::steady_clock::now();
+  double total = chrono::duration<double, micro>(end - start).count();
+  return total / repeats;
 }

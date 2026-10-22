@@ -9,7 +9,9 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # (used to check that every test is satisfiable).
 option(USE_SOLUTIONS "Build with the reference solutions" OFF)
 
-file(GLOB QUESTION_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/questions/*.cpp)
+file(GLOB QUESTION_SOURCES CONFIGURE_DEPENDS
+     ${CMAKE_SOURCE_DIR}/questions/*.cpp
+     ${CMAKE_SOURCE_DIR}/extra_questions/questions/*.cpp)
 
 add_executable(practice main.cpp framework/test_framework.cpp ${QUESTION_SOURCES})
 target_include_directories(practice PRIVATE ${CMAKE_SOURCE_DIR})
