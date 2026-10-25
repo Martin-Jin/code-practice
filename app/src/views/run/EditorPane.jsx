@@ -26,13 +26,6 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSug
       const action = editor.getAction('editor.action.formatDocument');
       if (action) action.run();
     },
-    // Phones have no Ctrl+Space, so a button opens the suggestion list.
-    suggest: () => {
-      const { editor } = live.current;
-      if (!editor) return;
-      editor.focus();
-      editor.trigger('button', 'editor.action.triggerSuggest', {});
-    },
     // Drop unsaved edits (used right before the run is reset, so they cannot overwrite the reset).
     discard: () => live.current.dirty && live.current.dirty.clear(),
     // Save edits still waiting on the autosave timer, then write everything to disk now.
@@ -72,7 +65,7 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSug
       const { monaco, createEditor } = mod;
       const editor = createEditor(host.current, state.catalog.editor, dark);
       mod.setFormatErrorHandler((message) => toast(message, 'bad'));
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => onRunRef.current());
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => onRunRef.current());
       // Ctrl+Space opens the suggestion list and also turns on suggestions-as-you-type.
       const openSuggestions = () => { onAutoSuggestRef.current(true); editor.trigger('keyboard', 'editor.action.triggerSuggest', {}); };
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, openSuggestions);
@@ -134,7 +127,7 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSug
     if (ready) live.current.mod.setTheme(dark);
   }, [ready, dark]);
 
-  // Suggestions as you type are off until Ctrl+Space (or the Suggest button) turns them on.
+  // Suggestions as you type are off until Ctrl+Space turns them on.
   useEffect(() => {
     if (!ready) return;
     const base = state.catalog.editor;

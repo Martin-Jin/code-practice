@@ -11,6 +11,7 @@ export const state = {
   stats: {},           // setId -> stats
   runner: 'online',    // 'local' | 'online'
   local: null,         // { compiler } when the local g++ server answered, else null
+  autoSuggest: false,  // editor shows name suggestions as you type (Settings, or Ctrl+Space)
 };
 
 let version = 0;

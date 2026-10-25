@@ -77,6 +77,9 @@ svg.icon.solid { fill: currentColor; stroke: none; }
 .btn.ghost { border-color: transparent; background: transparent; }
 .btn.ghost:hover { background: var(--surface-2); }
 .btn.icon-only { padding: 0; width: 32px; justify-content: center; }
+.btn.reveal { gap: 0; padding: 0 9px; }
+.btn.reveal .lbl { max-width: 0; margin-left: 0; opacity: 0; overflow: hidden; transition: max-width .2s ease, margin-left .2s ease, opacity .15s ease; }
+.btn.reveal:hover .lbl, .btn.reveal:focus-visible .lbl { max-width: 80px; margin-left: 6px; opacity: 1; }
 .btn.lg { height: 38px; padding: 0 18px; font-size: 14px; }
 .btn.sm { height: 26px; padding: 0 8px; font-size: 12px; }
 .btn:not(.ghost)[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
@@ -178,15 +181,17 @@ table.stats tr.zero td { color: var(--muted); }
 .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
 /* ---------- run workspace ---------- */
-.run { height: 100vh; display: grid; grid-template-rows: 42px 1fr; min-height: 0; }
-.run-top { display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
+/* The top bar slides away until the pointer (or keyboard focus) reaches the thin strip it leaves at the top. */
+.run { position: relative; height: 100vh; display: grid; grid-template-rows: minmax(0, 1fr); min-height: 0; }
+.run-top { position: absolute; inset: 0 0 auto 0; z-index: 30; height: 42px; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; transform: translateY(calc(-100% + 6px)); transition: transform .2s ease .05s, box-shadow .2s ease; }
+.run-top:hover, .run-top:focus-within { transform: none; box-shadow: 0 6px 16px rgb(0 0 0 / 25%); transition-delay: 0s; }
 .run-top h1 { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .run-top .progress { display: flex; align-items: center; gap: 8px; width: 150px; margin: 0 6px; font-size: 12px; color: var(--muted); }
 .run-top .progress .bar { flex: 1; }
-.run-body { display: grid; grid-template-columns: var(--side-w, 290px) minmax(0, 1fr); min-height: 0; }
+.run-body { padding-top: 6px; display: grid; grid-template-columns: 44px var(--side-w, 290px) minmax(0, 1fr); min-height: 0; }
 /* The hidden sidebar is display:none, so it leaves the grid: the workspace must then be the
    only column. (Keeping a 0-width first column pushed the workspace into it.) */
-.run-body.side-hidden { grid-template-columns: minmax(0, 1fr); }
+.run-body.side-hidden { grid-template-columns: 44px minmax(0, 1fr); }
 .run-body.side-hidden > .side { display: none; }
 .side { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 8px 0 24px; min-width: 0; }
 .side .grp-label { padding: 12px 14px 4px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
@@ -212,14 +217,14 @@ table.stats tr.zero td { color: var(--muted); }
 .st svg.icon { width: 10px; height: 10px; stroke-width: 2.2; }
 
 .work { position: relative; display: grid; grid-template-columns: var(--q-w, 42%) 6px minmax(0, 1fr); min-width: 0; min-height: 0; }
-.work.task-closed { grid-template-columns: 34px 0 minmax(0, 1fr); }
-.work > .rail, .work > .qpane { grid-column: 1; grid-row: 1; }
+.work.task-closed { grid-template-columns: 0 0 minmax(0, 1fr); }
+.work > .qpane { grid-column: 1; grid-row: 1; }
 .work > .splitter { grid-column: 2; grid-row: 1; }
 .work > .right { grid-column: 3; grid-row: 1; }
-.rail { display: none; }
-.work.task-closed .rail { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 12px; border: 0; border-right: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; font: inherit; }
-.work.task-closed .rail:hover { background: var(--surface-2); color: var(--text); }
-.rail span { writing-mode: vertical-rl; font-weight: 700; letter-spacing: .1em; font-size: 12px; }
+/* Icon strip at the far left (like VS Code's activity bar): one button per panel. */
+.activity { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; background: var(--surface); border-right: 1px solid var(--border); }
+.activity .btn { position: relative; }
+.activity .btn[aria-pressed="true"]::before { content: ""; position: absolute; left: -6px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: var(--accent); }
 .qpane { display: grid; grid-template-rows: auto 1fr; min-height: 0; min-width: 0; background: var(--surface); }
 .tabs { display: flex; gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--border); background: var(--surface); align-items: center; }
 .tabs button.tab { white-space: nowrap; border: 0; background: none; padding: 10px 12px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; gap: 6px; align-items: center; }
@@ -231,6 +236,11 @@ table.stats tr.zero td { color: var(--muted); }
 .prose h2 { font-size: 20px; margin-bottom: 8px; }
 .prose .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
 .prose .para { white-space: pre-wrap; margin: 0 0 12px; line-height: 1.6; tab-size: 4; }
+.prose .items { margin: 0 0 12px; padding-left: 22px; line-height: 1.6; }
+.prose .items li { margin: 3px 0; padding-left: 2px; }
+.prose .items li::marker { color: var(--muted); }
+.prose .items .items { margin: 2px 0 4px; }
+.prose .items li > .para { margin: 2px 0 6px; color: var(--muted); }
 .prose h3 { margin: 18px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .prose code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
 pre.code { margin: 0; padding: 14px 16px; background: var(--surface-2); border-radius: 8px; overflow: auto; line-height: 1.5; tab-size: 4; }
@@ -248,7 +258,11 @@ body.resizing .monaco-editor { pointer-events: none; }
 .right { display: grid; grid-template-rows: auto minmax(120px, 1fr) 6px var(--out-h, 38%); min-width: 0; min-height: 0; background: var(--surface); }
 .editor-bar { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border-bottom: 1px solid var(--border); min-width: 0; }
 .editor-bar > * { flex: none; }
-.editor-bar > .qt { flex: 1 1 0; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 60px; }
+.editor-bar > .qt { flex: 0 1 auto; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 36px; }
+.editor-bar > .spacer { flex: 1 1 0; }
+/* Only the question number shows until the title is hovered. */
+.qt-title { display: inline-block; vertical-align: bottom; max-width: 0; opacity: 0; overflow: hidden; white-space: pre; transition: max-width .3s ease, opacity .2s ease; }
+.qt:hover .qt-title { max-width: 80ch; opacity: 1; }
 .editor-bar .hint { font-size: 12px; color: var(--muted); }
 .editor-host { min-height: 0; min-width: 0; position: relative; }
 .right.out-closed { grid-template-rows: auto minmax(120px, 1fr) auto; }
@@ -307,7 +321,7 @@ table.difftable tr.add td.t.g:empty::before, table.difftable tr.del td.t.e:empty
 .running { display: flex; align-items: center; gap: 10px; padding: 24px 6px; color: var(--muted); }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--surface-3); border-top-color: var(--accent); animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } .bar > i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .btn.reveal .lbl, .qt-title, .run-top { transition: none; } .spinner { animation-duration: 2s; } .bar > i { transition: none; } }
 .placeholder { color: var(--muted); padding: 30px 8px; text-align: center; }
 
 /* menus, dialogs, toasts */
@@ -370,13 +384,15 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .show-mobile { display: none; }
 .run.mobile { height: 100dvh; grid-template-rows: 48px minmax(0, 1fr) auto; }
 .run.mobile .hide-mobile { display: none; }
+.run.mobile .run-top { position: static; transform: none; height: auto; box-shadow: none; }
+.run.mobile .run-body { padding-top: 0; }
 .run.mobile .show-mobile { display: inline-flex; }
 .run.mobile .run-body, .run.mobile .run-body.side-hidden { grid-template-columns: minmax(0, 1fr); }
 .run.mobile .run-body > .side { display: none; width: auto; border-right: 0; }
 .run.mobile[data-mtab="questions"] .run-body > .side { display: block; }
 .run.mobile[data-mtab="questions"] .work { display: none; }
 .run.mobile .work { grid-template-columns: minmax(0, 1fr); }
-.run.mobile .work > .rail, .run.mobile .splitter { display: none; }
+.run.mobile .activity, .run.mobile .splitter { display: none; }
 .run.mobile .work > .qpane, .run.mobile .work > .right { grid-column: 1; }
 .run.mobile[data-mtab="task"] .work > .right { display: none; }
 .run.mobile:not([data-mtab="task"]) .work > .qpane { display: none; }
@@ -389,6 +405,7 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .run.mobile .qpane .tabs .btn, .run.mobile .output .tabs .btn { display: none; }
 .run.mobile .editor-bar { flex-wrap: wrap; }
 .run.mobile .editor-bar > .qt { flex-basis: 100%; order: -1; }
+.run.mobile .qt-title { max-width: none; opacity: 1; }
 .run.mobile .qitem { padding-top: 12px; padding-bottom: 12px; }
 .run.mobile .side .cat { padding-top: 12px; padding-bottom: 12px; }
 .run.mobile .btn { height: 40px; }
@@ -418,3 +435,10 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
   dialog.modal form { max-height: calc(100dvh - 32px); }
   .menu { right: -40px; }
 }
+
+/* ---------- shortcuts dialog ---------- */
+.shortcuts { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; margin: 0; }
+.shortcuts dt { color: var(--text); }
+.shortcuts dd { margin: 0; text-align: right; display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.shortcuts h3 { grid-column: 1 / -1; margin: 8px 0 0; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.shortcuts .kbd { font-size: 12px; padding: 1px 6px; opacity: 1; }

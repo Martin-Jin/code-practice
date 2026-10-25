@@ -207,7 +207,7 @@ export default function Output({ result, q, running, runnerError, tab, onTab, on
   let body;
   if (running) body = <div className="running"><span className="spinner" /> Compiling and running the tests…</div>;
   else if (runnerError) body = <Banner tone="warn" icon="warning" title="Could not run your code" sub={runnerError} />;
-  else if (!result) body = <div className="placeholder">Press <b>Run</b> (<span className="kbd">Ctrl</span> + <span className="kbd">Enter</span>) to compile your answer and run the tests.</div>;
+  else if (!result) body = <div className="placeholder">Press <b>Run</b> (<span className="kbd">Ctrl</span> + <span className="kbd">Shift</span> + <span className="kbd">Enter</span>) to compile your answer and run the tests.</div>;
   else if (tab === 'compiler') body = <CompilerTab result={result} q={q} onJump={onJump} />;
   else if (tab === 'raw') body = <Raw result={result} />;
   else body = <Results result={result} q={q} onJump={onJump} onTab={onTab} />;

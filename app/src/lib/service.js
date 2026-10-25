@@ -9,6 +9,7 @@ import { execute, detectLocal } from './runners.js';
 
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
+const SUGGEST_KEY = 'autoSuggest';
 
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => b.toString(16).padStart(2, '0')).join('');
 
@@ -23,6 +24,7 @@ export async function boot() {
     let saved = null;
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }
     state.runner = saved === 'online' || (saved === 'local' && state.local) ? saved : state.local ? 'local' : 'online';
+    try { state.autoSuggest = localStorage.getItem(SUGGEST_KEY) === 'true'; } catch { /* storage blocked */ }
   } catch (e) {
     state.error = e.message;
   }
@@ -33,6 +35,12 @@ export async function boot() {
 export function setRunner(runner) {
   state.runner = runner;
   try { localStorage.setItem(RUNNER_KEY, runner); } catch { /* storage blocked */ }
+  notify();
+}
+
+export function setAutoSuggest(on) {
+  state.autoSuggest = on;
+  try { localStorage.setItem(SUGGEST_KEY, String(on)); } catch { /* storage blocked */ }
   notify();
 }
 

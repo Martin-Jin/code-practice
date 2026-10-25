@@ -3,7 +3,7 @@ import { MODE_LABELS } from '../../../shared/modes.js';
 import { useStore, state } from '../../lib/store.js';
 import { getSet, getQuestion } from '../../lib/catalog.js';
 import {
-  runQuestion, resetCode, resetRun, reselect, renameRun, deleteRun, runSummary, flushSaves,
+  runQuestion, setAutoSuggest, resetCode, resetRun, reselect, renameRun, deleteRun, runSummary, flushSaves,
 } from '../../lib/service.js';
 import Icon from '../../components/Icon.jsx';
 import { Modal, useDialogs } from '../../components/Dialogs.jsx';
@@ -102,8 +102,6 @@ export default function RunView({ runId, param, theme }) {
   const [editorKey, setEditorKey] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [autoSuggest, setAutoSuggestState] = useState(() => load('autoSuggest', false));
-  const setAutoSuggest = useCallback((on) => { setAutoSuggestState(on); save('autoSuggest', on); }, []);
   // On a phone the workspace shows one panel at a time, chosen from a bar at the bottom.
   const mobile = useMediaQuery('(max-width: 820px)');
   const [mtab, setMtab] = useState('task');
@@ -130,7 +128,7 @@ export default function RunView({ runId, param, theme }) {
   useEffect(() => {
     const onKey = (e) => {
       if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 't') { e.preventDefault(); toggleTask(); }
-      else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleSide(); }
+      else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'q') { e.preventDefault(); toggleSide(); }
       else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o') { e.preventDefault(); toggleOutput(); }
       else if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setSearchOpen(true); }
     };
@@ -295,9 +293,6 @@ export default function RunView({ runId, param, theme }) {
     <div className={`run${mobile ? ' mobile' : ''}`} data-mtab={mtab}>
       <header className="run-top">
         <a className="btn ghost icon-only" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
-        <button type="button" className="btn ghost icon-only hide-mobile" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the question list (Alt+B)" aria-label="Toggle question list">
-          <Icon name="sidebar" />
-        </button>
         <h1 title={`${run.name} (${MODE_LABELS[run.mode]})`}>{run.name}</h1>
         <span className="spacer" />
         <div className="progress" title={`${sum.passed} of ${sum.total} questions pass`}>
@@ -311,42 +306,41 @@ export default function RunView({ runId, param, theme }) {
       </header>
 
       <div className={`run-body${sideOpen ? '' : ' side-hidden'}`}>
+        <nav className="activity" aria-label="Panels">
+          <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the question list (Alt+Q)" aria-label="Question list">
+            <Icon name="sidebar" />
+          </button>
+          <button type="button" className="btn ghost icon-only" onClick={toggleTask} aria-pressed={taskOpen} title="Show or hide the task text next to the editor (Alt+T)" aria-label="Task">
+            <Icon name="task" />
+          </button>
+        </nav>
         <Sidebar run={run} set={set} current={n} onSearch={() => setSearchOpen(true)}
           onSelect={(num) => { goto(num); setMtab('task'); }} />
 
         <div className={`work${taskOpen || mobile ? '' : ' task-closed'}`} ref={workRef} style={{ '--q-w': `${sizes.q}%` }}>
-          <button type="button" className="rail" onClick={toggleTask} title="Show the task (Alt+T)">
-            <Icon name="task" /><span>TASK</span>
-          </button>
           {(taskOpen || mobile) && taskPane}
           {taskOpen && !mobile && <Splitter onMove={startDrag('x')} onEnd={endDrag} onReset={resetSizes} />}
 
           <section className={`right${outputOpen || mobile ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
             <div className="editor-bar">
-              <span className="qt" title={q.title}>Q{n} · {q.title}</span>
+              <span className="qt" title={q.title}>Q{n}<span className="qt-title"> · {q.title}</span></span>
+              <span className="spacer" />
               {stq.attempts > 0 && <span className="muted small">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
               {status === 'passed' && <span className="chip ok">Passed</span>}
-              <button type="button" className="btn ghost hide-mobile" aria-pressed={taskOpen} onClick={toggleTask} title="Show or hide the task text next to the editor (Alt+T)">
-                <Icon name="task" /> Task
-              </button>
-              <button type="button" className="btn ghost hide-mobile" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)">
-                <Icon name="stats" /> Output
+              <button type="button" className="btn ghost reveal hide-mobile" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)" aria-label="Output">
+                <Icon name="stats" /><span className="lbl">Output</span>
               </button>
               <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
               <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
                 <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
               </button>
-              <button type="button" className="btn ghost" aria-pressed={autoSuggest} title="Name suggestions as you type. Ctrl+Space turns this on and opens the list; click to switch it off or on."
-                onClick={() => { if (autoSuggest) setAutoSuggest(false); else { setAutoSuggest(true); if (editor.current) editor.current.suggest(); } }}>
-                <Icon name="code" /> Suggest
-              </button>
               <button type="button" className="btn ghost icon-only" onClick={() => editor.current && editor.current.format()} title="Format the code (Shift+Alt+F)" aria-label="Format code"><Icon name="format" /></button>
               <button type="button" className="btn ghost icon-only" onClick={resetCurrentCode} title="Reset code: put the starter code back" aria-label="Reset code"><Icon name="refresh" /></button>
-              <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Enter)">
+              <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Shift+Enter)">
                 <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'}
               </button>
             </div>
-            <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} autoSuggest={autoSuggest} onAutoSuggest={setAutoSuggest} />
+            <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} autoSuggest={st.autoSuggest} onAutoSuggest={setAutoSuggest} />
             {outputOpen && !mobile && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
             <Output
               result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen || mobile} onToggle={toggleOutput}

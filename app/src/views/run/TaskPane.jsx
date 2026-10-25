@@ -21,6 +21,79 @@ function reflow(lines) {
   return out.join('\n');
 }
 
+const indentOf = (line) => line.match(/^ */)[0].length;
+const BULLET = /^(\s*)([-*•]|\d+[.)])\s+(\S.*)$/;
+
+// A list marker starts an item, except a "0." or "2." at the very left, which is a wrapped
+// sentence ("... 0. (k may be ...)") rather than a numbered list.
+function marker(line, inList) {
+  const m = BULLET.exec(line);
+  if (!m) return null;
+  const ordered = /\d/.test(m[2]);
+  if (ordered && !inList && m[1].length === 0 && parseInt(m[2], 10) !== 1) return null;
+  return { indent: m[1].length, ordered, number: ordered ? parseInt(m[2], 10) : 0, text: m[3] };
+}
+
+// Splits lines into paragraphs and lists. An item owns the lines indented deeper than its marker;
+// those are parsed again, so nested lists work. Other text keeps the reflow rules above.
+function parseBlocks(lines) {
+  const blocks = [];
+  let para = [];
+  const flush = () => { if (para.length) blocks.push({ type: 'p', text: reflow(para) }); para = []; };
+  for (let i = 0; i < lines.length;) {
+    const first = marker(lines[i], false);
+    if (!first) { para.push(lines[i]); i += 1; continue; }
+    flush();
+    const list = { type: 'list', ordered: first.ordered, start: first.number, items: [] };
+    while (i < lines.length) {
+      const m = marker(lines[i], true);
+      if (!m || m.indent !== first.indent || m.ordered !== first.ordered) break;
+      i += 1;
+      const body = [];
+      while (i < lines.length && indentOf(lines[i]) > m.indent) body.push(lines[i++]);
+      list.items.push({ text: m.text, body });
+    }
+    blocks.push(list);
+  }
+  flush();
+  return blocks;
+}
+
+const dedent = (lines) => {
+  const n = Math.min(...lines.map(indentOf));
+  return lines.map((l) => l.slice(n));
+};
+
+// "T Top()      return the top" (a signature, a wide gap, then what it does) shows the signature as code.
+// A wide gap after plain words ("the node is a leaf    -> delete it") is only alignment.
+function Item({ item: { text, body: rawBody } }) {
+  const split = /^(.*?\S) {3,}(\S.*)$/.exec(text);
+  const sig = split && /[(){}<>:=]|^(class|struct)\b/.test(split[1]) ? split : null;
+  const body = rawBody.length ? dedent(rawBody) : [];
+  const nested = body.some((l) => marker(l, false));
+  const prose = !sig && !/\(|::/.test(text);
+  // Wrapped lines continue the sentence, unless a signature heads the item and they describe it.
+  if (!nested && (sig || prose)) {
+    const flat = (sig ? sig[2] : text.replace(/ {2,}/g, ' '));
+    const rest = [flat, ...body.map((l) => l.trim())].join(' ');
+    return <li>{sig && <><code>{sig[1]}</code> </>}<Inline text={rest} /></li>;
+  }
+  return (
+    <li>
+      {body.length > 0 && !nested ? <code>{text}</code> : <Inline text={text} />}
+      {body.length > 0 && <Blocks lines={body} />}
+    </li>
+  );
+}
+
+function Blocks({ lines }) {
+  return parseBlocks(lines).map((b, i) => (b.type === 'list'
+    ? (b.ordered
+      ? <ol key={i} className="items" start={b.start}>{b.items.map((it, k) => <Item key={k} item={it} />)}</ol>
+      : <ul key={i} className="items">{b.items.map((it, k) => <Item key={k} item={it} />)}</ul>)
+    : <p key={i} className="para"><Inline text={b.text} /></p>));
+}
+
 function Statement({ text }) {
   return text.split(/\n{2,}/).flatMap((para, i) => {
     const lines = para.split('\n');
@@ -28,7 +101,7 @@ function Statement({ text }) {
     const body = heading ? lines.slice(1) : lines;
     return [
       heading && <h3 key={`h${i}`}>Task</h3>,
-      body.length > 0 && <p key={`p${i}`} className="para"><Inline text={reflow(body)} /></p>,
+      body.length > 0 && <Blocks key={`b${i}`} lines={body} />,
     ];
   });
 }
