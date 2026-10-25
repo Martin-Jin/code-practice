@@ -7,6 +7,7 @@ import {
   runQuestion, setAutoSuggest, resetCode, resetRun, reselect, renameRun, deleteRun, runSummary, flushSaves,
 } from '../../lib/service.js';
 import Icon from '../../components/Icon.jsx';
+import Logo from '../../components/Logo.jsx';
 import { Modal, useDialogs } from '../../components/Dialogs.jsx';
 import { SettingsDialog, HelpDialog, THEME_ICON, THEME_LABEL } from '../../components/Shell.jsx';
 import ModePicker, { defaultChoice } from '../../components/ModePicker.jsx';
@@ -325,7 +326,7 @@ export default function RunView({ runId, param, theme }) {
   return (
     <div className={`run${mobile ? ' mobile' : ''}`} data-mtab={mtab}>
       <header className="run-top">
-        <a className="brand hide-mobile" href="#/" title="Practice Questions: back to the dashboard" aria-label="Back to the dashboard"><span className="logo"><Icon name="quiz" /></span></a>
+        <a className="brand hide-mobile" href="#/" title="Practice Questions: back to the dashboard" aria-label="Back to the dashboard"><span className="logo"><Logo /></span></a>
         <a className="btn ghost icon-only show-mobile" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
         <span className="qt" title={`${q.title} (${run.name}, ${MODE_LABELS[run.mode]})`}>Q{n} · {q.title}</span>
         {stq.attempts > 0 && <span className="muted small hide-mobile">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}

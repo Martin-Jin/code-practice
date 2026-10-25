@@ -5,6 +5,7 @@ import { ACTIONS, FIXED, comboFor, eventCombo, checkCombo } from '../lib/shortcu
 import { RUNNERS } from '../lib/runners.js';
 import { persistent } from '../lib/db.js';
 import Icon from './Icon.jsx';
+import Logo from './Logo.jsx';
 import Keys from './Keys.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
@@ -177,7 +178,7 @@ export default function Shell({ crumbs = [], theme, hero = null, children }) {
   return (
     <>
       <nav className="shell-nav">
-        <a className="brand" href="#/"><span className="logo"><Icon name="quiz" /></span>Practice Questions</a>
+        <a className="brand" href="#/"><span className="logo"><Logo /></span>Practice Questions</a>
         <div className="crumbs">
           {crumbs.map((c, i) => (
             <span key={i} style={{ display: 'contents' }}>

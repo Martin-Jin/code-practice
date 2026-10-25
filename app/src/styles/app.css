@@ -1,53 +1,53 @@
 /* ---------- tokens ---------- */
 :root {
-  --bg: #f4f5f7;
+  --bg: #faf6f5;
   --surface: #ffffff;
-  --surface-2: #eef0f3;
-  --surface-3: #e4e7ec;
-  --border: #d9dde3;
-  --control-border: #7d8591;
-  --text: #1a1d21;
-  --muted: #5d6671;
-  --accent: #1f5ee0;
+  --surface-2: #f6eeed;
+  --surface-3: #ecdfdd;
+  --border: #e4d3d0;
+  --control-border: #8c7773;
+  --text: #2b2120;
+  --muted: #6b5a57;
+  --accent: #d3202b;
   --accent-ink: #ffffff;
   --status-ink: #ffffff;
-  --accent-soft: #e6eefc;
+  --accent-soft: #fcebea;
   --ok: #167a3a;
   --ok-soft: #e3f4e8;
-  --bad: #c62828;
-  --bad-soft: #fbe7e6;
+  --bad: #a50e1a;
+  --bad-soft: #fde3e1;
   --warn: #8a5a00;
   --warn-soft: #fdf1d3;
   --diff-exp: #c8ecd2;
   --diff-exp-strong: #7fd199;
   --diff-got: #fbd0cc;
   --diff-got-strong: #ee8f88;
-  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 4px 14px rgb(16 24 40 / 6%);
+  --shadow: 0 1px 2px rgb(45 20 18 / 6%), 0 4px 14px rgb(45 20 18 / 6%);
   --mono: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --radius: 10px;
-  --hero-a: #d6e4ff;
-  --hero-b: #f4f5f7;
+  --hero-a: #fbd9d5;
+  --hero-b: #faf6f5;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1115; --surface: #161a20; --surface-2: #1d222a; --surface-3: #272d37; --border: #2b323c; --control-border: #667180;
-    --text: #e7eaee; --muted: #8e98a5; --accent: #6ea8ff; --accent-ink: #0b1220; --status-ink: #0b1220; --accent-soft: #172438;
-    --ok: #55d17c; --ok-soft: #12281a; --bad: #ff7b72; --bad-soft: #301816; --warn: #e3b341; --warn-soft: #2e2410;
+    --bg: #141011; --surface: #1c1617; --surface-2: #261e1f; --surface-3: #332829; --border: #3a2e2f; --control-border: #7d6b6c;
+    --text: #f3ebea; --muted: #a8969a; --accent: #ff6a63; --accent-ink: #1a0b0b; --status-ink: #140a0a; --accent-soft: #3a1819;
+    --ok: #55d17c; --ok-soft: #12281a; --bad: #ff8a80; --bad-soft: #3a1a18; --warn: #e3b341; --warn-soft: #2e2410;
     --diff-exp: #16422a; --diff-exp-strong: #23763f; --diff-got: #4a1d1b; --diff-got-strong: #b3413b;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px rgb(0 0 0 / 30%);
-    --hero-a: #16294a; --hero-b: #0e1115;
+    --hero-a: #3a1517; --hero-b: #141011;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0e1115; --surface: #161a20; --surface-2: #1d222a; --surface-3: #272d37; --border: #2b323c; --control-border: #667180;
-  --text: #e7eaee; --muted: #8e98a5; --accent: #6ea8ff; --accent-ink: #0b1220; --status-ink: #0b1220; --accent-soft: #172438;
-  --ok: #55d17c; --ok-soft: #12281a; --bad: #ff7b72; --bad-soft: #301816; --warn: #e3b341; --warn-soft: #2e2410;
+  --bg: #141011; --surface: #1c1617; --surface-2: #261e1f; --surface-3: #332829; --border: #3a2e2f; --control-border: #7d6b6c;
+  --text: #f3ebea; --muted: #a8969a; --accent: #ff6a63; --accent-ink: #1a0b0b; --status-ink: #140a0a; --accent-soft: #3a1819;
+  --ok: #55d17c; --ok-soft: #12281a; --bad: #ff8a80; --bad-soft: #3a1a18; --warn: #e3b341; --warn-soft: #2e2410;
   --diff-exp: #16422a; --diff-exp-strong: #23763f; --diff-got: #4a1d1b; --diff-got-strong: #b3413b;
   --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px rgb(0 0 0 / 30%);
-  --hero-a: #16294a; --hero-b: #0e1115;
+  --hero-a: #3a1517; --hero-b: #141011;
   color-scheme: dark;
 }
 
@@ -117,7 +117,7 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); }
 .brand:hover { text-decoration: none; }
 .run-top .brand { margin-right: 10px; }  /* 16px to the title, like the dashboard's breadcrumb */
-.brand .logo { width: 24px; height: 24px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; }
+.brand .logo { width: 32px; height: 32px; color: var(--accent); display: grid; place-items: center; }
 .crumbs { display: flex; align-items: center; gap: 8px; color: var(--muted); min-width: 0; }
 .crumbs a { color: var(--muted); }
 .crumbs b { color: var(--text); font-weight: 600; }
