@@ -7,8 +7,8 @@ import Icon from './Icon.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
 
-const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
-const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
+export const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
+export const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
 
 // Shows the current mode; a click switches to the next one (auto, light, dark).
 export function ThemeButton({ theme }) {
@@ -20,7 +20,7 @@ export function ThemeButton({ theme }) {
   );
 }
 
-function SettingsDialog({ close }) {
+export function SettingsDialog({ close }) {
   const st = useStore();
   const options = ['local', 'online'];
   return (
@@ -71,7 +71,7 @@ const SHORTCUTS = [
   ]],
 ];
 
-function HelpDialog({ close }) {
+export function HelpDialog({ close }) {
   return (
     <Modal title="Keyboard shortcuts" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
       <dl className="shortcuts">

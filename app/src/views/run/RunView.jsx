@@ -7,7 +7,7 @@ import {
 } from '../../lib/service.js';
 import Icon from '../../components/Icon.jsx';
 import { Modal, useDialogs } from '../../components/Dialogs.jsx';
-import { SettingsButton, ThemeButton } from '../../components/Shell.jsx';
+import { SettingsDialog, HelpDialog, THEME_ICON, THEME_LABEL } from '../../components/Shell.jsx';
 import ModePicker, { defaultChoice } from '../../components/ModePicker.jsx';
 import { toast } from '../../components/Toasts.jsx';
 import Sidebar, { questionStatus } from './Sidebar.jsx';
@@ -211,6 +211,12 @@ export default function RunView({ runId, param, theme }) {
   const afterSelectionChange = () => { setEditorKey((k) => k + 1); setOutTabs({}); setRunnerError(null); window.location.hash = `#/run/${runId}`; };
 
   const menu = [
+    { label: 'Reset code', icon: 'refresh', title: 'Put the starter code back for this question', onClick: resetCurrentCode },
+    { label: `Suggest as you type: ${st.autoSuggest ? 'on' : 'off'}`, icon: 'code', title: 'Name suggestions while typing. Ctrl+Space also turns this on.', onClick: () => setAutoSuggest(!st.autoSuggest) },
+    { label: 'Settings…', icon: 'gear', onClick: () => dialogs.open(({ close }) => <SettingsDialog close={close} />) },
+    { label: `Theme: ${THEME_LABEL[theme.mode]}`, icon: THEME_ICON[theme.mode], title: `Click for ${THEME_LABEL[theme.next]}`, onClick: theme.toggle },
+    { label: 'Keyboard shortcuts', icon: 'help', onClick: () => dialogs.open(({ close }) => <HelpDialog close={close} />) },
+    'sep',
     { label: 'Rename run', icon: 'pencil', onClick: async () => {
       const name = await dialogs.prompt({ title: 'Rename run', label: 'Run name (leave empty for the default)', initial: run.name });
       if (name !== null) renameRun(run.id, name);
@@ -292,23 +298,36 @@ export default function RunView({ runId, param, theme }) {
   return (
     <div className={`run${mobile ? ' mobile' : ''}`} data-mtab={mtab}>
       <header className="run-top">
-        <a className="btn ghost icon-only" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
-        <h1 title={`${run.name} (${MODE_LABELS[run.mode]})`}>{run.name}</h1>
+        <a className="btn ghost icon-only show-mobile" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
+        <span className="qt" title={`${q.title} (${run.name}, ${MODE_LABELS[run.mode]})`}>Q{n}<span className="qt-title"> · {q.title}</span></span>
+        {stq.attempts > 0 && <span className="muted small hide-mobile">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
+        {status === 'passed' && <span className="chip ok">Passed</span>}
         <span className="spacer" />
-        <div className="progress" title={`${sum.passed} of ${sum.total} questions pass`}>
+        <div className="progress hide-mobile" title={`${sum.passed} of ${sum.total} questions pass`}>
           <div className={`bar${run.completedAt ? ' ok' : ''}`}><i style={{ width: `${(sum.passed / sum.total) * 100}%` }} /></div>
           <span>{sum.passed}/{sum.total}</span>
         </div>
         {run.completedAt && <button type="button" className="btn" onClick={() => { setCelebrate(false); setFinishOpen(true); }}>Results</button>}
+        <button type="button" className="btn ghost reveal hide-mobile" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)" aria-label="Output">
+          <Icon name="stats" /><span className="lbl">Output</span>
+        </button>
+        <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
+        <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
+          <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
+        </button>
+        <button type="button" className="btn ghost icon-only hide-mobile" onClick={() => editor.current && editor.current.format()} title="Format the code (Shift+Alt+F)" aria-label="Format code"><Icon name="format" /></button>
+        <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Shift+Enter)">
+          <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'}
+        </button>
         <RunMenu items={menu} />
-        <SettingsButton />
-        <ThemeButton theme={theme} />
       </header>
 
       <div className={`run-body${sideOpen ? '' : ' side-hidden'}`}>
         <nav className="activity" aria-label="Panels">
-          <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the question list (Alt+Q)" aria-label="Question list">
-            <Icon name="sidebar" />
+          <a className="btn ghost icon-only" href="#/" title="Exit to the dashboard. Your progress is kept." aria-label="Exit to the dashboard"><Icon name="exit" /></a>
+          <hr />
+          <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the questions (Alt+Q)" aria-label="Questions">
+            <Icon name="questions" />
           </button>
           <button type="button" className="btn ghost icon-only" onClick={toggleTask} aria-pressed={taskOpen} title="Show or hide the task text next to the editor (Alt+T)" aria-label="Task">
             <Icon name="task" />
@@ -322,24 +341,6 @@ export default function RunView({ runId, param, theme }) {
           {taskOpen && !mobile && <Splitter onMove={startDrag('x')} onEnd={endDrag} onReset={resetSizes} />}
 
           <section className={`right${outputOpen || mobile ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
-            <div className="editor-bar">
-              <span className="qt" title={q.title}>Q{n}<span className="qt-title"> · {q.title}</span></span>
-              <span className="spacer" />
-              {stq.attempts > 0 && <span className="muted small">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
-              {status === 'passed' && <span className="chip ok">Passed</span>}
-              <button type="button" className="btn ghost reveal hide-mobile" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)" aria-label="Output">
-                <Icon name="stats" /><span className="lbl">Output</span>
-              </button>
-              <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
-              <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
-                <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
-              </button>
-              <button type="button" className="btn ghost icon-only" onClick={() => editor.current && editor.current.format()} title="Format the code (Shift+Alt+F)" aria-label="Format code"><Icon name="format" /></button>
-              <button type="button" className="btn ghost icon-only" onClick={resetCurrentCode} title="Reset code: put the starter code back" aria-label="Reset code"><Icon name="refresh" /></button>
-              <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Shift+Enter)">
-                <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'}
-              </button>
-            </div>
             <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} autoSuggest={st.autoSuggest} onAutoSuggest={setAutoSuggest} />
             {outputOpen && !mobile && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
             <Output

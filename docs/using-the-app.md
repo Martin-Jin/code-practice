@@ -7,15 +7,15 @@ The app is a practice interface for coding questions, modelled on a CodeRunner q
 - **Published page (nothing to install):** the GitHub Pages site for this repo. It compiles your code on wandbox.org. See [deploying.md](deploying.md) for the address and what that means.
 - **Local server (real g++, offline):** run `app/start.ps1` from PowerShell. It opens http://localhost:5270 and compiles with your MinGW g++. First run installs the packages and builds the app, which takes about a minute.
 
-Both versions look and behave the same. The only difference is the **runner** (where your code is compiled). Switch it with the gear button, top right. Local g++ appears there only when the local server is running.
+Both versions look and behave the same. The only difference is the **runner** (where your code is compiled). Switch it in Settings (the gear button on the dashboard, or **Settings…** in the **⋯** menu inside a run). Local g++ appears there only when the local server is running.
 
 ## Help and shortcuts
 
-The **?** button in the top bar of the dashboard, set and stats pages lists every keyboard shortcut.
+The **?** button in the top bar of the dashboard, set and stats pages lists every keyboard shortcut. Inside a run, use **Keyboard shortcuts** in the **⋯** menu.
 
 ## Theme
 
-The sun, moon and half-circle button (top right) cycles **Auto**, **Light** and **Dark**. Auto follows your system and changes with it; Light and Dark stay fixed. The choice is remembered in this browser.
+The sun, moon and half-circle button (top right of the dashboard, or **Theme** in the **⋯** menu inside a run) cycles **Auto**, **Light** and **Dark**. Auto follows your system and changes with it; Light and Dark stay fixed. The choice is remembered in this browser.
 
 ## Search
 
@@ -38,11 +38,12 @@ The sun, moon and half-circle button (top right) cycles **Auto**, **Light** and 
 
 ## Inside a run
 
-- **Icon strip:** the narrow strip at the far left has one button per panel, like VS Code's activity bar: the question list (`Alt+Q`) and the task (`Alt+T`); the lit one is open. The top bar above them holds the way back to the dashboard, the run name, progress, menu, settings and theme. In the editor bar only the question number shows; hover it to slide out the title. **Output** shows its name on hover too.
+- **Icon strip:** the narrow strip at the far left works like VS Code's activity bar. The door icon exits to the dashboard (progress is kept). Below it, one button per panel: the questions (`Alt+Q`) and the task (`Alt+T`); the lit one is open.
+- **Top bar:** one bar for the whole run. On the left, the question number (hover it to slide out the title), attempts and a Passed badge. On the right, the progress bar, **Output** (shows its name on hover), previous and next question, format, **Run**, and the **⋯** menu. The menu holds the rest: reset code, suggest-as-you-type on or off, settings, theme, keyboard shortcuts, then the run options (rename, reset progress, new questions, change mode, abandon).
 - **Question list:** grouped by topic under headings you can collapse. The icon shows the state: empty circle (not started), pencil (edited, not run), red cross (tests failing), amber triangle (does not compile), green tick (passed).
 - **Task and editor:** the task text sits beside the editor so you can read it while you type. The **Task** button in the icon strip (or `Alt+T`, or the arrow on the task pane) hides it so the editor and output get the width; use the same button or key to bring it back. It always sits beside the editor and moves it over rather than covering it. Drag the divider between the task and the editor to resize it, or double-click it to reset. Drag it to the far left to hide the task; the output panel hides the same way when you drag its divider to the bottom. Sizes are saved in this browser and are the same for every question and run. The **Provided code** tab shows the code your answer is added to. The **Question list** button (or `Alt+Q`) hides the question list.
 - **Output panel:** **Output** (or `Alt+O`, or the arrow on the output bar) hides the panel so the editor gets the whole height. The bar stays visible with the last result ("All passed", "3/5 passed", "Compile error"); click a tab on it to reopen. Pressing Run opens it again.
-- **Editor:** the editor from VS Code, set up from this repo's `.vscode/settings.json`: no pop-up suggestions, brackets and quotes close themselves. Press `Ctrl+Space` to list names from your code and the provided code (variables, functions, classes, keywords); `Enter` or `Tab` accepts one. Ctrl+Space also turns on suggestions as you type, and they stay on in this browser until you untick **Suggest names as you type** under **Editor** in Settings (the gear button). `Shift+Alt+F` (or the format button) tidies the whole answer with clang-format in Google style, the course style; the formatter (about 2.5 MB) is downloaded the first time you use it. The editor starts with the starter code, never with your earlier answers.
+- **Editor:** the editor from VS Code, set up from this repo's `.vscode/settings.json`: no pop-up suggestions, brackets and quotes close themselves. Press `Ctrl+Space` to list names from your code and the provided code (variables, functions, classes, keywords); `Enter` or `Tab` accepts one. Ctrl+Space also turns on suggestions as you type, and they stay on in this browser until you switch **Suggest as you type** off in the **⋯** menu (or untick it under **Editor** in Settings). `Shift+Alt+F` (or the format button) tidies the whole answer with clang-format in Google style, the course style; the formatter (about 2.5 MB) is downloaded the first time you use it. The editor starts with the starter code, never with your earlier answers.
 - **Run** (`Ctrl+Shift+Enter`; plain `Ctrl+Enter` is VS Code's "insert line below"): compiles your answer and runs the tests. Your answer is put in the question file between the answer markers, so line numbers in compiler messages match the question file.
 - **Output:**
   - **Results:** a banner (passed, failed, compile error, crash, timeout) and one card per test. A failing test shows the message exactly as the framework printed it, plus a highlighted comparison of expected and got. Printed output is compared line by line (as CodeRunner does, ignoring trailing spaces).
