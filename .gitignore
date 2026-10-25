@@ -6,3 +6,7 @@ build*/
 *.exe
 scratch*
 deleted/
+app/node_modules/
+app/dist/
+app/.work/
+app/public/catalog.json

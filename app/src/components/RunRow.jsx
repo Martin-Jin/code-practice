@@ -1,0 +1,48 @@
+import { MODE_LABELS } from '../../shared/modes.js';
+import { getSet } from '../lib/catalog.js';
+import { deleteRun, runSummary } from '../lib/service.js';
+import { timeAgo, plural } from '../lib/format.js';
+import Icon from './Icon.jsx';
+import { useDialogs } from './Dialogs.jsx';
+
+// One saved run: progress, mode and Resume / Abandon.
+export default function RunRow({ run, showSet = true }) {
+  const { confirm } = useDialogs();
+  const sum = runSummary(run);
+  const pct = sum.total ? (sum.passed / sum.total) * 100 : 0;
+  const done = !!run.completedAt;
+
+  const abandon = async () => {
+    const ok = await confirm({
+      title: done ? 'Delete this run?' : 'Abandon this run?',
+      body: done ? 'Its results will be removed. Your lifetime stats are kept.'
+        : `You have ${plural(sum.passed, 'question')} passed out of ${sum.total}. Abandoning deletes this run’s progress and drafts. Your lifetime stats are kept.`,
+      confirmText: done ? 'Delete' : 'Abandon run',
+      danger: true,
+    });
+    if (ok) deleteRun(run.id);
+  };
+
+  return (
+    <div className="card run-row">
+      <div style={{ minWidth: 0 }}>
+        <div className="title" title={run.name}>{run.name}</div>
+        <div className="sub">
+          <span className="chip accent">{MODE_LABELS[run.mode]}</span>
+          {showSet && <span className="chip">{getSet(run.setId)?.name || run.setId}</span>}
+          <span className="muted">{done ? `Finished ${timeAgo(run.completedAt)}` : `Updated ${timeAgo(run.updatedAt)}`}</span>
+        </div>
+      </div>
+      <div className="prog">
+        <div className={`bar${done ? ' ok' : ''}`}><i style={{ width: `${pct}%` }} /></div>
+        <span>{sum.passed} / {sum.total} passed · {plural(sum.totalAttempts, 'attempt')}</span>
+      </div>
+      <div className="btns">
+        <a className="btn primary" href={`#/run/${run.id}${done ? '/summary' : ''}`}>{done ? 'Results' : 'Resume'}</a>
+        <button type="button" className="btn ghost icon-only danger" onClick={abandon} title={done ? 'Delete run' : 'Abandon run'} aria-label={done ? 'Delete run' : 'Abandon run'}>
+          <Icon name="trash" />
+        </button>
+      </div>
+    </div>
+  );
+}

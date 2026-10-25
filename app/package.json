@@ -1,0 +1,24 @@
+{
+  "name": "code-practice-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Web interface for practising coding questions: modes, editor, test output and stats",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "catalog": "node tools/build-catalog.js",
+    "build": "node tools/build-catalog.js && vite build",
+    "serve": "node server/server.js",
+    "verify": "node tools/verify.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "monaco-editor": "0.52.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "6.0.7"
+  }
+}

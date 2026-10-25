@@ -1,9 +1,11 @@
-# Rebuild and run the practice questions.
+﻿# Rebuild and run the practice questions from the command line.
 #   ./run.ps1               build your answers, run the question set in main.cpp
 #   ./run.ps1 5             set kQuestion = 5 in main.cpp first (0 = all)
 #   ./run.ps1 -Solutions    build the reference solutions instead (build_sol/)
+#   ./run.ps1 -Set other    build a different question set from sets/other/
 param(
   [int]$Question = -1,
+  [string]$Set = "mecheng270",
   [switch]$Solutions
 )
 
@@ -21,7 +23,7 @@ $dir = if ($Solutions) { "build_sol" } else { "build" }
 $on = if ($Solutions) { "ON" } else { "OFF" }
 
 # Always re-run configure so new question files are picked up.
-cmake -S . -B $dir -G Ninja "-DUSE_SOLUTIONS=$on"
+cmake -S . -B $dir -G Ninja "-DUSE_SOLUTIONS=$on" "-DSET_NAME=$Set"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 cmake --build $dir
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

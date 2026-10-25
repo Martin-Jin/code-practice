@@ -1,0 +1,21 @@
+{
+  "id": "example-set",
+  "name": "Example set",
+  "language": "cpp",
+  "description": "A two-question set that shows the format. Copy this folder into sets/ and rename it to start your own.",
+  "questionDirs": [
+    { "dir": "questions", "solutions": "solutions" }
+  ],
+  "groups": {
+    "core": "Questions"
+  },
+  "categories": [
+    { "id": "arrays", "name": "Arrays", "group": "core", "questions": [1] },
+    { "id": "printing", "name": "Printing", "group": "core", "questions": [2] }
+  ],
+  "practice": {
+    "name": "Practice test",
+    "fixed": [{ "category": "arrays", "count": 1 }],
+    "pick": { "count": 1, "from": ["printing"] }
+  }
+}

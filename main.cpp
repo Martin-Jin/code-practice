@@ -6,7 +6,7 @@
 //      0      -> run every question (summary at the end)
 //
 //  Then build & run (see README.md). Each question lives in
-//  questions/qNN_*.cpp - write your answer between the
+//  sets/<set>/questions/qNN_*.cpp - write your answer between the
 //  "YOUR ANSWER STARTS HERE / ENDS HERE" markers in that file.
 // ============================================================================
 #include "framework/test_framework.h"

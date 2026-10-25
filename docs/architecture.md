@@ -1,0 +1,86 @@
+# Architecture
+
+How the web app turns a question file and your answer into a result, and why it is built this way. Read this before changing `app/`, `framework/` or the question layout.
+
+## Why it is shaped like this
+
+The questions are C++ and must be compiled to be checked. The app has to work in two places: on a static website (GitHub Pages cannot run a compiler) and on your own machine with the real g++. So the app is split into a **browser app that does everything except compile**, and a **runner** that only compiles and runs one C++ file. Two runners exist, and either can be chosen at any time.
+
+## Pipeline for one Run
+
+```mermaid
+flowchart LR
+  Q[question file<br/>in catalog.json] --> B[buildProgram<br/>shared/program.js]
+  A[your answer<br/>from the editor] --> B
+  F[test framework<br/>source] --> B
+  B -->|one C++ file| R{runner}
+  R -->|local| L[server/local-run.js<br/>g++ on this computer]
+  R -->|online| W[wandbox.org<br/>from the browser]
+  L --> X[raw result:<br/>compiler text, exit code,<br/>stdout, stderr]
+  W --> X
+  X --> N[analyse<br/>shared/program.js]
+  N --> S[service.js<br/>saves attempt and stats]
+  S --> U[Results, Compiler,<br/>Raw output panels]
+```
+
+## Components
+
+| Part | Where | Job |
+| --- | --- | --- |
+| Question sets | `sets/<id>/` | Question files, solutions and `set.json`. See [question-format.md](question-format.md). |
+| Test framework | `framework/` | Registers questions, runs tests, prints results and (when asked) structured events. |
+| Catalog builder | `app/server/catalog.js`, `app/tools/build-catalog.js` | Reads every set and writes `catalog.json`: task text, provided code, starter code and the file split around the answer. No solutions. |
+| Shared logic | `app/shared/` | `program.js` (build the program, analyse a result) and `modes.js` (pick questions for each mode). Plain JavaScript used by the browser, the server and the tools. |
+| Browser app | `app/src/` | React views, the editor (Monaco), saved runs and stats (IndexedDB), the two runners. |
+| Local server | `app/server/server.js`, `local-run.js` | Serves the built app and compiles with g++ on `POST /api/execute`. Binds to `127.0.0.1` only. |
+| Tools | `app/tools/` | `verify.js` (check every solution and stub through the real pipeline). |
+| CI | `.github/workflows/pages.yml` | Builds every question, runs the unit tests and `verify`, then publishes `app/dist` to GitHub Pages. |
+
+## Mechanisms
+
+### One self-contained C++ file
+
+**Why it exists:** a remote compile service takes one source file, and a single file also removes the need for cached object files locally.
+
+**What it does:** `buildProgram` takes the question file with the answer cut out (`before` and `after`), pastes your code between them, inlines the framework header where the question includes it, appends the framework source and a `main()` that calls `tf::RunQuestion(N)`.
+
+**How `#line` keeps messages honest:** inlining would shift line numbers. `#line` directives restore the original file name and numbering after each inlined block, so g++ reports `q24_bst_remove.cpp:112:5` exactly as a normal build would. The app subtracts the answer's first line to get the editor line and draws the squiggle.
+
+**Limitations:** every Run compiles the framework again (about half a second locally).
+
+### Test events on stderr
+
+**Why it exists:** the console output is for people. To draw a diff the app needs the expected and actual values as data, and parsing console text breaks when the student prints their own debug lines.
+
+**What it does:** the generated file starts with `#define TF_EVENTS_STDERR`. With that defined, `framework/test_framework.cpp` writes one JSON object per event to stderr between the control characters `0x1E` and `0x1F`: `question`, `test_start`, `test_end` (with the failures and their expected/actual values). `analyse` pulls them out; whatever is left of stderr is the student's own.
+
+**Why this approach:** a log file needs a path and an environment variable, which a remote service cannot provide. Control characters cannot appear in normal output. A normal build (CMake, `run.ps1`) does not define the macro and prints exactly what it always did.
+
+**Crashes:** `test_start` is written before the test body runs, so a crash or timeout is attributed to the test that was running. Tests after it are reported as not run.
+
+### Starter code comes from git HEAD
+
+**Why it exists:** you practise by editing the stubs in the question files, so the working tree may hold your answers. The editor must always start from the pristine stub.
+
+**What it does:** the catalog builder reads each question with `git show HEAD:<path>` and falls back to the working tree only when that fails (a new, uncommitted file). Set `CATALOG_SOURCE=worktree` to read the working tree instead, for example while writing a new question.
+
+### Runners
+
+- **Local** (`app/server/local-run.js`): writes the file to a temporary folder, runs `g++ -std=gnu++17 -Wall -Wextra -Wno-unused-parameter` (the same flags as CMake), runs the result with a 10 s limit, and deletes the folder. Up to 4 compiles run at once.
+- **Online** (`app/src/lib/runners.js`): `POST https://wandbox.org/api/compile.json` from the browser with the newest g++ that Wandbox lists. A build counts as failed when the program printed nothing and the compiler text contains an error.
+
+The server accepts requests only from its own page (`Host` and `Origin` are checked). It runs whatever C++ it is sent, so this blocks other websites and DNS-rebinding tricks from using it.
+
+### Saved state
+
+Runs and stats are stored in the browser's IndexedDB by `app/src/lib/service.js`. Typing updates a draft in memory and writes to disk at most every 400 ms. A run holds one draft and one last result per question. Stats are fixed-size counters per question, so storage stays bounded; deleting a run removes its drafts.
+
+### Why React and Vite
+
+The workspace has many panels that must stay in step (question list, editor, output, progress, stats). Hand-written DOM updates were the obvious place for bugs, so a component model pays for itself. React is the most widely documented choice, and Vite builds to plain static files, which is what GitHub Pages needs. Plain HTML and CSS would have worked for the first screen but not for this much shared state. TypeScript was left out to keep the project small; the shared logic is covered by unit tests instead.
+
+## Limitations
+
+- C++ only (`language: "cpp"`). A second language would need its own framework, `buildProgram` and runner.
+- The online runner depends on a free third-party service: it needs internet, may rate-limit, and receives your answer. The local runner has none of these limits.
+- Progress is per browser and is not synced.

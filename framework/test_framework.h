@@ -42,6 +42,12 @@ void HiddenTest(const std::string& name, const std::function<void()>& body);
 // Marks the current test as failed with a message (usually called via Expect*).
 void Fail(const std::string& message);
 
+// Same, plus the pieces of a comparison (kind is "value" or "output"). The web app reads
+// them (see TF_EVENTS_STDERR in test_framework.cpp) to draw a diff; the console output is
+// the same either way.
+void Fail(const std::string& message, const char* kind, const std::string& what,
+          const std::string& expected, const std::string& actual);
+
 // Runs `body`, captures everything it prints to std::cout, and compares it to
 // `expected` the way CodeRunner does (trailing whitespace on each line and at
 // the end of the output is ignored).
@@ -61,7 +67,8 @@ std::string Str(const T& v) {
 template <typename A, typename B>
 void ExpectEq(const A& actual, const B& expected, const std::string& what = "value") {
   if (!(actual == expected)) {
-    Fail(what + ": expected " + Str(expected) + " but got " + Str(actual));
+    Fail(what + ": expected " + Str(expected) + " but got " + Str(actual), "value", what,
+         Str(expected), Str(actual));
   }
 }
 

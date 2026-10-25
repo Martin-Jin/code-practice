@@ -1,0 +1,29 @@
+// One mutable app state object. Anything that changes it calls notify(); components call
+// useStore() to re-render on every change. Views are small, so re-rendering them whole is
+// cheaper than tracking fine-grained subscriptions.
+import { useSyncExternalStore } from 'react';
+
+export const state = {
+  ready: false,
+  error: null,
+  catalog: null,
+  runs: {},            // id -> run (see service.js)
+  stats: {},           // setId -> stats
+  runner: 'online',    // 'local' | 'online'
+  local: null,         // { compiler } when the local g++ server answered, else null
+};
+
+let version = 0;
+const listeners = new Set();
+
+export function notify() {
+  version++;
+  listeners.forEach((l) => l());
+}
+
+const subscribe = (l) => { listeners.add(l); return () => listeners.delete(l); };
+
+export function useStore() {
+  useSyncExternalStore(subscribe, () => version);
+  return state;
+}
