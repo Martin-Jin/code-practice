@@ -264,6 +264,7 @@ export function LibrarySection() {
                 </div>
                 <div className="actions">
                   <a className="btn primary" href={`#/lib/${encodeURIComponent(set.id)}`}>Browse</a>
+                  <a className="btn" href={`#/lib/${encodeURIComponent(set.id)}/stats`}>Stats</a>
                   {set.userOwned
                     ? <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}><Icon name="plus" /> Add a question</button>
                     : <button type="button" className="btn" onClick={() => remove(set)}><Icon name="trash" /> Remove</button>}

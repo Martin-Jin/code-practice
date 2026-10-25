@@ -68,6 +68,7 @@ export default function LibrarySet({ setId, theme }) {
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
         <div className="row">
+          <a className="btn" href={`#/lib/${encodeURIComponent(setId)}/stats`}>Stats</a>
           {record.userOwned && <button type="button" className="btn primary" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}>Add a question</button>}
           <button type="button" className="btn danger" onClick={remove}>{record.userOwned ? 'Delete all my questions' : 'Remove from this browser'}</button>
         </div>

@@ -97,6 +97,19 @@ export function check(setId, uid, question) {
   return result;
 }
 
+// Clears the counters and last results of every question in a set (the Stats page's Reset). Answers, difficult
+// flags and answer keys are kept, since they are the user's own work rather than statistics.
+export function resetLibStats(setId) {
+  for (const rec of Object.values(state.libProgress)) {
+    if (rec.setId !== setId) continue;
+    rec.attempts = 0; rec.right = 0; rec.wrong = 0; rec.views = 0; rec.firstAt = null; rec.lastAt = null;
+    delete rec.lastOverall;
+    rec.updatedAt = now();
+    persist('libProgress', rec, 0);
+  }
+  notify();
+}
+
 export function resetAnswers(setId, uid) {
   const rec = ensure(setId, uid);
   rec.answers = {};
