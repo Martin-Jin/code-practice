@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, setLibCurrent, finishLibRun, runStatus } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
@@ -36,7 +36,9 @@ export default function QuestionView({ setId, uid, run, theme }) {
   }, [setId, uid, !!question]);
 
   const go = (i) => (run ? `#/practice/${run.id}/${encodeURIComponent(questions[i].uid)}` : `#/q/${encodeURIComponent(setId)}/${encodeURIComponent(questions[i].uid)}`);
-  const finish = () => { finishLibRun(run.id); window.location.hash = `#/practice/${run.id}/summary`; };
+  // A session finishes only when every question that can be checked has been; until then Finish is not offered.
+  const pending = run && !run.completedAt ? pendingChecks(run).length : 0;
+  const finish = () => { if (finishLibRun(run.id)) window.location.hash = `#/practice/${run.id}/summary`; };
   const answers = progress ? progress.answers : {};
 
   const runCheck = () => setResult(check(setId, uid, question).overall);
@@ -109,8 +111,12 @@ export default function QuestionView({ setId, uid, run, theme }) {
             <span className="spacer" />
             {index > 0 && <a className="btn" href={go(index - 1)}><Icon name="back" /> Previous</a>}
             {index < questions.length - 1 && <a className="btn primary" href={go(index + 1)}>Next</a>}
-            {run && index === questions.length - 1 && <button type="button" className="btn primary" onClick={finish}>Finish</button>}
+            {run && !run.completedAt && pending === 0 && <button type="button" className="btn primary" onClick={finish}>Finish</button>}
+            {run && run.completedAt && <a className="btn primary" href={`#/practice/${run.id}/summary`}>Results</a>}
           </div>
+          {run && pending > 0 && index === questions.length - 1 && (
+            <p className="muted" style={{ marginTop: 10 }}>{plural(pending, 'question')} still to check before this session can finish: check each numbered question above that is not yet green or red (a question with no answer key cannot be checked, so it does not count).</p>
+          )}
           {progress && progress.attempts > 0 && (
             <p className="muted" style={{ marginTop: 10 }}>Checked {plural(progress.attempts, 'time')}: {progress.right} right, {progress.wrong} not right.</p>
           )}

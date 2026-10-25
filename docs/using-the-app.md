@@ -111,7 +111,7 @@ Questions can also be added to a folder's manifest by an AI agent: give it [ques
 A set's page (**Browse**) has a **Practise** panel. Choose a mode and press **Start**; the session keeps its list of questions, so you can leave and **Resume** it from the dashboard.
 
 - **All questions**, in the order of the set; **Random** (you choose how many, optionally only from some sections); **By section**; **Marked difficult**; **Not seen yet**; **Not right last time**. A mode with nothing to pick says so instead of starting.
-- A strip of numbers along the top shows each question's result in this session (green right, red not right, an orange underline for difficult) and takes you to it. **Finish** on the last question opens a summary with the counts, every question's result, and **Practise the questions not right** to start a retry session.
+- A strip of numbers along the top shows each question's result in this session (green right, red not right, an orange underline for difficult) and takes you to it. **Finish** appears once you have checked every question that has an answer key (right or not right; a question with no key cannot be checked, so it does not hold the session back) and marks the session finished. It opens a summary with the counts, every question's result, and **Practise the questions not right** to start a retry session.
 - Sessions appear on the dashboard beside C++ runs. Abandoning one keeps your answers, results and flags on the questions.
 
 A question opens with its wording (typed text with maths, an image, or the page region from the PDF), an answer box for each part, and a panel beside it.

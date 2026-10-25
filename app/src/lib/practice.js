@@ -2,7 +2,7 @@
 // last check, how often each was right or wrong, and the "difficult" flag; plus the user's own
 // corrections to a question (answer keys). Components call these and re-render through
 // store.notify(). Data is saved to IndexedDB (see db.js) and is part of a backup.
-import { checkQuestion } from '../../shared/answers.js';
+import { checkQuestion, uncheckedQuestions } from '../../shared/answers.js';
 import { applyEdit } from '../../shared/questionset.js';
 import { pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes.js';
 import { weightOf, libraryTrouble } from '../../shared/weights.js';
@@ -167,13 +167,26 @@ export function setLibCurrent(id, uid) {
   persist('libRuns', run, 300);
 }
 
+// The uids of a session's questions that still need a counted check (right or wrong) before it can finish.
+export function pendingChecks(run) {
+  const set = state.library.sets[run.setId];
+  if (!set) return [];
+  const all = effectiveQuestions(set);
+  const questions = run.questions.map((uid) => all.find((q) => q.uid === uid)).filter(Boolean);
+  return uncheckedQuestions(questions, (uid) => runStatus(run, uid));
+}
+
+// Marks a session finished, but only once every checkable question has been checked, whether right or wrong.
+// Returns whether it is finished.
 export function finishLibRun(id) {
   const run = state.libRuns[id];
-  if (!run) return;
+  if (!run) return false;
+  if (!run.completedAt && pendingChecks(run).length) return false;
   run.completedAt = run.completedAt || now();
   run.updatedAt = now();
   db.put('libRuns', run);
   notify();
+  return true;
 }
 
 // How a question went in this session: 'right' or 'wrong' from its latest counted check since the

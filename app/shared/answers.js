@@ -66,6 +66,17 @@ export function checkQuestion(question, answers) {
   return { parts, overall };
 }
 
+// Whether checking can ever give this question a result: it has a self-marked part or a part with an answer key.
+export function canCheck(question) {
+  return question.parts.some((p) => p.type === 'self' || (p.type === 'numeric' && p.answer !== null && p.answer !== undefined) || (p.type === 'mcq' && p.correct.length > 0));
+}
+
+// The questions of a practice session still waiting for a counted check. statusOf(uid) is the question's result in
+// the session ('right', 'wrong') or null. A question with no answer key cannot be checked, so it never holds a session back.
+export function uncheckedQuestions(questions, statusOf) {
+  return questions.filter((q) => canCheck(q) && !statusOf(q.uid)).map((q) => q.uid);
+}
+
 // The expected answer as text, for showing after a wrong check.
 export function expectedText(part) {
   if (part.type === 'numeric') return part.answer === null || part.answer === undefined ? '' : `${part.answer}${part.unit ? ` ${part.unit}` : ''}`;

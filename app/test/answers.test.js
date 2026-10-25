@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseNumber, tolerance, checkNumeric, checkMcq, checkPart, checkQuestion, expectedText } from '../shared/answers.js';
+import { parseNumber, tolerance, checkNumeric, checkMcq, checkPart, checkQuestion, expectedText, canCheck, uncheckedQuestions } from '../shared/answers.js';
 
 const num = (answer, extra = {}) => ({ label: 'a', type: 'numeric', unit: 'kg', answer, ...extra });
 const mcq = (correct, extra = {}) => ({ label: 'b', type: 'mcq', options: ['w', 'x', 'y', 'z'], correct, ...extra });
@@ -71,4 +71,20 @@ test('expectedText shows the answer with its unit', () => {
   assert.equal(expectedText(num(5, { unit: '' })), '5');
   assert.equal(expectedText(num(null)), '');
   assert.equal(expectedText(mcq([0, 2])), 'w; y');
+});
+
+test('a session waits for a counted check on every question that can be checked', () => {
+  const qs = [
+    { uid: 'a', parts: [num(2)] },
+    { uid: 'b', parts: [mcq([1])] },
+    { uid: 'c', parts: [{ label: '', type: 'self' }] },
+    { uid: 'd', parts: [num(null)] },           // no answer key: cannot be checked
+    { uid: 'e', parts: [num(null), mcq([])] },
+  ];
+  assert.deepEqual(qs.map(canCheck), [true, true, true, false, false]);
+  const status = { a: 'right', b: 'wrong' };
+  assert.deepEqual(uncheckedQuestions(qs, (uid) => status[uid] || null), ['c']);
+  status.c = 'right';
+  assert.deepEqual(uncheckedQuestions(qs, (uid) => status[uid] || null), []);
+  assert.deepEqual(uncheckedQuestions(qs, () => null), ['a', 'b', 'c']);
 });
