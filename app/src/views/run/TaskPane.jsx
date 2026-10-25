@@ -48,8 +48,14 @@ function ProvidedCode({ code }) {
 }
 
 export default function TaskPane({ q, onHide }) {
-  const [tab, setTab] = useState('task');
-  useEffect(() => setTab('task'), [q.number]);
+  // The pane unmounts when hidden, so the last tab is kept in this browser (not reset per question).
+  const [tab, setTabState] = useState(() => {
+    try { return localStorage.getItem('taskTab') === 'provided' ? 'provided' : 'task'; } catch { return 'task'; }
+  });
+  const setTab = (next) => {
+    setTabState(next);
+    try { localStorage.setItem('taskTab', next); } catch { /* storage blocked */ }
+  };
   return (
     <section className="qpane" aria-label="Question">
       <div className="tabs" role="tablist">
