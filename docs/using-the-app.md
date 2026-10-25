@@ -13,6 +13,11 @@ Both versions look and behave the same. The only difference is the **runner** (w
 
 The sun, moon and half-circle button (top right) cycles **Auto**, **Light** and **Dark**. Auto follows your system and changes with it; Light and Dark stay fixed. The choice is remembered in this browser.
 
+## Search
+
+- **In a run:** `Ctrl+P` (or the search box at the top of the question list) opens a fuzzy search over that run's questions. Type a few letters of the title, number or topic (for example `bst rem` finds Binary search tree: Remove()), use the arrow keys, and press Enter to jump to it. The editor keeps its focus afterwards.
+- **On the dashboard, set and stats pages:** `Ctrl+P` or `/` (or the search box in the top bar) searches question sets and every question in them. Choosing a set opens it; choosing a question starts a one-question run.
+
 ## Pages
 
 - **Dashboard** (`#/`): every question set, every run in progress, and finished runs. Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.

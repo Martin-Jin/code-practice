@@ -16,6 +16,7 @@ import EditorPane from './EditorPane.jsx';
 import Output from './Output.jsx';
 import Finish from './Finish.jsx';
 import RunMenu from './RunMenu.jsx';
+import QuickSearch from '../../components/QuickSearch.jsx';
 
 const load = (key, fallback) => {
   try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch { return fallback; }
@@ -62,7 +63,7 @@ function Splitter({ horizontal, onMove, onEnd, onReset }) {
 }
 
 function ChangeModeDialog({ run, set, close }) {
-  const [choice, setChoice] = useState({ mode: run.mode, options: { ...defaultChoice().options, ...run.options } });
+  const [choice, setChoice] = useState({ mode: run.mode === 'custom' ? 'practice' : run.mode, options: { ...defaultChoice().options, ...run.options } });
   return (
     <Modal
       title="Change test mode" wide onClose={() => close(null)}
@@ -99,6 +100,7 @@ export default function RunView({ runId, param, theme }) {
   sizesRef.current = sizes;
   const [editorKey, setEditorKey] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
 
   const set = run && getSet(run.setId);
@@ -124,6 +126,7 @@ export default function RunView({ runId, param, theme }) {
       if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 't') { e.preventDefault(); toggleTask(); }
       else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleSide(); }
       else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o') { e.preventDefault(); toggleOutput(); }
+      else if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setSearchOpen(true); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -271,6 +274,16 @@ export default function RunView({ runId, param, theme }) {
 
   const taskPane = <TaskPane q={q} onHide={toggleTask} />;
 
+  // Fuzzy search over this run's questions (Ctrl+P).
+  const searchItems = searchOpen ? numbers.map((m) => {
+    const mq = getQuestion(run.setId, m);
+    const cat = set.categories.find((c) => c.questions.includes(m));
+    return {
+      key: m, label: `Q${m} ${mq.title}`, sub: cat ? cat.name : '', keywords: mq.topic,
+      status: questionStatus(run, m), badge: m === n ? 'current' : `${mq.marks}m`, onSelect: () => goto(m),
+    };
+  }) : [];
+
   return (
     <div className="run">
       <header className="run-top">
@@ -291,7 +304,7 @@ export default function RunView({ runId, param, theme }) {
       </header>
 
       <div className={`run-body${sideOpen ? '' : ' side-hidden'}`}>
-        <Sidebar run={run} set={set} current={n} onSelect={goto} />
+        <Sidebar run={run} set={set} current={n} onSelect={goto} onSearch={() => setSearchOpen(true)} />
 
         <div className={`work${taskOpen ? '' : ' task-closed'}`} ref={workRef} style={{ '--q-w': `${sizes.q}%` }}>
           <button type="button" className="rail" onClick={toggleTask} title="Show the task (Alt+T)">
@@ -331,6 +344,13 @@ export default function RunView({ runId, param, theme }) {
 
         </div>
       </div>
+
+      {searchOpen && (
+        <QuickSearch
+          items={searchItems} placeholder="Search the questions in this run…"
+          onClose={() => { setSearchOpen(false); setTimeout(() => editor.current && editor.current.focus(), 0); }}
+        />
+      )}
 
       {showFinish && (
         <Finish run={run} celebrate={celebrate} onClose={() => { setFinishOpen(false); setCelebrate(false); if (param === 'summary') goto(n); }} />

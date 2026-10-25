@@ -1,6 +1,6 @@
 // How each test mode picks its questions. Works on a set as described in catalog.json.
-export const MODES = ['practice', 'random', 'topic', 'all'];
-export const MODE_LABELS = { practice: 'Practice test', random: 'Random', topic: 'By topic', all: 'All questions' };
+export const MODES = ['practice', 'random', 'topic', 'all', 'custom'];
+export const MODE_LABELS = { practice: 'Practice test', random: 'Random', topic: 'By topic', all: 'All questions', custom: 'Single question' };
 
 function shuffle(arr, rng) {
   const a = arr.slice();
@@ -29,6 +29,7 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
     includeExtra: !!options.includeExtra,
     count: Math.floor(Number(options.count) || 0),
     categories: Array.isArray(options.categories) ? options.categories : [],
+    questions: Array.isArray(options.questions) ? options.questions.map(Number) : [],
   };
   const byId = (ids) => set.categories.filter((c) => ids.includes(c.id));
   let picked = [];
@@ -46,6 +47,11 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
     const all = eligibleCategories(set, opts).flatMap((c) => c.questions);
     if (opts.count < 1) throw new Error('Choose how many questions you want');
     picked = shuffle(all, rng).slice(0, Math.min(opts.count, all.length));
+  } else if (mode === 'custom') {
+    // An explicit list (the search box starts one-question runs this way); not offered in the picker.
+    const known = new Set(set.categories.flatMap((c) => c.questions));
+    picked = opts.questions.filter((n) => known.has(n));
+    if (!picked.length) throw new Error('No such question');
   } else if (mode === 'topic') {
     picked = byId(opts.categories).flatMap((c) => c.questions);
     if (!picked.length) throw new Error('Pick at least one topic');

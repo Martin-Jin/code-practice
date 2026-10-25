@@ -14,7 +14,7 @@ export function questionStatus(run, n) {
 }
 
 // Questions of the run, grouped under collapsible category headings.
-export default function Sidebar({ run, set, current, onSelect }) {
+export default function Sidebar({ run, set, current, onSelect, onSearch }) {
   const key = `collapsed:${run.id}`;
   const [collapsed, setCollapsed] = useState(() => {
     try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
@@ -32,6 +32,9 @@ export default function Sidebar({ run, set, current, onSelect }) {
 
   return (
     <nav className="side" aria-label="Questions in this run">
+      <button type="button" className="side-search" onClick={onSearch} title="Search the questions in this run (Ctrl+P)">
+        <Icon name="search" /><span>Search questions</span><span className="kbd">Ctrl+P</span>
+      </button>
       {sections.map((s) => (
         <div key={s.group}>
           {sections.length > 1 && <div className="grp-label">{s.label}</div>}

@@ -341,3 +341,26 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 .confetti i { position: absolute; top: -12px; width: 8px; height: 14px; border-radius: 2px; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
+
+/* ---------- quick search ---------- */
+.nav-search, .side-search {
+  display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--muted); font: inherit; border-radius: 8px; cursor: pointer; text-align: left;
+}
+.nav-search:hover, .side-search:hover { border-color: var(--accent); color: var(--text); }
+.nav-search { height: 32px; padding: 0 10px; min-width: 260px; }
+.nav-search-text, .side-search span:nth-child(2) { flex: 1; }
+.side-search { width: calc(100% - 20px); margin: 4px 10px 8px; padding: 6px 10px; }
+dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px)); }
+.quick-input { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--muted); }
+.quick-input input { flex: 1; height: 28px; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 16px; padding: 0; }
+.quick-list { list-style: none; margin: 0; padding: 6px; max-height: min(52vh, 420px); overflow-y: auto; }
+.quick-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; }
+.quick-list li.active { background: var(--accent-soft); }
+.quick-list .q-text { flex: 1; min-width: 0; display: grid; }
+.quick-list .q-label { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-list .q-sub { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-list mark { background: none; color: var(--accent); font-weight: 800; }
+.quick-list .st { flex: none; }
+.quick-empty { color: var(--muted); cursor: default !important; justify-content: center; padding: 22px 10px !important; }
+.quick-foot { padding: 8px 16px; border-top: 1px solid var(--border); font-size: 12px; }

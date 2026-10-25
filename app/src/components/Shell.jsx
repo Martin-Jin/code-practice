@@ -4,6 +4,7 @@ import { RUNNERS } from '../lib/runners.js';
 import { persistent } from '../lib/db.js';
 import Icon from './Icon.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
+import GlobalSearch from './GlobalSearch.jsx';
 
 const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
 const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
@@ -73,6 +74,7 @@ export default function Shell({ crumbs = [], theme, children }) {
           ))}
         </div>
         <span className="spacer" />
+        <GlobalSearch />
         <SettingsButton />
         <ThemeButton theme={theme} />
       </nav>

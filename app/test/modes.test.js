@@ -57,3 +57,13 @@ test('picked questions are ordered by category then position', () => {
 test('unknown mode is rejected', () => {
   assert.throws(() => pickQuestions(set, 'nope'), /mode/);
 });
+
+test('custom mode picks exactly the listed questions', () => {
+  assert.deepEqual(pickQuestions(set, 'custom', { questions: [24] }), [24]);
+  assert.deepEqual(pickQuestions(set, 'custom', { questions: [38, 1, 24] }), [1, 24, 38].sort((a, b) => {
+    const order = set.categories.flatMap((c) => c.questions);
+    return order.indexOf(a) - order.indexOf(b);
+  }));
+  assert.throws(() => pickQuestions(set, 'custom', { questions: [99999] }), /No such question/);
+  assert.throws(() => pickQuestions(set, 'custom', {}), /No such question/);
+});
