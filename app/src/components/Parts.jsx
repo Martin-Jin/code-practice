@@ -165,6 +165,26 @@ function PartEditor({ draft, index, onChange, onRemove }) {
   );
 }
 
+export const draftsOf = (parts) => parts.map(toDraft);
+export const partsOf = (drafts) => drafts.map(fromDraft);   // throws an Error saying what is wrong
+export const blankDrafts = () => [toDraft({ label: '', type: 'self' })];
+
+// The list of part forms with "Add a part". drafts and onChange work on the drafts from draftsOf.
+export function PartsEditor({ drafts, onChange }) {
+  return (
+    <>
+      {drafts.map((d, i) => (
+        <PartEditor key={i} draft={d} index={i}
+          onChange={(next) => onChange(drafts.map((p, j) => (j === i ? next : p)))}
+          onRemove={() => onChange(drafts.filter((_, j) => j !== i))} />
+      ))}
+      <div className="row">
+        <button type="button" className="btn sm" onClick={() => onChange([...drafts, toDraft(blankPart(nextLabel(drafts)))])}><Icon name="plus" /> Add a part</button>
+      </div>
+    </>
+  );
+}
+
 // Edit a question's parts, marks, tags and (for a PDF question) crop. `onSave(edit)` receives only
 // what the user can change; `onRevert` puts the imported version back.
 export function AnswerKeyEditor({ question, edited, onSave, onRevert }) {
@@ -194,14 +214,7 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert }) {
       <p className="muted">
         Add what the app needs to check your answers. This is saved in this browser and is part of a backup; the imported file is not changed.
       </p>
-      {parts.map((d, i) => (
-        <PartEditor key={i} draft={d} index={i}
-          onChange={(next) => change(() => setParts(parts.map((p, j) => (j === i ? next : p))))}
-          onRemove={() => change(() => setParts(parts.filter((_, j) => j !== i)))} />
-      ))}
-      <div className="row">
-        <button type="button" className="btn sm" onClick={() => change(() => setParts([...parts, toDraft(blankPart(nextLabel(parts)))]))}><Icon name="plus" /> Add a part</button>
-      </div>
+      <PartsEditor drafts={parts} onChange={(next) => change(() => setParts(next))} />
       <div className="row">
         <label>Marks <input type="number" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => change(() => setMarks(e.target.value))} /></label>
         <label className="grow">Tags <input type="text" value={tags} placeholder="comma separated search words" style={{ width: '100%' }} onChange={(e) => change(() => setTags(e.target.value))} /></label>

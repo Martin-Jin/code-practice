@@ -1,6 +1,8 @@
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { removeSet } from '../lib/library.js';
+import { deleteMine, deleteMineQuestion } from '../lib/mine.js';
+import AddQuestionDialog from '../components/AddQuestion.jsx';
 import { effectiveQuestions, getProgress } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
@@ -23,7 +25,7 @@ const PART_LABEL = { numeric: 'number', mcq: 'choice', self: 'self-mark' };
 // An imported set: its questions grouped by section, in the order the manifest lists them.
 export default function LibrarySet({ setId, theme }) {
   const st = useStore();
-  const { confirm } = useDialogs();
+  const { confirm, open } = useDialogs();
   const record = st.library.sets[setId];
 
   if (!record) {
@@ -41,13 +43,21 @@ export default function LibrarySet({ setId, theme }) {
   const runs = Object.values(st.libRuns).filter((r) => r.setId === setId).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
   const remove = async () => {
+    const mine = record.userOwned;
     const ok = await confirm({
-      title: `Remove ${record.title}?`,
-      body: 'This deletes the copy kept in this browser. Your folder is not touched, and you can add it again later.',
-      confirmText: 'Remove', danger: true,
+      title: mine ? 'Delete all your own questions?' : `Remove ${record.title}?`,
+      body: mine ? `This deletes the ${plural(questions.length, 'question')} you made, with their images. They are only kept in this browser and in your backups.`
+        : 'This deletes the copy kept in this browser. Your folder is not touched, and you can add it again later.',
+      confirmText: mine ? 'Delete them' : 'Remove', danger: true,
     });
     if (!ok) return;
-    try { await removeSet(setId); window.location.hash = '#/'; } catch (e) { toast(`Could not remove it: ${e.message}`, 'bad'); }
+    try { await (mine ? deleteMine() : removeSet(setId)); window.location.hash = '#/'; } catch (e) { toast(`Could not remove it: ${e.message}`, 'bad'); }
+  };
+
+  const removeQuestion = async (q) => {
+    const ok = await confirm({ title: 'Delete this question?', body: `"${q.title}" and its image are deleted. Your answers to it are kept but have nothing to show.`, confirmText: 'Delete', danger: true });
+    if (!ok) return;
+    try { await deleteMineQuestion(q.uid); } catch (e) { toast(`Could not delete it: ${e.message}`, 'bad'); }
   };
 
   return (
@@ -57,7 +67,10 @@ export default function LibrarySet({ setId, theme }) {
         <p className="muted">
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
-        <div className="row"><button type="button" className="btn danger" onClick={remove}>Remove from this browser</button></div>
+        <div className="row">
+          {record.userOwned && <button type="button" className="btn primary" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}>Add a question</button>}
+          <button type="button" className="btn danger" onClick={remove}>{record.userOwned ? 'Delete all my questions' : 'Remove from this browser'}</button>
+        </div>
       </div>
 
       <LibraryPracticePicker set={record} />
@@ -84,6 +97,7 @@ export default function LibrarySet({ setId, theme }) {
                     {progressChips(getProgress(setId, q.uid))}
                   </div>
                 </div>
+                {record.userOwned && <button type="button" className="btn ghost sm" onClick={() => removeQuestion(q)} aria-label={`Delete ${q.title}`}>Delete</button>}
               </div>
             ))}
           </div>

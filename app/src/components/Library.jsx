@@ -4,6 +4,7 @@ import { plural } from '../lib/format.js';
 import { scanFolder, indexPdf, importSet, removeSet, requestPersistence, storageStatus, mb } from '../lib/library.js';
 import Icon from './Icon.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
+import AddQuestionDialog from './AddQuestion.jsx';
 import { toast } from './Toasts.jsx';
 
 const FORMAT_DOC = 'https://github.com/martin-jin/code-practice/blob/main/docs/question-set-format.md';
@@ -222,7 +223,9 @@ export function LibrarySection() {
                 </div>
                 <div className="actions">
                   <a className="btn primary" href={`#/lib/${encodeURIComponent(set.id)}`}>Browse</a>
-                  <button type="button" className="btn" onClick={() => remove(set)}><Icon name="trash" /> Remove</button>
+                  {set.userOwned
+                    ? <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}><Icon name="plus" /> Add a question</button>
+                    : <button type="button" className="btn" onClick={() => remove(set)}><Icon name="trash" /> Remove</button>}
                 </div>
               </div>
             ))}
@@ -231,7 +234,8 @@ export function LibrarySection() {
       <div className="row" style={{ marginTop: 12 }}>
         <button type="button" className="btn" onClick={() => input.current.click()}><Icon name="plus" /> Add or update a folder…</button>
         <input ref={input} type="file" webkitdirectory="" multiple hidden onChange={onChoose} />
-        <span className="muted">Choose the folder that holds your <code>.questions.json</code> files. Choose it again after changing them.</span>
+        <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}><Icon name="plus" /> Add a question…</button>
+        <span className="muted">Choose the folder that holds your <code>.questions.json</code> files (choose it again after changing them), or make a question from a screenshot.</span>
       </div>
       <StorageNote />
     </section>

@@ -43,6 +43,10 @@ export async function scanFolder(files) {
     const dir = dirOf(m.path);
     const parsed = parseQuestionSet(await m.file.text());
     const item = { path: m.path, set: parsed.set, errors: parsed.errors, skipped: parsed.skipped, files: {}, missing: [], bytes: 0, status: null };
+    if (item.set && item.set.id === MINE_ID) {
+      item.errors = [`The id "${MINE_ID}" is kept for questions made in the app. Choose another id in the manifest.`];
+      item.set = null;
+    }
     if (item.set && ids.has(item.set.id)) {
       item.errors = [`It has the same id ("${item.set.id}") as ${ids.get(item.set.id)}, which is imported instead.`];
       item.set = null;
@@ -141,8 +145,25 @@ export async function removeSet(id) {
   notify();
 }
 
-// A stored file (a PDF or image of an imported set) as a Blob, or null.
+// The set id of the user's own questions (see mine.js). No folder may use it.
+export const MINE_ID = 'mine';
+
+// Shows the user's own questions as a set beside the imported ones, or hides it when it is empty.
+export function syncMine() {
+  const record = state.libMine[MINE_ID];
+  if (!record || !record.manifest.questions.length) { delete state.library.sets[MINE_ID]; return; }
+  state.library.sets[MINE_ID] = {
+    id: MINE_ID, title: record.manifest.title, course: '', manifest: record.manifest, folder: '', importedAt: record.updatedAt,
+    bytes: Object.values(record.images).reduce((n, url) => n + url.length, 0), missing: [], files: {}, userOwned: true,
+  };
+}
+
+// A stored file (a PDF or image of an imported set, or an image of the user's own questions) as a Blob, or null.
 export async function getFile(setId, rel) {
+  if (setId === MINE_ID) {
+    const url = state.libMine[MINE_ID] && state.libMine[MINE_ID].images[rel];
+    return url ? (await fetch(url)).blob() : null;
+  }
   const record = await db.get('libFiles', `${setId}/${rel}`);
   return record ? record.file : null;
 }

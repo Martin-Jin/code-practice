@@ -8,6 +8,7 @@ import { pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes
 import { weightOf, libraryTrouble } from '../../shared/weights.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
+import { syncMine } from './library.js';
 
 export const keyOf = (setId, uid) => `${setId}/${uid}`;
 const now = () => new Date().toISOString();
@@ -18,6 +19,7 @@ export async function loadPractice() {
   for (const r of edits) state.libEdits[r.key] = r;
   for (const r of runs) state.libRuns[r.id] = r;
   for (const r of mine) state.libMine[r.id] = r;
+  syncMine();
 }
 
 // ---- questions with the user's edits ----

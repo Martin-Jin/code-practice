@@ -110,6 +110,10 @@ A bad question does not stop its set. It is left out, and the import screen says
 
 A file named by the set but missing from the folder does not stop the import either. The question is kept, shown without that file, and the set card says how many files are missing.
 
+## Questions made in the app
+
+**Add a question…** in the app saves questions in a set with the id `mine` ("My questions"), stored in the browser instead of copied from a folder, with the same question format and the images as data URLs. No folder may use the id `mine`: the import screen refuses a manifest that does.
+
 ## Your changes
 
 The user can add or correct parts, marks, tags and a PDF question's crop box in the app (**Answer key**). Those are saved apart from the set, as an overlay on the question with the same `uid`, so importing the folder again never overwrites them and they are part of a backup. The same goes for answers typed, results and the difficult flag. This is another reason a `uid` must not change.
