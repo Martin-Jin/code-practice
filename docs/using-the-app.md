@@ -51,6 +51,12 @@ The sun, moon and half-circle button (top right) cycles **Auto**, **Light** and 
   - *Abandon run*: deletes the run.
 - **Finish screen:** when every question passes, a summary shows attempts, wrong runs, compile errors and time. **Review my answers** returns to the editor; **Results** on the dashboard reopens it.
 
+## On a phone
+
+Below 820 px wide the run screen shows one panel at a time, chosen from the bar at the bottom: **Questions**, **Task**, **Code** and **Output**. Picking a question opens its Task, and pressing Run in the Code panel jumps to Output (a coloured dot on the tab shows the last result). The editor bar gets a **Suggest** button, because a phone has no `Ctrl+Space`. The dashboard, set and stats pages simply stack into one column.
+
+It works, but a phone is a cramped place to write C++: the on-screen keyboard covers most of the editor and brackets are awkward to reach. Expect to use it for reading tasks, checking results and light edits; use a laptop for real practice. Pane resizing and the keyboard shortcuts are desktop-only.
+
 ## Where your data lives
 
 Runs, drafts and stats are saved in this browser (IndexedDB), automatically as you type. They are not sent anywhere and do not sync between browsers, computers or between the published page and the local server (different addresses count as different sites). Clearing site data deletes them.

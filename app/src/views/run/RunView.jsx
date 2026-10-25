@@ -17,6 +17,7 @@ import Output from './Output.jsx';
 import Finish from './Finish.jsx';
 import RunMenu from './RunMenu.jsx';
 import QuickSearch from '../../components/QuickSearch.jsx';
+import useMediaQuery from '../../components/useMediaQuery.js';
 
 const load = (key, fallback) => {
   try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch { return fallback; }
@@ -101,6 +102,9 @@ export default function RunView({ runId, param, theme }) {
   const [editorKey, setEditorKey] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // On a phone the workspace shows one panel at a time, chosen from a bar at the bottom.
+  const mobile = useMediaQuery('(max-width: 820px)');
+  const [mtab, setMtab] = useState('task');
   const [celebrate, setCelebrate] = useState(false);
 
   const set = run && getSet(run.setId);
@@ -161,6 +165,7 @@ export default function RunView({ runId, param, theme }) {
     const code = editor.current.getCode();
     setOutputOpen(true);  // a run is pointless if its result stays hidden
     save('outputOpen', true);
+    setMtab('output');
     setRunning(num);
     setRunnerError(null);
     try {
@@ -285,10 +290,10 @@ export default function RunView({ runId, param, theme }) {
   }) : [];
 
   return (
-    <div className="run">
+    <div className={`run${mobile ? ' mobile' : ''}`} data-mtab={mtab}>
       <header className="run-top">
         <a className="btn ghost icon-only" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
-        <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the question list (Alt+B)" aria-label="Toggle question list">
+        <button type="button" className="btn ghost icon-only hide-mobile" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the question list (Alt+B)" aria-label="Toggle question list">
           <Icon name="sidebar" />
         </button>
         <h1 title={`${run.name} (${MODE_LABELS[run.mode]})`}>{run.name}</h1>
@@ -304,29 +309,33 @@ export default function RunView({ runId, param, theme }) {
       </header>
 
       <div className={`run-body${sideOpen ? '' : ' side-hidden'}`}>
-        <Sidebar run={run} set={set} current={n} onSelect={goto} onSearch={() => setSearchOpen(true)} />
+        <Sidebar run={run} set={set} current={n} onSearch={() => setSearchOpen(true)}
+          onSelect={(num) => { goto(num); setMtab('task'); }} />
 
-        <div className={`work${taskOpen ? '' : ' task-closed'}`} ref={workRef} style={{ '--q-w': `${sizes.q}%` }}>
+        <div className={`work${taskOpen || mobile ? '' : ' task-closed'}`} ref={workRef} style={{ '--q-w': `${sizes.q}%` }}>
           <button type="button" className="rail" onClick={toggleTask} title="Show the task (Alt+T)">
             <Icon name="task" /><span>TASK</span>
           </button>
-          {taskOpen && taskPane}
-          {taskOpen && <Splitter onMove={startDrag('x')} onEnd={endDrag} onReset={resetSizes} />}
+          {(taskOpen || mobile) && taskPane}
+          {taskOpen && !mobile && <Splitter onMove={startDrag('x')} onEnd={endDrag} onReset={resetSizes} />}
 
-          <section className={`right${outputOpen ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
+          <section className={`right${outputOpen || mobile ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
             <div className="editor-bar">
               <span className="qt" title={q.title}>Q{n} · {q.title}</span>
               {stq.attempts > 0 && <span className="muted small">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
               {status === 'passed' && <span className="chip ok">Passed</span>}
-              <button type="button" className="btn ghost" aria-pressed={taskOpen} onClick={toggleTask} title="Show or hide the task text next to the editor (Alt+T)">
+              <button type="button" className="btn ghost hide-mobile" aria-pressed={taskOpen} onClick={toggleTask} title="Show or hide the task text next to the editor (Alt+T)">
                 <Icon name="task" /> Task
               </button>
-              <button type="button" className="btn ghost" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)">
+              <button type="button" className="btn ghost hide-mobile" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)">
                 <Icon name="stats" /> Output
               </button>
               <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
               <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
                 <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
+              </button>
+              <button type="button" className="btn ghost show-mobile" onClick={() => editor.current && editor.current.suggest()} title="Show name suggestions (Ctrl+Space)">
+                <Icon name="code" /> Suggest
               </button>
               <button type="button" className="btn ghost icon-only" onClick={resetCurrentCode} title="Reset code: put the starter code back" aria-label="Reset code"><Icon name="refresh" /></button>
               <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Enter)">
@@ -334,9 +343,9 @@ export default function RunView({ runId, param, theme }) {
               </button>
             </div>
             <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} />
-            {outputOpen && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
+            {outputOpen && !mobile && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
             <Output
-              result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen} onToggle={toggleOutput}
+              result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen || mobile} onToggle={toggleOutput}
               tab={outTabs[n] || 'results'} onTab={(t) => setOutTabs((o) => ({ ...o, [n]: t }))}
               onJump={(line, col) => editor.current && editor.current.reveal(line, col)}
             />
@@ -344,6 +353,17 @@ export default function RunView({ runId, param, theme }) {
 
         </div>
       </div>
+
+      {mobile && (
+        <nav className="m-tabs" aria-label="Panels">
+          {[['questions', 'sidebar', 'Questions'], ['task', 'task', 'Task'], ['code', 'code', 'Code'], ['output', 'stats', 'Output']].map(([id, icon, label]) => (
+            <button key={id} type="button" aria-selected={mtab === id} onClick={() => setMtab(id)}>
+              <Icon name={icon} />{label}
+              {id === 'output' && result && <span className={`dot ${result.status === 'passed' ? 'ok' : 'bad'}`} />}
+            </button>
+          ))}
+        </nav>
+      )}
 
       {searchOpen && (
         <QuickSearch

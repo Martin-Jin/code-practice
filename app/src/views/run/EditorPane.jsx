@@ -16,6 +16,13 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun }, ref) 
     getCode: () => (live.current.editor ? live.current.editor.getValue() : run.state[n].code),
     setCode: (code) => live.current.editor && live.current.editor.setValue(code),
     focus: () => live.current.editor && live.current.editor.focus(),
+    // Phones have no Ctrl+Space, so a button opens the suggestion list.
+    suggest: () => {
+      const { editor } = live.current;
+      if (!editor) return;
+      editor.focus();
+      editor.trigger('button', 'editor.action.triggerSuggest', {});
+    },
     // Drop unsaved edits (used right before the run is reset, so they cannot overwrite the reset).
     discard: () => live.current.dirty && live.current.dirty.clear(),
     // Save edits still waiting on the autosave timer, then write everything to disk now.
