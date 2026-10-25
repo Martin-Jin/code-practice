@@ -181,14 +181,13 @@ table.stats tr.zero td { color: var(--muted); }
 .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
 /* ---------- run workspace ---------- */
-/* The top bar slides away until the pointer (or keyboard focus) reaches the thin strip it leaves at the top. */
-.run { position: relative; height: 100vh; display: grid; grid-template-rows: minmax(0, 1fr); min-height: 0; }
-.run-top { position: absolute; inset: 0 0 auto 0; z-index: 30; height: 42px; display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; transform: translateY(calc(-100% + 6px)); transition: transform .2s ease .05s, box-shadow .2s ease; }
-.run-top:hover, .run-top:focus-within { transform: none; box-shadow: 0 6px 16px rgb(0 0 0 / 25%); transition-delay: 0s; }
+/* Top bar and workspace. */
+.run { height: 100vh; display: grid; grid-template-rows: 42px 1fr; min-height: 0; }
+.run-top { display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
 .run-top h1 { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .run-top .progress { display: flex; align-items: center; gap: 8px; width: 150px; margin: 0 6px; font-size: 12px; color: var(--muted); }
 .run-top .progress .bar { flex: 1; }
-.run-body { padding-top: 6px; display: grid; grid-template-columns: 44px var(--side-w, 290px) minmax(0, 1fr); min-height: 0; }
+.run-body { display: grid; grid-template-columns: 44px var(--side-w, 290px) minmax(0, 1fr); min-height: 0; }
 /* The hidden sidebar is display:none, so it leaves the grid: the workspace must then be the
    only column. (Keeping a 0-width first column pushed the workspace into it.) */
 .run-body.side-hidden { grid-template-columns: 44px minmax(0, 1fr); }
@@ -321,7 +320,7 @@ table.difftable tr.add td.t.g:empty::before, table.difftable tr.del td.t.e:empty
 .running { display: flex; align-items: center; gap: 10px; padding: 24px 6px; color: var(--muted); }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--surface-3); border-top-color: var(--accent); animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .btn.reveal .lbl, .qt-title, .run-top { transition: none; } .spinner { animation-duration: 2s; } .bar > i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .btn.reveal .lbl, .qt-title { transition: none; } .spinner { animation-duration: 2s; } .bar > i { transition: none; } }
 .placeholder { color: var(--muted); padding: 30px 8px; text-align: center; }
 
 /* menus, dialogs, toasts */
@@ -384,8 +383,6 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .show-mobile { display: none; }
 .run.mobile { height: 100dvh; grid-template-rows: 48px minmax(0, 1fr) auto; }
 .run.mobile .hide-mobile { display: none; }
-.run.mobile .run-top { position: static; transform: none; height: auto; box-shadow: none; }
-.run.mobile .run-body { padding-top: 0; }
 .run.mobile .show-mobile { display: inline-flex; }
 .run.mobile .run-body, .run.mobile .run-body.side-hidden { grid-template-columns: minmax(0, 1fr); }
 .run.mobile .run-body > .side { display: none; width: auto; border-right: 0; }
