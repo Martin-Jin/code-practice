@@ -33,6 +33,14 @@ export default function App() {
   const st = useStore();
   const theme = useTheme();
   useEffect(() => { boot(); }, []);
+  // Ctrl+S is muscle memory from VS Code; the app saves by itself, so stop the browser's save dialog.
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 's') e.preventDefault();
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, []);
 
   let body;
   if (!st.ready) body = <div className="running" style={{ justifyContent: 'center', height: '100vh' }}><span className="spinner" /> Loading…</div>;

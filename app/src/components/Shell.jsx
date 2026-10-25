@@ -1,9 +1,11 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
-import { setRunner, setAutoSuggest } from '../lib/service.js';
+import { setRunner, setAutoSuggest, setShortcut, resetShortcuts } from '../lib/service.js';
+import { ACTIONS, FIXED, comboFor, eventCombo, checkCombo } from '../lib/shortcuts.js';
 import { RUNNERS } from '../lib/runners.js';
 import { persistent } from '../lib/db.js';
 import Icon from './Icon.jsx';
+import Keys from './Keys.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
 
@@ -54,39 +56,88 @@ export function SettingsDialog({ close }) {
   );
 }
 
-const SHORTCUTS = [
-  ['Anywhere', [
-    ['Search questions', ['Ctrl+P']],
-    ['Search question sets and questions (dashboard)', ['/']],
-  ]],
-  ['In a run', [
-    ['Compile and run the tests', ['Ctrl+Shift+Enter']],
-    ['Show or hide the task', ['Alt+T']],
-    ['Show or hide the question list', ['Alt+Q']],
-    ['Show or hide the output', ['Alt+O']],
-  ]],
-  ['In the editor', [
-    ['Open name suggestions', ['Ctrl+Space']],
-    ['Format the code', ['Shift+Alt+F']],
-  ]],
-];
-
+// Keyboard shortcuts. Click a key combination to record a new one; a combination that clashes
+// with another action is refused, and one that clashes with a browser shortcut asks first.
 export function HelpDialog({ close }) {
+  const st = useStore();
+  const [editing, setEditing] = useState(null);   // action id waiting for a key press
+  const [note, setNote] = useState('');            // why the last key press was refused
+  const [pending, setPending] = useState(null);    // { id, combo, text }: a clash to confirm
+
+  const apply = (id, combo) => {
+    setShortcut(id, combo === ACTIONS.find((a) => a.id === id).def ? null : combo);
+    setEditing(null);
+    setNote('');
+    setPending(null);
+  };
+
+  useEffect(() => {
+    if (!editing) return undefined;
+    const onKey = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.key === 'Escape') { setEditing(null); setNote(''); return; }
+      const combo = eventCombo(e);
+      if (!combo) return;
+      const res = checkCombo(combo, editing, st.shortcuts);
+      if (res.error) { setNote(res.error); return; }
+      if (res.warning) { setPending({ id: editing, combo, text: res.warning }); setEditing(null); setNote(''); return; }
+      apply(editing, combo);
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [editing, st.shortcuts]);
+
+  const changed = Object.keys(st.shortcuts).length > 0;
+  const groups = [...new Set([...ACTIONS, ...FIXED].map((x) => x.group))];
   return (
-    <Modal title="Keyboard shortcuts" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
+    <Modal
+      title="Keyboard shortcuts" onClose={() => close()}
+      footer={(
+        <>
+          {changed && <button type="button" className="btn" onClick={() => { resetShortcuts(); setNote(''); setPending(null); }}>Reset all</button>}
+          <button type="button" className="btn primary" onClick={() => close()}>Done</button>
+        </>
+      )}
+    >
+      <p className="muted">Click a shortcut to change it, then press the new keys. Esc cancels.</p>
       <dl className="shortcuts">
-        {SHORTCUTS.map(([group, rows]) => (
+        {groups.map((group) => (
           <Fragment key={group}>
             <h3>{group}</h3>
-            {rows.map(([what, keys]) => (
-              <Fragment key={what}>
-                <dt>{what}</dt>
-                <dd>{keys.map((k) => <span key={k} className="kbd">{k}</span>)}</dd>
+            {ACTIONS.filter((x) => x.group === group).map((a) => (
+              <Fragment key={a.id}>
+                <dt>{a.label}</dt>
+                <dd>
+                  {st.shortcuts[a.id] && !editing && (
+                    <button type="button" className="btn ghost sm" onClick={() => apply(a.id, a.def)} title={`Put ${a.def} back`}>Reset</button>
+                  )}
+                  <button type="button" className={`rebind${editing === a.id ? ' recording' : ''}`} aria-label={`${a.label}: ${comboFor(a.id, st.shortcuts)}. Change`}
+                    onClick={() => { setEditing(a.id); setNote(''); setPending(null); }}>
+                    {editing === a.id ? 'Press the new keys…' : <Keys combo={comboFor(a.id, st.shortcuts)} />}
+                  </button>
+                </dd>
+              </Fragment>
+            ))}
+            {FIXED.filter((x) => x.group === group).map((f) => (
+              <Fragment key={f.label}>
+                <dt>{f.label}</dt>
+                <dd><span className="kbd">{f.combo}</span></dd>
               </Fragment>
             ))}
           </Fragment>
         ))}
       </dl>
+      {note && <div className="notice" role="alert">{note}</div>}
+      {pending && (
+        <div className="notice" role="alert">
+          <p>{pending.text}</p>
+          <p style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+            <button type="button" className="btn primary sm" onClick={() => apply(pending.id, pending.combo)}>Use {pending.combo} anyway</button>
+            <button type="button" className="btn sm" onClick={() => setPending(null)}>Keep the old one</button>
+          </p>
+        </div>
+      )}
     </Modal>
   );
 }

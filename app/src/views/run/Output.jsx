@@ -2,6 +2,9 @@ import { tokenDiff, lineDiff, showWhitespace } from '../../lib/diff.js';
 import { RUNNERS } from '../../lib/runners.js';
 import { plural } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
+import Keys from '../../components/Keys.jsx';
+import { useStore } from '../../lib/store.js';
+import { comboFor } from '../../lib/shortcuts.js';
 
 // Text with the changed parts marked. Whitespace-only changes are made visible.
 function Marked({ segments }) {
@@ -203,11 +206,12 @@ function CompilerTab({ result, q, onJump }) {
 }
 
 export default function Output({ result, q, running, runnerError, tab, onTab, onJump, open, onToggle }) {
+  const st = useStore();
   const c = result && result.compile;
   let body;
   if (running) body = <div className="running"><span className="spinner" /> Compiling and running the tests…</div>;
   else if (runnerError) body = <Banner tone="warn" icon="warning" title="Could not run your code" sub={runnerError} />;
-  else if (!result) body = <div className="placeholder">Press <b>Run</b> (<span className="kbd">Ctrl</span> + <span className="kbd">Shift</span> + <span className="kbd">Enter</span>) to compile your answer and run the tests.</div>;
+  else if (!result) body = <div className="placeholder">Press <b>Run</b> (<Keys combo={comboFor('run', st.shortcuts)} />) to compile your answer and run the tests.</div>;
   else if (tab === 'compiler') body = <CompilerTab result={result} q={q} onJump={onJump} />;
   else if (tab === 'raw') body = <Raw result={result} />;
   else body = <Results result={result} q={q} onJump={onJump} onTab={onTab} />;
@@ -233,7 +237,7 @@ export default function Output({ result, q, running, runnerError, tab, onTab, on
         {!open && summary}
         <span className="spacer" />
         <button type="button" className="btn ghost sm icon-only" onClick={onToggle} aria-expanded={open}
-          title={open ? 'Hide the output (Alt+O)' : 'Show the output (Alt+O)'} aria-label={open ? 'Hide output' : 'Show output'}>
+          title={`${open ? 'Hide' : 'Show'} the output (${comboFor('output', st.shortcuts)})`} aria-label={open ? 'Hide output' : 'Show output'}>
           <Icon name="chevron" style={open ? undefined : { transform: 'rotate(180deg)' }} />
         </button>
       </div>

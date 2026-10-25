@@ -4,12 +4,14 @@ import { buildProgram, analyse } from '../../shared/program.js';
 import { pickQuestions, MODE_LABELS } from '../../shared/modes.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
+import { ACTIONS } from './shortcuts.js';
 import { fetchCatalog, getSet, getQuestion, getSupport } from './catalog.js';
 import { execute, detectLocal } from './runners.js';
 
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
 const SUGGEST_KEY = 'autoSuggest';
+const SHORTCUTS_KEY = 'shortcuts';
 
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => b.toString(16).padStart(2, '0')).join('');
 
@@ -25,6 +27,10 @@ export async function boot() {
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }
     state.runner = saved === 'online' || (saved === 'local' && state.local) ? saved : state.local ? 'local' : 'online';
     try { state.autoSuggest = localStorage.getItem(SUGGEST_KEY) === 'true'; } catch { /* storage blocked */ }
+    try {
+      const saved = JSON.parse(localStorage.getItem(SHORTCUTS_KEY) || '{}');
+      for (const a of ACTIONS) if (typeof saved[a.id] === 'string') state.shortcuts[a.id] = saved[a.id];
+    } catch { /* storage blocked or not JSON */ }
   } catch (e) {
     state.error = e.message;
   }
@@ -42,6 +48,20 @@ export function setAutoSuggest(on) {
   state.autoSuggest = on;
   try { localStorage.setItem(SUGGEST_KEY, String(on)); } catch { /* storage blocked */ }
   notify();
+}
+
+// combo null puts the default back; the last argument of resetShortcuts clears every choice.
+function saveShortcuts() {
+  try { localStorage.setItem(SHORTCUTS_KEY, JSON.stringify(state.shortcuts)); } catch { /* storage blocked */ }
+  notify();
+}
+export function setShortcut(id, combo) {
+  if (combo) state.shortcuts[id] = combo; else delete state.shortcuts[id];
+  saveShortcuts();
+}
+export function resetShortcuts() {
+  state.shortcuts = {};
+  saveShortcuts();
 }
 
 // ---- saving ----

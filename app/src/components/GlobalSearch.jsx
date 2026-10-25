@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useStore } from '../lib/store.js';
+import { useStore, state } from '../lib/store.js';
 import { createRun } from '../lib/service.js';
 import Icon from './Icon.jsx';
 import QuickSearch from './QuickSearch.jsx';
 import { toast } from './Toasts.jsx';
+import { eventCombo, actionFor } from '../lib/shortcuts.js';
 
 const count = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 const typing = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
@@ -16,7 +17,8 @@ export default function GlobalSearch() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setOpen(true); }
+      const action = actionFor(eventCombo(e), state.shortcuts);
+      if (action && action.id === 'search' && !document.querySelector('dialog[open]')) { e.preventDefault(); setOpen(true); }
       else if (e.key === '/' && !typing(e.target) && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setOpen(true); }
     };
     window.addEventListener('keydown', onKey);
@@ -56,8 +58,8 @@ export default function GlobalSearch() {
 
   return (
     <>
-      <button type="button" className="nav-search" onClick={() => setOpen(true)} title="Search question sets and questions (Ctrl+P or /)" aria-label="Search question sets and questions">
-        <Icon name="search" /><span className="nav-search-text">Search sets and questions</span><span className="kbd">Ctrl+P</span>
+      <button type="button" className="nav-search" onClick={() => setOpen(true)} title="Search question sets and questions" aria-label="Search question sets and questions">
+        <Icon name="search" /><span className="nav-search-text">Search sets and questions</span>
       </button>
       {open && (
         <QuickSearch

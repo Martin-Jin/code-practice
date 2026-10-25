@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MODE_LABELS } from '../../../shared/modes.js';
 import { useStore, state } from '../../lib/store.js';
+import { eventCombo, actionFor, comboFor } from '../../lib/shortcuts.js';
 import { getSet, getQuestion } from '../../lib/catalog.js';
 import {
   runQuestion, setAutoSuggest, resetCode, resetRun, reselect, renameRun, deleteRun, runSummary, flushSaves,
@@ -83,6 +84,7 @@ function ChangeModeDialog({ run, set, close }) {
 
 export default function RunView({ runId, param, theme }) {
   const st = useStore();
+  const keyOf = (id) => comboFor(id, st.shortcuts);
   const run = st.runs[runId];
   const dialogs = useDialogs();
   const editor = useRef(null);
@@ -125,16 +127,33 @@ export default function RunView({ runId, param, theme }) {
   const toggleSide = useCallback(() => setSideOpen((open) => { save('sideOpen', !open); return !open; }), []);
   const toggleOutput = useCallback(() => setOutputOpen((open) => { save('outputOpen', !open); return !open; }), []);
 
+  // Keyboard shortcuts (rebindable, see shortcuts.js). Capture phase, so they also work while the
+  // editor has focus; ignored while a dialog is open. actionsRef is filled in below, once the
+  // handlers exist.
+  const actionsRef = useRef({});
   useEffect(() => {
     const onKey = (e) => {
-      if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 't') { e.preventDefault(); toggleTask(); }
-      else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'q') { e.preventDefault(); toggleSide(); }
-      else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o') { e.preventDefault(); toggleOutput(); }
-      else if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); setSearchOpen(true); }
+      if (document.querySelector('dialog[open]')) return;
+      const combo = eventCombo(e);
+      const action = combo && actionFor(combo, state.shortcuts);
+      const fn = action && action.id !== 'exit' && actionsRef.current[action.id];
+      if (!fn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      fn();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [toggleTask, toggleSide, toggleOutput]);
+    // Leaving the run waits for the bubble phase: if the editor (closing a suggestion list, clearing
+    // a selection) or a menu already used the key, it has called preventDefault and we stay.
+    const onKeyLate = (e) => {
+      if (e.defaultPrevented || document.querySelector('dialog[open]')) return;
+      const combo = eventCombo(e);
+      const action = combo && actionFor(combo, state.shortcuts);
+      if (action && action.id === 'exit') { e.preventDefault(); window.location.hash = '#/'; }
+    };
+    window.addEventListener('keydown', onKey, true);
+    window.addEventListener('keydown', onKeyLate);
+    return () => { window.removeEventListener('keydown', onKey, true); window.removeEventListener('keydown', onKeyLate); };
+  }, []);
 
   // Write drafts to disk when the tab is hidden or closed.
   useEffect(() => {
@@ -212,7 +231,7 @@ export default function RunView({ runId, param, theme }) {
 
   const menu = [
     { label: 'Reset code', icon: 'refresh', title: 'Put the starter code back for this question', onClick: resetCurrentCode },
-    { label: `Suggest as you type: ${st.autoSuggest ? 'on' : 'off'}`, icon: 'code', title: 'Name suggestions while typing. Ctrl+Space also turns this on.', onClick: () => setAutoSuggest(!st.autoSuggest) },
+    { label: `Suggest as you type: ${st.autoSuggest ? 'on' : 'off'}`, icon: 'code', title: `Name suggestions while typing. ${keyOf('suggest')} also turns this on.`, onClick: () => setAutoSuggest(!st.autoSuggest) },
     { label: 'Settings…', icon: 'gear', onClick: () => dialogs.open(({ close }) => <SettingsDialog close={close} />) },
     { label: `Theme: ${THEME_LABEL[theme.mode]}`, icon: THEME_ICON[theme.mode], title: `Click for ${THEME_LABEL[theme.next]}`, onClick: theme.toggle },
     { label: 'Keyboard shortcuts', icon: 'help', onClick: () => dialogs.open(({ close }) => <HelpDialog close={close} />) },
@@ -285,7 +304,14 @@ export default function RunView({ runId, param, theme }) {
 
   const taskPane = <TaskPane q={q} onHide={toggleTask} />;
 
-  // Fuzzy search over this run's questions (Ctrl+P).
+  actionsRef.current = {
+    run: handleRun, task: toggleTask, side: toggleSide, output: toggleOutput,
+    search: () => setSearchOpen(true),
+    format: () => editor.current && editor.current.format(),
+    suggest: () => editor.current && editor.current.suggest(),
+  };
+
+  // Fuzzy search over this run's questions.
   const searchItems = searchOpen ? numbers.map((m) => {
     const mq = getQuestion(run.setId, m);
     const cat = set.categories.find((c) => c.questions.includes(m));
@@ -298,8 +324,9 @@ export default function RunView({ runId, param, theme }) {
   return (
     <div className={`run${mobile ? ' mobile' : ''}`} data-mtab={mtab}>
       <header className="run-top">
+        <a className="brand hide-mobile" href="#/" title="Code Practice: back to the dashboard" aria-label="Back to the dashboard"><span className="logo"><Icon name="terminal" /></span></a>
         <a className="btn ghost icon-only show-mobile" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
-        <span className="qt" title={`${q.title} (${run.name}, ${MODE_LABELS[run.mode]})`}>Q{n}<span className="qt-title"> · {q.title}</span></span>
+        <span className="qt" title={`${q.title} (${run.name}, ${MODE_LABELS[run.mode]})`}>Q{n} · {q.title}</span>
         {stq.attempts > 0 && <span className="muted small hide-mobile">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
         {status === 'passed' && <span className="chip ok">Passed</span>}
         <span className="spacer" />
@@ -308,30 +335,28 @@ export default function RunView({ runId, param, theme }) {
           <span>{sum.passed}/{sum.total}</span>
         </div>
         {run.completedAt && <button type="button" className="btn" onClick={() => { setCelebrate(false); setFinishOpen(true); }}>Results</button>}
-        <button type="button" className="btn ghost reveal hide-mobile" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)" aria-label="Output">
-          <Icon name="stats" /><span className="lbl">Output</span>
-        </button>
         <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
         <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
           <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
         </button>
-        <button type="button" className="btn ghost icon-only hide-mobile" onClick={() => editor.current && editor.current.format()} title="Format the code (Shift+Alt+F)" aria-label="Format code"><Icon name="format" /></button>
-        <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Shift+Enter)">
+        <button type="button" className="btn ghost icon-only hide-mobile" onClick={() => editor.current && editor.current.format()} title={`Format the code (${keyOf('format')})`} aria-label="Format code"><Icon name="format" /></button>
+        <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title={`Compile and run the tests (${keyOf('run')})`}>
           <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'}
         </button>
-        <RunMenu items={menu} />
+        <RunMenu items={menu} className="show-mobile" />
       </header>
 
       <div className={`run-body${sideOpen ? '' : ' side-hidden'}`}>
         <nav className="activity" aria-label="Panels">
           <a className="btn ghost icon-only" href="#/" title="Exit to the dashboard. Your progress is kept." aria-label="Exit to the dashboard"><Icon name="exit" /></a>
           <hr />
-          <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the questions (Alt+Q)" aria-label="Questions">
+          <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title={`Show or hide the questions (${keyOf('side')})`} aria-label="Questions">
             <Icon name="questions" />
           </button>
-          <button type="button" className="btn ghost icon-only" onClick={toggleTask} aria-pressed={taskOpen} title="Show or hide the task text next to the editor (Alt+T)" aria-label="Task">
+          <button type="button" className="btn ghost icon-only" onClick={toggleTask} aria-pressed={taskOpen} title={`Show or hide the task text next to the editor (${keyOf('task')})`} aria-label="Task">
             <Icon name="task" />
           </button>
+          <RunMenu items={menu} side />
         </nav>
         <Sidebar run={run} set={set} current={n} onSearch={() => setSearchOpen(true)}
           onSelect={(num) => { goto(num); setMtab('task'); }} />
@@ -341,7 +366,7 @@ export default function RunView({ runId, param, theme }) {
           {taskOpen && !mobile && <Splitter onMove={startDrag('x')} onEnd={endDrag} onReset={resetSizes} />}
 
           <section className={`right${outputOpen || mobile ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
-            <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} autoSuggest={st.autoSuggest} onAutoSuggest={setAutoSuggest} />
+            <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} autoSuggest={st.autoSuggest} onAutoSuggest={setAutoSuggest} />
             {outputOpen && !mobile && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
             <Output
               result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen || mobile} onToggle={toggleOutput}

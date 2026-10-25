@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { plural } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
+import { useStore } from '../../lib/store.js';
+import { comboFor } from '../../lib/shortcuts.js';
 
 // `code` spans in the task text.
 function Inline({ text }) {
@@ -121,6 +123,7 @@ function ProvidedCode({ code }) {
 }
 
 export default function TaskPane({ q, onHide }) {
+  const st = useStore();
   // The pane unmounts when hidden, so the last tab is kept in this browser (not reset per question).
   const [tab, setTabState] = useState(() => {
     try { return localStorage.getItem('taskTab') === 'provided' ? 'provided' : 'task'; } catch { return 'task'; }
@@ -136,7 +139,7 @@ export default function TaskPane({ q, onHide }) {
         <button type="button" role="tab" className="tab" aria-selected={tab === 'provided'} onClick={() => setTab('provided')}>Provided code</button>
         <span className="spacer" />
         {onHide && (
-          <button type="button" className="btn ghost sm icon-only" onClick={onHide} title="Hide the task (Alt+T)" aria-label="Hide task">
+          <button type="button" className="btn ghost sm icon-only" onClick={onHide} title={`Hide the task (${comboFor('task', st.shortcuts)})`} aria-label="Hide task">
             <Icon name="back" />
           </button>
         )}

@@ -32,8 +32,8 @@ export default function Sidebar({ run, set, current, onSelect, onSearch }) {
 
   return (
     <nav className="side" aria-label="Questions in this run">
-      <button type="button" className="side-search" onClick={onSearch} title="Search the questions in this run (Ctrl+P)">
-        <Icon name="search" /><span>Search questions</span><span className="kbd">Ctrl+P</span>
+      <button type="button" className="side-search" onClick={onSearch} title="Search the questions in this run">
+        <Icon name="search" /><span>Search questions</span>
       </button>
       {sections.map((s) => (
         <div key={s.group}>

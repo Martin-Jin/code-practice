@@ -79,9 +79,6 @@ svg.icon.solid { fill: currentColor; stroke: none; }
 .btn.ghost { border-color: transparent; background: transparent; }
 .btn.ghost:hover { background: var(--surface-2); }
 .btn.icon-only { padding: 0; width: 32px; justify-content: center; }
-.btn.reveal { gap: 0; padding: 0 9px; }
-.btn.reveal .lbl { max-width: 0; margin-left: 0; opacity: 0; overflow: hidden; transition: max-width .2s ease, margin-left .2s ease, opacity .15s ease; }
-.btn.reveal:hover .lbl, .btn.reveal:focus-visible .lbl { max-width: 80px; margin-left: 6px; opacity: 1; }
 .btn.lg { height: 38px; padding: 0 18px; font-size: 14px; }
 .btn.sm { height: 26px; padding: 0 8px; font-size: 12px; }
 .btn:not(.ghost)[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
@@ -227,6 +224,7 @@ table.stats tr.zero td { color: var(--muted); }
 /* Icon strip at the far left (like VS Code's activity bar): one button per panel. */
 .activity { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; background: var(--surface); border-right: 1px solid var(--border); }
 .activity .btn { position: relative; }
+.activity .menu-wrap { margin-top: auto; }
 .activity hr { width: 24px; margin: 4px 0; border: 0; border-top: 1px solid var(--border); }
 .activity .btn[aria-pressed="true"]::before { content: ""; position: absolute; left: -6px; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; background: var(--accent); }
 .qpane { display: grid; grid-template-rows: auto 1fr; min-height: 0; min-width: 0; background: var(--surface); }
@@ -260,9 +258,6 @@ body.resizing .monaco-editor { pointer-events: none; }
 .splitter.h { cursor: row-resize; height: 6px; }
 
 .right { display: grid; grid-template-rows: minmax(120px, 1fr) 6px var(--out-h, 38%); min-width: 0; min-height: 0; background: var(--surface); }
-/* Only the question number shows until the title is hovered. */
-.qt-title { display: inline-block; vertical-align: bottom; max-width: 0; opacity: 0; overflow: hidden; white-space: pre; transition: max-width .3s ease, opacity .2s ease; }
-.qt:hover .qt-title { max-width: 80ch; opacity: 1; }
 .editor-host { min-height: 0; min-width: 0; position: relative; }
 .right.out-closed { grid-template-rows: minmax(120px, 1fr) auto; }
 .output.closed { grid-template-rows: auto; }
@@ -320,12 +315,13 @@ table.difftable tr.add td.t.g:empty::before, table.difftable tr.del td.t.e:empty
 .running { display: flex; align-items: center; gap: 10px; padding: 24px 6px; color: var(--muted); }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--surface-3); border-top-color: var(--accent); animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .btn.reveal .lbl, .qt-title { transition: none; } .spinner { animation-duration: 2s; } .bar > i { transition: none; } }
+@media (prefers-reduced-motion: reduce) {  .spinner { animation-duration: 2s; } .bar > i { transition: none; } }
 .placeholder { color: var(--muted); padding: 30px 8px; text-align: center; }
 
 /* menus, dialogs, toasts */
 .menu-wrap { position: relative; }
 .menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 230px; padding: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); display: grid; }
+.menu.side { right: auto; left: calc(100% + 6px); top: auto; bottom: 0; }
 .menu button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; background: none; color: var(--text); font: inherit; text-align: left; border-radius: 6px; cursor: pointer; }
 .menu button:hover:not(:disabled) { background: var(--surface-2); }
 .menu button:disabled { opacity: .45; cursor: not-allowed; }
@@ -401,7 +397,6 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 /* The panels are chosen from the bottom bar, so their own hide arrows would do nothing. */
 .run.mobile .qpane .tabs .btn, .run.mobile .output .tabs .btn { display: none; }
 .run.mobile .run-top > .qt { flex: 1 1 0; }
-.run.mobile .qt-title { max-width: none; opacity: 1; }
 .run.mobile .qitem { padding-top: 12px; padding-bottom: 12px; }
 .run.mobile .side .cat { padding-top: 12px; padding-bottom: 12px; }
 .run.mobile .btn { height: 40px; }
@@ -429,7 +424,6 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
   .run-row .btns .btn { height: 40px; }
   input[type=text], input[type=number], select { font-size: 16px; height: 40px; }  /* 16px stops iOS zooming into fields */
   dialog.modal form { max-height: calc(100dvh - 32px); }
-  .menu { right: -40px; }
 }
 
 /* ---------- shortcuts dialog ---------- */
@@ -437,4 +431,7 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .shortcuts dt { color: var(--text); }
 .shortcuts dd { margin: 0; text-align: right; display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
 .shortcuts h3 { grid-column: 1 / -1; margin: 8px 0 0; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-.shortcuts .kbd { font-size: 12px; padding: 1px 6px; opacity: 1; }
+.shortcuts .kbd { font-size: 12px; padding: 1px 6px; }
+.shortcuts .rebind { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text); font: inherit; cursor: pointer; }
+.shortcuts .rebind:hover { background: var(--surface-2); border-color: var(--control-border); }
+.shortcuts .rebind.recording { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-size: 12px; }

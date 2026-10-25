@@ -6,12 +6,10 @@ import { toast } from '../../components/Toasts.jsx';
 
 // The Monaco editor. One model per question, so undo history and cursor position survive
 // switching questions. Exposes getCode / setCode / setMarkers / reveal to the run view.
-const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSuggest, onAutoSuggest }, ref) {
+const EditorPane = forwardRef(function EditorPane({ run, n, dark, autoSuggest, onAutoSuggest }, ref) {
   const host = useRef(null);
   const live = useRef({});          // editor, monaco module, models, view states
   const [ready, setReady] = useState(false);
-  const onRunRef = useRef(onRun);
-  onRunRef.current = onRun;
   const onAutoSuggestRef = useRef(onAutoSuggest);
   onAutoSuggestRef.current = onAutoSuggest;
 
@@ -19,6 +17,14 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSug
     getCode: () => (live.current.editor ? live.current.editor.getValue() : run.state[n].code),
     setCode: (code) => live.current.editor && live.current.editor.setValue(code),
     focus: () => live.current.editor && live.current.editor.focus(),
+    // Opens the suggestion list and also turns on suggestions-as-you-type.
+    suggest: () => {
+      const { editor } = live.current;
+      if (!editor) return;
+      editor.focus();
+      onAutoSuggestRef.current(true);
+      editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+    },
     format: () => {
       const { editor } = live.current;
       if (!editor) return;
@@ -65,11 +71,6 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSug
       const { monaco, createEditor } = mod;
       const editor = createEditor(host.current, state.catalog.editor, dark);
       mod.setFormatErrorHandler((message) => toast(message, 'bad'));
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => onRunRef.current());
-      // Ctrl+Space opens the suggestion list and also turns on suggestions-as-you-type.
-      const openSuggestions = () => { onAutoSuggestRef.current(true); editor.trigger('keyboard', 'editor.action.triggerSuggest', {}); };
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, openSuggestions);
-      editor.addCommand(monaco.KeyMod.WinCtrl | monaco.KeyCode.Space, openSuggestions);
       // dirty: questions edited since their last autosave
       live.current = { editor, monaco, mod, models: new Map(), views: new Map(), dirty: new Set() };
       setReady(true);
@@ -127,7 +128,7 @@ const EditorPane = forwardRef(function EditorPane({ run, n, dark, onRun, autoSug
     if (ready) live.current.mod.setTheme(dark);
   }, [ready, dark]);
 
-  // Suggestions as you type are off until Ctrl+Space turns them on.
+  // Suggestions as you type are off until the suggest shortcut (or the menu) turns them on.
   useEffect(() => {
     if (!ready) return;
     const base = state.catalog.editor;
