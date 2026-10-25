@@ -112,6 +112,7 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); }
 .brand:hover { text-decoration: none; }
+.run-top .brand { margin-right: 10px; }  /* 16px to the title, like the dashboard's breadcrumb */
 .brand .logo { width: 24px; height: 24px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; }
 .crumbs { display: flex; align-items: center; gap: 8px; color: var(--muted); min-width: 0; }
 .crumbs a { color: var(--muted); }
@@ -181,8 +182,8 @@ table.stats tr.zero td { color: var(--muted); }
 
 /* ---------- run workspace ---------- */
 /* Top bar and workspace. */
-.run { height: 100vh; display: grid; grid-template-rows: 42px 1fr; min-height: 0; }
-.run-top { display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
+.run { height: 100vh; display: grid; grid-template-rows: 52px 1fr; min-height: 0; }
+.run-top { display: flex; align-items: center; gap: 6px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
 .run-top > * { flex: none; }
 .run-top > .qt { flex: 0 1 auto; font-weight: 650; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 36px; }
 .run-top > .spacer { flex: 1 1 0; }
@@ -399,6 +400,7 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .run.mobile .run-top > .qt { flex: 1 1 0; }
 .run.mobile .qitem { padding-top: 12px; padding-bottom: 12px; }
 .run.mobile .side .cat { padding-top: 12px; padding-bottom: 12px; }
+.run.mobile .run-top { padding: 0 12px; }
 .run.mobile .btn { height: 40px; }
 .run.mobile .btn.icon-only { width: 40px; }
 .run.mobile .m-tabs { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom); }
