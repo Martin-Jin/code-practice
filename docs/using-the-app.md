@@ -2,6 +2,8 @@
 
 The app is a practice interface for coding questions, modelled on a CodeRunner quiz: you read a task, write an answer in an editor, press Run, and see which tests pass. Question sets are folders under `sets/`, so more sets can be added later (see [question-format.md](question-format.md)).
 
+It also holds your own practice questions that are not code: PDFs, quiz screenshots and questions you make yourself. They are described under [Your own question sets](#your-own-question-sets), and everything you do in the app can be saved with [Back up and restore](#back-up-and-restore).
+
 ## Where to open it
 
 - **Published page (nothing to install):** the GitHub Pages site for this repo. It compiles your code on wandbox.org. See [deploying.md](deploying.md) for the address and what that means.

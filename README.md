@@ -2,6 +2,8 @@
 
 A web interface for practising coding questions, with test modes, an in-browser editor, test output with highlighted diffs, saved progress and stats. Questions come in **sets**: folders under `sets/` that follow a fixed format, so adding more questions or a whole new set means adding files, not changing the app.
 
+It also holds practice questions that are not code (PDFs of worked problems, quiz screenshots, questions you type or paste), kept in folders on your own computer and never committed. You can search them, answer and check them, mark them difficult, practise in sessions, and back up all your progress; see [docs/question-set-format.md](docs/question-set-format.md) for how to add them.
+
 The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style C++ questions for MECHENG270 Part 2 (linked lists, stacks and queues, trees, recursion, searching, complex numbers, DFT/FFT) plus one big revision question.
 
 ## Open it

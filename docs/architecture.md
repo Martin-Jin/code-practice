@@ -105,6 +105,6 @@ The workspace has many panels that must stay in step (question list, editor, out
 
 ## Limitations
 
-- C++ only (`language: "cpp"`). A second language would need its own framework, `buildProgram` and runner.
+- The coding sets are C++ only (`language: "cpp"`). A second language would need its own framework, `buildProgram` and runner. The user's own question sets (PDFs, screenshots, typed questions) have no code and no runner.
 - The online runner depends on a free third-party service: it needs internet, may rate-limit, and receives your answer. The local runner has none of these limits.
 - Progress is per browser and is not synced. A backup file moves it by hand.
