@@ -5,15 +5,13 @@ A practice-question and quiz web app. It runs two kinds of question side by side
 - **Coding questions:** C++ questions in CodeRunner style, with test modes, an in-browser editor, test output with highlighted diffs and stats. They come in **sets**: folders under `sets/` that follow a fixed format, so adding more questions or a whole new set means adding files, not changing the app.
 - **Your own practice questions:** PDFs of worked problems, quiz screenshots and questions you type or paste. They stay in folders on your own computer and are never committed. You can answer and check them, mark them difficult, practise in sessions, and ask for the ones you struggle with to come up more often.
 
-(The repository is still called `code-practice`, which is also part of the published page's address.)
-
 **New here?** [docs/adding-questions.md](docs/adding-questions.md) walks through setting the project up after cloning and adding questions of either kind.
 
 The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style C++ questions for MECHENG270 Part 2 (linked lists, stacks and queues, trees, recursion, searching, complex numbers, DFT/FFT) plus one big revision question.
 
 ## Open it
 
-- **Published page:** `https://martin-jin.github.io/code-practice/`. Nothing to install. It compiles on wandbox.org.
+- **Published page:** `https://martin-jin.github.io/practice-questions/`. Nothing to install. It compiles on wandbox.org.
 - **Locally, with your own g++:** run `app/start.ps1` in PowerShell. It opens http://localhost:5270.
 - **From the command line only:** see [Doing a question without the app](#doing-a-question-without-the-app).
 

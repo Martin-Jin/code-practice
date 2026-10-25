@@ -7,7 +7,7 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
 import { toast } from './Toasts.jsx';
 
-const DOCS = 'https://github.com/martin-jin/code-practice/blob/main/docs';
+const DOCS = 'https://github.com/martin-jin/practice-questions/blob/main/docs';
 const FORMAT_DOC = `${DOCS}/question-set-format.md`;
 const STATUS = { new: ['New', 'accent'], update: ['Changed', 'warn'], current: ['Up to date', 'ok'] };
 
