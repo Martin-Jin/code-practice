@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { plural } from '../../lib/format.js';
+import Icon from '../../components/Icon.jsx';
 
 // `code` spans in the task text.
 function Inline({ text }) {
@@ -46,7 +47,7 @@ function ProvidedCode({ code }) {
     : <pre className="code mono">{code}</pre>;
 }
 
-export default function TaskPane({ q }) {
+export default function TaskPane({ q, onHide }) {
   const [tab, setTab] = useState('task');
   useEffect(() => setTab('task'), [q.number]);
   return (
@@ -54,6 +55,12 @@ export default function TaskPane({ q }) {
       <div className="tabs" role="tablist">
         <button type="button" role="tab" className="tab" aria-selected={tab === 'task'} onClick={() => setTab('task')}>Task</button>
         <button type="button" role="tab" className="tab" aria-selected={tab === 'provided'} onClick={() => setTab('provided')}>Provided code</button>
+        <span className="spacer" />
+        {onHide && (
+          <button type="button" className="btn ghost sm icon-only" onClick={onHide} title="Hide the task (Alt+T)" aria-label="Hide task">
+            <Icon name="back" />
+          </button>
+        )}
       </div>
       <div className="pane-scroll prose">
         {tab === 'task' ? (

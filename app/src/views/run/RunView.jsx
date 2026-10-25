@@ -69,6 +69,7 @@ export default function RunView({ runId, param, theme }) {
   const [taskOpen, setTaskOpen] = useState(() => load('taskOpen', window.innerWidth > 1100));
   const [peek, setPeek] = useState(false);
   const [sideOpen, setSideOpen] = useState(() => load('sideOpen', true));
+  const [outputOpen, setOutputOpen] = useState(() => load('outputOpen', true));
   const [sizes, setSizes] = useState(() => load('sizes', { q: 42, out: 38 }));
   const [editorKey, setEditorKey] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
@@ -91,16 +92,18 @@ export default function RunView({ runId, param, theme }) {
     setTaskOpen((open) => { save('taskOpen', !open); return !open; });
   }, []);
   const toggleSide = useCallback(() => setSideOpen((open) => { save('sideOpen', !open); return !open; }), []);
+  const toggleOutput = useCallback(() => setOutputOpen((open) => { save('outputOpen', !open); return !open; }), []);
 
   useEffect(() => {
     const onKey = (e) => {
       if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 't') { e.preventDefault(); if (taskOpen) toggleTask(); else setPeek((p) => !p); }
       else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleSide(); }
+      else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o') { e.preventDefault(); toggleOutput(); }
       else if (e.key === 'Escape') setPeek(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [taskOpen, toggleTask, toggleSide]);
+  }, [taskOpen, toggleTask, toggleSide, toggleOutput]);
 
   // Write drafts to disk when the tab is hidden or closed.
   useEffect(() => {
@@ -129,6 +132,8 @@ export default function RunView({ runId, param, theme }) {
       save('online-ack', true);
     }
     const code = editor.current.getCode();
+    setOutputOpen(true);  // a run is pointless if its result stays hidden
+    save('outputOpen', true);
     setRunning(num);
     setRunnerError(null);
     try {
@@ -220,7 +225,7 @@ export default function RunView({ runId, param, theme }) {
     }
   };
 
-  const taskPane = <TaskPane q={q} />;
+  const taskPane = <TaskPane q={q} onHide={taskOpen ? toggleTask : () => setPeek(false)} />;
 
   return (
     <div className="run">
@@ -252,13 +257,16 @@ export default function RunView({ runId, param, theme }) {
           {taskOpen && taskPane}
           {taskOpen && <Splitter onMove={startDrag('x')} onEnd={() => save('sizes', sizes)} />}
 
-          <section className="right" ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
+          <section className={`right${outputOpen ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
             <div className="editor-bar">
               <span className="qt" title={q.title}>Q{n} · {q.title}</span>
               {stq.attempts > 0 && <span className="chip">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
               {status === 'passed' && <span className="chip ok">Passed</span>}
               <button type="button" className="btn" aria-pressed={taskOpen} onClick={toggleTask} title="Show or hide the task text next to the editor (Alt+T)">
                 <Icon name="task" /> Task
+              </button>
+              <button type="button" className="btn" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)">
+                <Icon name="stats" /> Output
               </button>
               <button type="button" className="btn icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
               <button type="button" className="btn icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
@@ -270,9 +278,9 @@ export default function RunView({ runId, param, theme }) {
               </button>
             </div>
             <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} />
-            <Splitter horizontal onMove={startDrag('y')} onEnd={() => save('sizes', sizes)} />
+            {outputOpen && <Splitter horizontal onMove={startDrag('y')} onEnd={() => save('sizes', sizes)} />}
             <Output
-              result={result} q={q} running={running === n} runnerError={runnerError}
+              result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen} onToggle={toggleOutput}
               tab={outTabs[n] || 'results'} onTab={(t) => setOutTabs((o) => ({ ...o, [n]: t }))}
               onJump={(line, col) => editor.current && editor.current.reveal(line, col)}
             />

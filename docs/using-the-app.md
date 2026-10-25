@@ -26,7 +26,8 @@ Both versions look and behave the same. The only difference is the **runner** (w
 ## Inside a run
 
 - **Question list (left):** grouped by topic under headings you can collapse. The icon shows the state: empty circle (not started), pencil (edited, not run), red cross (tests failing), amber triangle (does not compile), green tick (passed).
-- **Task and editor:** the task text sits beside the editor so you can read it while you type. **Task** (or `Alt+T`) collapses it to a thin rail; click the rail or press `Alt+T` to peek at it over the editor and `Esc` to close. The **Provided code** tab shows the code your answer is added to. `Alt+B` hides the question list.
+- **Task and editor:** the task text sits beside the editor so you can read it while you type. **Task** (or `Alt+T`, or the arrow on the task pane) collapses it to a thin rail; click the rail or press `Alt+T` to peek at it over the editor, and `Esc` or the arrow to close the peek. The **Provided code** tab shows the code your answer is added to. `Alt+B` hides the question list.
+- **Output panel:** **Output** (or `Alt+O`, or the arrow on the output bar) hides the panel so the editor gets the whole height. The bar stays visible with the last result ("All passed", "3/5 passed", "Compile error"); click a tab on it to reopen. Pressing Run opens it again.
 - **Editor:** the editor from VS Code, set up from this repo's `.vscode/settings.json`: no pop-up suggestions, brackets and quotes close themselves. Press `Ctrl+Space` to list names from your code and the provided code (variables, functions, classes, keywords), then `Tab` to accept. The editor starts with the starter code, never with your earlier answers.
 - **Run** (`Ctrl+Enter`): compiles your answer and runs the tests. Your answer is put in the question file between the answer markers, so line numbers in compiler messages match the question file.
 - **Output:**

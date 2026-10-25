@@ -202,7 +202,7 @@ function CompilerTab({ result, q, onJump }) {
   );
 }
 
-export default function Output({ result, q, running, runnerError, tab, onTab, onJump }) {
+export default function Output({ result, q, running, runnerError, tab, onTab, onJump, open, onToggle }) {
   const c = result && result.compile;
   let body;
   if (running) body = <div className="running"><span className="spinner" /> Compiling and running the tests…</div>;
@@ -213,18 +213,31 @@ export default function Output({ result, q, running, runnerError, tab, onTab, on
   else body = <Results result={result} q={q} onJump={onJump} onTab={onTab} />;
 
   const tabs = [['results', 'Results'], ['compiler', 'Compiler'], ['raw', 'Raw output']];
+  // What the collapsed bar shows, so the last result is still visible with the output hidden.
+  let summary = null;
+  if (running) summary = <span className="chip">Running…</span>;
+  else if (result && result.status === 'passed') summary = <span className="chip ok">All passed</span>;
+  else if (result && result.status === 'compile_error') summary = <span className="chip bad">Compile error</span>;
+  else if (result) summary = <span className="chip bad">{result.summary.passed}/{result.summary.total} passed</span>;
+
   return (
-    <section className="output">
+    <section className={`output${open ? '' : ' closed'}`}>
       <div className="tabs" role="tablist">
         {tabs.map(([id, label]) => (
-          <button key={id} type="button" role="tab" className="tab" aria-selected={tab === id} onClick={() => onTab(id)}>
+          <button key={id} type="button" role="tab" className="tab" aria-selected={open && tab === id} onClick={() => { if (!open) onToggle(); onTab(id); }}>
             {label}
             {id === 'compiler' && c && c.errorCount > 0 && <span className="badge bad">{c.errorCount}</span>}
             {id === 'compiler' && c && c.errorCount === 0 && c.warningCount > 0 && <span className="badge">{c.warningCount}</span>}
           </button>
         ))}
+        {!open && summary}
+        <span className="spacer" />
+        <button type="button" className="btn ghost sm icon-only" onClick={onToggle} aria-expanded={open}
+          title={open ? 'Hide the output (Alt+O)' : 'Show the output (Alt+O)'} aria-label={open ? 'Hide output' : 'Show output'}>
+          <Icon name="chevron" style={open ? undefined : { transform: 'rotate(180deg)' }} />
+        </button>
       </div>
-      <div className="out-body">{body}</div>
+      {open && <div className="out-body">{body}</div>}
     </section>
   );
 }

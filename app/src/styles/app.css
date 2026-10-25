@@ -242,6 +242,9 @@ pre.code { margin: 0; padding: 14px 16px; background: var(--surface-2); border-r
 .editor-bar > .qt { flex: 1 1 0; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 60px; }
 .editor-bar .hint { font-size: 12px; color: var(--muted); }
 .editor-host { min-height: 0; min-width: 0; position: relative; }
+.right.out-closed { grid-template-rows: auto minmax(120px, 1fr) auto; }
+.output.closed { grid-template-rows: auto; }
+.tabs > .chip { margin-left: 6px; }
 .output { display: grid; grid-template-rows: auto 1fr; min-height: 0; border-top: 1px solid var(--border); background: var(--surface); }
 .out-body { overflow: auto; min-height: 0; padding: 14px 16px 28px; }
 
