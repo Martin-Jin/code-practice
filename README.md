@@ -21,7 +21,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 | [`sets/mecheng270/INDEX.md`](sets/mecheng270/INDEX.md) | Every MECHENG270 question with title, marks and topic. |
 | `framework/` | The small C++ test framework every question uses. You never need to edit it. |
 | `templates/example-set/` | A two-question example set. Copy it to start a new set. |
-| `main.cpp`, `CMakeLists.txt`, `run.ps1` | Command-line build and runner (see below). |
+| `main.cpp`, `CMakeLists.txt` | Command-line build and runner (see below). |
 | `.github/workflows/pages.yml` | Checks every question and publishes the app to GitHub Pages. |
 | `docs/` | The guides listed below. |
 
@@ -41,14 +41,22 @@ You need a C++17 compiler (MinGW g++ or clang++) and CMake 3.16 or newer. In Pow
 
 1. Open `main.cpp` and set `constexpr int kQuestion = 7;` (`0` runs every question and prints a summary).
 2. Open the question file in `sets/mecheng270/questions/` (extras are in `sets/mecheng270/extra_questions/questions/`), read the task, and write your answer between the `YOUR ANSWER STARTS HERE` and `YOUR ANSWER ENDS HERE` markers. Do not edit the provided code or the tests.
-3. Run `./run.ps1` (or `./run.ps1 7` to set `kQuestion` first). It configures CMake with Ninja, builds and runs. Add `-Set <id>` to build another set from `sets/`.
+3. Build and run, with the VS Code build task (`Ctrl+Shift+B`) and the debug launch, or in PowerShell:
+
+   ```powershell
+   cmake -S . -B build -G Ninja
+   cmake --build build
+   ./build/practice.exe
+   ```
+
+   Run the configure step again after adding a question file, so CMake picks it up. Add `-DSET_NAME=<id>` to build another set from `sets/`.
 4. A passing question prints `-> ALL PASSED (7/7 tests passed)`. A failing test shows what it expected and what your code produced. The name of each test is printed before it runs, so a crash shows which test caused it.
 
 Printed output is compared ignoring trailing whitespace, as CodeRunner does. Some tasks say "must use recursion"; the tests cannot enforce that, so check it yourself.
 
 ### Check the reference solutions
 
-`./run.ps1 -Solutions` builds with the solutions instead of your answers. To run every question with its solution (all 611 tests should pass), without touching `main.cpp`:
+Configure with `-DUSE_SOLUTIONS=ON` (in a separate folder such as `build_sol`) to build the solutions instead of your answers. To run every question with its solution (all 611 tests should pass), without touching `main.cpp`:
 
 ```powershell
 cmake -S . -B build_all -G Ninja -DUSE_SOLUTIONS=ON -DRUN_ALL=ON

@@ -54,7 +54,7 @@ flowchart LR
 
 **What it does:** the generated file starts with `#define TF_EVENTS_STDERR`. With that defined, `framework/test_framework.cpp` writes one JSON object per event to stderr between the control characters `0x1E` and `0x1F`: `question`, `test_start`, `test_end` (with the failures and their expected/actual values). `analyse` pulls them out; whatever is left of stderr is the student's own.
 
-**Why this approach:** a log file needs a path and an environment variable, which a remote service cannot provide. Control characters cannot appear in normal output. A normal build (CMake, `run.ps1`) does not define the macro and prints exactly what it always did.
+**Why this approach:** a log file needs a path and an environment variable, which a remote service cannot provide. Control characters cannot appear in normal output. A normal build (CMake) does not define the macro and prints exactly what it always did.
 
 **Crashes:** `test_start` is written before the test body runs, so a crash or timeout is attributed to the test that was running. Tests after it are reported as not run.
 

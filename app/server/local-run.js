@@ -1,5 +1,5 @@
 // The "local" runner: compiles one self-contained C++ file with g++ and runs it.
-// Same flags as the CMake build, so results match `run.ps1`.
+// Same flags as the CMake build, so results match the CMake build.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
