@@ -5,6 +5,7 @@ import RunRow from '../components/RunRow.jsx';
 import { LibRunRow } from '../components/LibraryPractice.jsx';
 import { BackupReminder } from '../components/Backup.jsx';
 import { LibrarySection } from '../components/Library.jsx';
+import Hero from '../components/Hero.jsx';
 
 const questionCount = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 
@@ -16,14 +17,13 @@ export default function Dashboard({ theme }) {
     .sort((a, b) => b.r.updatedAt.localeCompare(a.r.updatedAt));
   const ongoing = merged(false);
   const finished = merged(true);
+  // The hero offers to pick up the session touched last.
+  const last = ongoing[0];
+  const resume = last ? { label: `Resume ${last.r.name}`, href: last.kind === 'lib' ? `#/practice/${last.r.id}` : `#/run/${last.r.id}` } : null;
   const row = ({ kind, r }) => (kind === 'lib' ? <LibRunRow key={r.id} run={r} /> : <RunRow key={r.id} run={r} />);
 
   return (
-    <Shell theme={theme} crumbs={[{ label: 'Dashboard' }]}>
-      <div className="page-head">
-        <h1>Practice dashboard</h1>
-        <p className="muted">Pick a question set to start a run. Runs keep their progress until you reset or abandon them, and you can have several going at once.</p>
-      </div>
+    <Shell theme={theme} crumbs={[{ label: 'Dashboard' }]} hero={<Hero action={resume} />}>
 
       <BackupReminder />
 

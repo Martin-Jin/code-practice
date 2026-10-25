@@ -34,7 +34,7 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 
 ## Pages
 
-- **Dashboard** (`#/`): every question set, every run in progress, and finished runs. Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.
+- **Dashboard** (`#/`): a banner with a greeting that changes each visit (and a button to resume your latest session), then every question set, **Your library**, every run in progress, and finished runs. Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.
 - **Set page**: choose a test mode and start a run. Also lists your runs in that set and links to its stats.
 - **Library** (on the dashboard): question sets from folders on your computer. See [Your own question sets](#your-own-question-sets).
 - **Run**: the workspace described below.
@@ -85,6 +85,8 @@ It works, but a phone is a cramped place to write C++: the on-screen keyboard co
 ## Your own question sets
 
 The dashboard's **Your library** section shows question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it.
+
+Press **How to add questions** beside **Your library** for a short guide to everything below (and [adding-questions.md](adding-questions.md) for the full one).
 
 1. Press **Add or update a folder…** and choose a folder. It works in Firefox, Edge and Chrome. Firefox and Chrome may say they are "uploading" the files; they are only being read on this computer.
 2. The app lists the sets it found, with how many questions, the size and whether each is new, changed or up to date. Sets with problems say why, and PDFs without a manifest are listed as not imported.

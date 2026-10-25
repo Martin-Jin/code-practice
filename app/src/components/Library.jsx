@@ -7,7 +7,8 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
 import { toast } from './Toasts.jsx';
 
-const FORMAT_DOC = 'https://github.com/martin-jin/code-practice/blob/main/docs/question-set-format.md';
+const DOCS = 'https://github.com/martin-jin/code-practice/blob/main/docs';
+const FORMAT_DOC = `${DOCS}/question-set-format.md`;
 const STATUS = { new: ['New', 'accent'], update: ['Changed', 'warn'], current: ['Up to date', 'ok'] };
 
 function SetChoice({ item, picked, onToggle }) {
@@ -161,6 +162,42 @@ function ImportDialog({ files, close }) {
   );
 }
 
+// A short guide to every way of getting questions in. The full version is docs/adding-questions.md.
+function HelpDialog({ close }) {
+  return (
+    <Modal wide title="How to add questions" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
+      <h3>A practice PDF</h3>
+      <ol className="steps">
+        <li>Press <b>Add or update a folder…</b> and choose the folder that holds the PDF.</li>
+        <li>Press <b>Find the questions</b> next to it. The app reads the PDF (about half a minute) and lists what it found, checked against the PDF's cover.</li>
+        <li>Tick it and press <b>Import</b>. Open it from <b>Your library</b> with <b>Browse</b>.</li>
+      </ol>
+      <p className="muted">The PDF must come from the vault's <i>Combined questions prompt</i>. To keep the result beside the PDF, run <code>node tools/index-pdf.js "file.pdf"</code> in the repo's <code>app</code> folder, then import the folder. Nothing is uploaded; your folder is not changed.</p>
+
+      <h3>A screenshot, or a question you write</h3>
+      <ol className="steps">
+        <li>Press <b>Add a question…</b>, then Ctrl+V to paste a screenshot (or drop or choose an image).</li>
+        <li>Drag a box over the question, give it a title, a section and the parts to answer (a number with its unit, multiple choice, or self-marked).</li>
+        <li>Press <b>Save question</b>. It goes in <b>My questions</b>, and is included in a backup.</li>
+      </ol>
+
+      <h3>Let an agent do it</h3>
+      <p>The vault's <i>Add question prompt</i> adds one question to a <code>.questions.json</code> file from a screenshot, from any folder. The <i>Combined questions prompt</i> builds the practice PDFs.</p>
+
+      <h3>After importing</h3>
+      <ul>
+        <li>Open a question and use the <b>Answer key</b> tab to add the answer, so the app can check what you type.</li>
+        <li><b>Mark as difficult</b> (or press D) flags a question. Turn on <b>Settings &gt; Practice</b> to draw those more often.</li>
+        <li>Practise a set from its page, and press <b>Back up now</b> in Settings now and then: your progress is only in this browser.</li>
+      </ul>
+
+      <h3>More coding questions</h3>
+      <p>Coding questions are C++ files in the repo, not added here. Follow section 2 of <a href={`${DOCS}/adding-questions.md`} target="_blank" rel="noreferrer">the adding-questions guide</a>.</p>
+      <p className="muted"><a href={`${DOCS}/adding-questions.md`} target="_blank" rel="noreferrer">Full guide</a> · <a href={FORMAT_DOC} target="_blank" rel="noreferrer">How question sets are laid out</a></p>
+    </Modal>
+  );
+}
+
 function StorageNote() {
   const st = useStore();
   const [info, setInfo] = useState(null);
@@ -200,11 +237,14 @@ export function LibrarySection() {
 
   return (
     <section>
-      <div className="section-title"><h2>Your library</h2><span className="muted">{sets.length}</span></div>
+      <div className="section-title">
+        <h2>Your library</h2><span className="muted">{sets.length}</span>
+        <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
+      </div>
       {sets.length === 0
         ? (
           <div className="empty">
-            Question sets from folders on this computer (practice PDFs, quiz screenshots) show up here. Nothing is uploaded: the app keeps a copy in this browser.
+            Question sets from folders on this computer (practice PDFs, quiz screenshots) show up here. Nothing is uploaded: the app keeps a copy in this browser. Press <b>How to add questions</b> to get started.
           </div>
         )
         : (

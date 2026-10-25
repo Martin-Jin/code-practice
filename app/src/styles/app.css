@@ -26,6 +26,8 @@
   --mono: ui-monospace, "Cascadia Code", Consolas, Menlo, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --radius: 10px;
+  --hero-a: #d6e4ff;
+  --hero-b: #f4f5f7;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -35,6 +37,7 @@
     --ok: #55d17c; --ok-soft: #12281a; --bad: #ff7b72; --bad-soft: #301816; --warn: #e3b341; --warn-soft: #2e2410;
     --diff-exp: #16422a; --diff-exp-strong: #23763f; --diff-got: #4a1d1b; --diff-got-strong: #b3413b;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px rgb(0 0 0 / 30%);
+    --hero-a: #16294a; --hero-b: #0e1115;
     color-scheme: dark;
   }
 }
@@ -44,6 +47,7 @@
   --ok: #55d17c; --ok-soft: #12281a; --bad: #ff7b72; --bad-soft: #301816; --warn: #e3b341; --warn-soft: #2e2410;
   --diff-exp: #16422a; --diff-exp-strong: #23763f; --diff-got: #4a1d1b; --diff-got-strong: #b3413b;
   --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px rgb(0 0 0 / 30%);
+  --hero-a: #16294a; --hero-b: #0e1115;
   color-scheme: dark;
 }
 
@@ -486,3 +490,13 @@ fieldset.part-edit legend { font-weight: 650; padding: 0 6px; }
 .sum-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 14px; }
 .dropzone { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 18px; border: 2px dashed var(--border); border-radius: 10px; color: var(--muted); }
 .dropzone:focus-visible, .dropzone:hover { border-color: var(--accent); }
+
+/* ---------- landing hero ---------- */
+.hero { position: relative; overflow: hidden; display: flex; align-items: flex-end; min-height: clamp(240px, 42vh, 440px); background: linear-gradient(160deg, var(--hero-a), var(--hero-b)); border-bottom: 1px solid var(--border); }
+.hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, var(--bg) 0%, transparent 38%); }
+.hero .art { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--accent); }
+.hero .copy { position: relative; z-index: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px 40px; display: grid; gap: 10px; justify-items: start; }
+.hero .eyebrow { margin: 0; font-size: 13px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { font-size: clamp(26px, 4.2vw, 44px); letter-spacing: -0.02em; max-width: 18em; text-wrap: balance; }
+@media (max-width: 760px) { .hero .copy { padding: 0 16px 28px; } }
+ol.steps { margin: 0 0 6px; padding-left: 20px; display: grid; gap: 4px; }

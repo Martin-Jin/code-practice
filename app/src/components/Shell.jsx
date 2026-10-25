@@ -172,12 +172,12 @@ export function SettingsButton() {
   );
 }
 
-// Top bar for the dashboard, set and stats pages.
-export default function Shell({ crumbs = [], theme, children }) {
+// Top bar for the dashboard, set and stats pages. `hero` is a banner between the bar and the page (the landing page's).
+export default function Shell({ crumbs = [], theme, hero = null, children }) {
   return (
     <>
       <nav className="shell-nav">
-        <a className="brand" href="#/"><span className="logo"><Icon name="terminal" /></span>Code Practice</a>
+        <a className="brand" href="#/"><span className="logo"><Icon name="quiz" /></span>Practice Questions</a>
         <div className="crumbs">
           {crumbs.map((c, i) => (
             <span key={i} style={{ display: 'contents' }}>
@@ -192,6 +192,7 @@ export default function Shell({ crumbs = [], theme, children }) {
         <HelpButton />
         <ThemeButton theme={theme} />
       </nav>
+      {hero}
       <main className="page">{children}</main>
     </>
   );

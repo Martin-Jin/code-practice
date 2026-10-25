@@ -1,8 +1,13 @@
-# Code Practice
+# Practice Questions
 
-A web interface for practising coding questions, with test modes, an in-browser editor, test output with highlighted diffs, saved progress and stats. Questions come in **sets**: folders under `sets/` that follow a fixed format, so adding more questions or a whole new set means adding files, not changing the app.
+A practice-question and quiz web app. It runs two kinds of question side by side, with search, saved progress, stats and a backup of everything:
 
-It also holds practice questions that are not code (PDFs of worked problems, quiz screenshots, questions you type or paste), kept in folders on your own computer and never committed. You can search them, answer and check them, mark them difficult, practise in sessions, and back up all your progress; see [docs/question-set-format.md](docs/question-set-format.md) for how to add them.
+- **Coding questions:** C++ questions in CodeRunner style, with test modes, an in-browser editor, test output with highlighted diffs and stats. They come in **sets**: folders under `sets/` that follow a fixed format, so adding more questions or a whole new set means adding files, not changing the app.
+- **Your own practice questions:** PDFs of worked problems, quiz screenshots and questions you type or paste. They stay in folders on your own computer and are never committed. You can answer and check them, mark them difficult, practise in sessions, and ask for the ones you struggle with to come up more often.
+
+(The repository is still called `code-practice`, which is also part of the published page's address.)
+
+**New here?** [docs/adding-questions.md](docs/adding-questions.md) walks through setting the project up after cloning and adding questions of either kind.
 
 The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style C++ questions for MECHENG270 Part 2 (linked lists, stacks and queues, trees, recursion, searching, complex numbers, DFT/FFT) plus one big revision question.
 
@@ -33,6 +38,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 | Doc | Open it to |
 |---|---|
 | [docs/using-the-app.md](docs/using-the-app.md) | Learn the app: modes, runs, editor shortcuts, output, stats, where data is stored, backup and restore. |
+| [docs/adding-questions.md](docs/adding-questions.md) | Set up after cloning, and add more coding questions, a whole coding set, or your own practice questions. Start here. |
 | [docs/question-format.md](docs/question-format.md) | Add a question or a whole set, and check it. Describes the file layout the app depends on. |
 | [docs/question-set-format.md](docs/question-set-format.md) | Add practice PDFs or quiz screenshots from your own folders: the `.questions.json` manifest and how sets are found. |
 | [docs/architecture.md](docs/architecture.md) | Change the app: how a Run works, why it is built this way, limits. |

@@ -2,7 +2,7 @@
   "name": "code-practice-app",
   "private": true,
   "version": "1.0.0",
-  "description": "Web interface for practising coding questions: modes, editor, test output and stats",
+  "description": "Practice question and quiz web app: coding questions with an editor and tests, plus your own PDFs, screenshots and typed questions with answer checking, sessions and stats",
   "type": "module",
   "scripts": {
     "dev": "vite",

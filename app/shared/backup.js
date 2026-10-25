@@ -65,7 +65,7 @@ export function buildBackup({ stores, settings, now = new Date() }) {
 export function parseBackup(text) {
   let raw;
   try { raw = JSON.parse(text); } catch { throw new Error('That file is not valid JSON, so it is not a backup.'); }
-  if (!isObject(raw) || raw.format !== FORMAT) throw new Error('That file is not a Code Practice backup.');
+  if (!isObject(raw) || raw.format !== FORMAT) throw new Error('That file is not a Practice Questions backup.');
   if (!Number.isInteger(raw.version) || raw.version < 1) throw new Error('That backup has no usable version number.');
   if (raw.version > VERSION) throw new Error('That backup was made by a newer version of the app. Open the newest version of the page to restore it.');
   if (!time(raw.createdAt)) throw new Error('That backup has no creation date.');
