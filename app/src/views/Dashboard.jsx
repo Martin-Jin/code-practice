@@ -2,6 +2,7 @@ import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import Shell from '../components/Shell.jsx';
 import RunRow from '../components/RunRow.jsx';
+import { BackupReminder } from '../components/Backup.jsx';
 
 const questionCount = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 
@@ -17,6 +18,8 @@ export default function Dashboard({ theme }) {
         <h1>Practice dashboard</h1>
         <p className="muted">Pick a question set to start a run. Runs keep their progress until you reset or abandon them, and you can have several going at once.</p>
       </div>
+
+      <BackupReminder />
 
       <section>
         <div className="section-title"><h2>Question sets</h2></div>

@@ -2,6 +2,7 @@ import { MODE_LABELS } from '../../shared/modes.js';
 import { getSet } from '../lib/catalog.js';
 import { deleteRun, runSummary } from '../lib/service.js';
 import { timeAgo, plural } from '../lib/format.js';
+import { backupNote } from '../lib/backup.js';
 import Icon from './Icon.jsx';
 import { useDialogs } from './Dialogs.jsx';
 
@@ -16,7 +17,7 @@ export default function RunRow({ run, showSet = true }) {
     const ok = await confirm({
       title: done ? 'Delete this run?' : 'Abandon this run?',
       body: done ? 'Its results will be removed. Your lifetime stats are kept.'
-        : `You have ${plural(sum.passed, 'question')} passed out of ${sum.total}. Abandoning deletes this run’s progress and drafts. Your lifetime stats are kept.`,
+        : `You have ${plural(sum.passed, 'question')} passed out of ${sum.total}. Abandoning deletes this run’s progress and drafts. Your lifetime stats are kept.${backupNote()}`,
       confirmText: done ? 'Delete' : 'Abandon run',
       danger: true,
     });

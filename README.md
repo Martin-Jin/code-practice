@@ -29,7 +29,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 
 | Doc | Open it to |
 |---|---|
-| [docs/using-the-app.md](docs/using-the-app.md) | Learn the app: modes, runs, editor shortcuts, output, stats, where data is stored. |
+| [docs/using-the-app.md](docs/using-the-app.md) | Learn the app: modes, runs, editor shortcuts, output, stats, where data is stored, backup and restore. |
 | [docs/question-format.md](docs/question-format.md) | Add a question or a whole set, and check it. Describes the file layout the app depends on. |
 | [docs/architecture.md](docs/architecture.md) | Change the app: how a Run works, why it is built this way, limits. |
 | [docs/deploying.md](docs/deploying.md) | Publish to GitHub Pages, run the local server, develop the app, see CI. |

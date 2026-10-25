@@ -33,6 +33,25 @@ async function tx(store, mode, fn) {
 
 const safe = async (fn, fallback) => { try { return await fn(); } catch { return fallback; } };
 
+// Writes { storeName: [records] } in one transaction, so a failure leaves every store as it
+// was. Unlike put(), errors are thrown: a restore must not report success if nothing saved.
+// `clear` empties each named store first.
+export async function writeAll(stores, { clear = false } = {}) {
+  const db = await open();
+  const names = Object.keys(stores);
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(names, 'readwrite');
+    for (const name of names) {
+      const s = t.objectStore(name);
+      if (clear) s.clear();
+      for (const record of stores[name]) s.put(record);
+    }
+    t.oncomplete = () => resolve();
+    t.onerror = () => reject(t.error);
+    t.onabort = () => reject(t.error);
+  });
+}
+
 export const getAll = (store) => safe(() => tx(store, 'readonly', (s) => s.getAll()), []);
 export const put = (store, value) => safe(() => tx(store, 'readwrite', (s) => s.put(value)));
 export const remove = (store, key) => safe(() => tx(store, 'readwrite', (s) => s.delete(key)));

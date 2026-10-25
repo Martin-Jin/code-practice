@@ -127,6 +127,8 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--border); border-radius: var(--radius); }
 .notice { padding: 10px 14px; border-radius: 8px; background: var(--warn-soft); color: var(--warn); font-size: 13px; }
+.notice.row { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.notice.row > span { flex: 1 1 320px; }
 .set-card { padding: 20px; display: grid; gap: 14px; align-content: start; }
 .set-card .meta { display: flex; flex-wrap: wrap; gap: 6px; }
 .set-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }

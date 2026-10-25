@@ -75,6 +75,20 @@ It works, but a phone is a cramped place to write C++: the on-screen keyboard co
 
 Runs, drafts and stats are saved in this browser (IndexedDB), automatically as you type. They are not sent anywhere and do not sync between browsers, computers or between the published page and the local server (different addresses count as different sites). Clearing site data deletes them.
 
+In your browser's "clear browsing data" window, **cached images and files** is safe to clear. **Cookies and site data** deletes your progress, as does a "clear on close" setting or a private window.
+
+### Back up and restore
+
+**Settings > Backup** keeps a copy outside the browser.
+
+- **Back up now** downloads one file, `code-practice-backup-YYYY-MM-DD.json`. It holds every run, draft and stat from every question set, plus your settings (theme, runner, shortcuts, pane sizes). Question sets themselves are not in it, because they come with the app.
+- **Restore from a backup…** reads such a file and shows what is in it before changing anything. Choose how:
+  - **Merge** (the default) keeps what is in this browser and adds what the file has. Where both have the same run or question, the newer one wins, and counters are never added together, so restoring the same file twice changes nothing.
+  - **Replace everything** erases the runs, stats and settings here first. Use it on a clean machine.
+- A restore reloads the page. If the browser cannot save the data, the restore stops with nothing changed.
+- The dashboard shows a reminder once you have made 20 or more attempts since the last backup and the last backup is over a week old (or there is none). Abandoning a run or resetting stats mentions it too when your backup is out of date.
+- Use the file to move progress between browsers, between the published page and the local server, or to a new computer.
+
 ## Limits
 
 - The runner stops a program after 10 s (local) or at wandbox.org's own limit (online). That is reported as a timeout, with the test that was running.

@@ -30,7 +30,7 @@ flowchart LR
 | Question sets | `sets/<id>/` | Question files, solutions and `set.json`. See [question-format.md](question-format.md). |
 | Test framework | `framework/` | Registers questions, runs tests, prints results and (when asked) structured events. |
 | Catalog builder | `app/server/catalog.js`, `app/tools/build-catalog.js` | Reads every set and writes `catalog.json`: task text, provided code, starter code and the file split around the answer. No solutions. |
-| Shared logic | `app/shared/` | `program.js` (build the program, analyse a result) and `modes.js` (pick questions for each mode). Plain JavaScript used by the browser, the server and the tools. |
+| Shared logic | `app/shared/` | `program.js` (build the program, analyse a result), `modes.js` (pick questions for each mode) and `backup.js` (the backup file format, checks and merge rules). Plain JavaScript used by the browser, the server and the tools. |
 | Browser app | `app/src/` | React views, the editor (Monaco), saved runs and stats (IndexedDB), the two runners. |
 | Local server | `app/server/server.js`, `local-run.js` | Serves the built app and compiles with g++ on `POST /api/execute`. Binds to `127.0.0.1` only. |
 | Tools | `app/tools/` | `verify.js` (check every solution and stub through the real pipeline). |
@@ -75,6 +75,15 @@ The server accepts requests only from its own page (`Host` and `Origin` are chec
 
 Runs and stats are stored in the browser's IndexedDB by `app/src/lib/service.js`. Typing updates a draft in memory and writes to disk at most every 400 ms. A run holds one draft and one last result per question. Stats are fixed-size counters per question, so storage stays bounded; deleting a run removes its drafts.
 
+### Backups
+
+Everything above lives only in one browser, so `app/src/lib/backup.js` can write all of it to one JSON file and read it back. The format, validation and merge rules are in `app/shared/backup.js`, so they are unit tested without a browser. Each IndexedDB store is described once in its `STORES` table (key field, shape check, how two copies of a record merge), and `state` holds each store's records under the store's own name. A new store (or a new set kind) is added to both and is then covered by backup and restore.
+
+- **Merge** keeps the newer side of each record (runs by `updatedAt`, stats per question by `lastAt`). Counters are never summed, so a restore is repeatable.
+- **Replace** clears the stores first. Both write every store in one IndexedDB transaction (`db.writeAll`), so a failure leaves the data as it was, and drop queued draft saves first so none lands afterwards.
+- Settings are the whole of localStorage except the two reminder bookkeeping keys. The file has a `version`; a file from a newer version is refused, and older ones keep loading as stores are added.
+- The page reloads after a restore, because theme, runner and shortcuts are read once at start-up.
+
 ### Why React and Vite
 
 The workspace has many panels that must stay in step (question list, editor, output, progress, stats). Hand-written DOM updates were the obvious place for bugs, so a component model pays for itself. React is the most widely documented choice, and Vite builds to plain static files, which is what GitHub Pages needs. Plain HTML and CSS would have worked for the first screen but not for this much shared state. TypeScript was left out to keep the project small; the shared logic is covered by unit tests instead.
@@ -83,4 +92,4 @@ The workspace has many panels that must stay in step (question list, editor, out
 
 - C++ only (`language: "cpp"`). A second language would need its own framework, `buildProgram` and runner.
 - The online runner depends on a free third-party service: it needs internet, may rate-limit, and receives your answer. The local runner has none of these limits.
-- Progress is per browser and is not synced.
+- Progress is per browser and is not synced. A backup file moves it by hand.

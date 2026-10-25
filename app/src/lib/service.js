@@ -77,6 +77,12 @@ export function flushSaves() {
   timers.clear();
 }
 
+// Drops queued draft saves, so one cannot land after a restore and overwrite restored data.
+export function discardPendingSaves() {
+  for (const t of timers.values()) clearTimeout(t);
+  timers.clear();
+}
+
 // ---- helpers ----
 function freshQuestionState(q) {
   return {

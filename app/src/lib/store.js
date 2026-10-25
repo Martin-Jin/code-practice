@@ -9,6 +9,7 @@ export const state = {
   catalog: null,
   runs: {},            // id -> run (see service.js)
   stats: {},           // setId -> stats
+  // Each IndexedDB store is kept here under its own name; backups rely on that (lib/backup.js).
   runner: 'online',    // 'local' | 'online'
   local: null,         // { compiler } when the local g++ server answered, else null
   shortcuts: {},       // action id -> combo the user chose (defaults are in shortcuts.js)

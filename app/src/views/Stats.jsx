@@ -3,6 +3,7 @@ import { useStore } from '../lib/store.js';
 import { getSet, getQuestion } from '../lib/catalog.js';
 import { resetStats, statsFor } from '../lib/service.js';
 import { timeAgo, plural } from '../lib/format.js';
+import { backupNote } from '../lib/backup.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
@@ -50,7 +51,7 @@ export default function Stats({ setId, theme }) {
   const reset = async () => {
     const ok = await confirm({
       title: 'Reset stats for this set?',
-      body: `This clears every counter on this page (${plural(sumOf('attempts'), 'attempt')} so far). Your runs and their progress are not affected.`,
+      body: `This clears every counter on this page (${plural(sumOf('attempts'), 'attempt')} so far). Your runs and their progress are not affected.${backupNote()}`,
       confirmText: 'Reset stats', danger: true,
     });
     if (ok) resetStats(setId);

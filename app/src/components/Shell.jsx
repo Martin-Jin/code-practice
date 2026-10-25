@@ -8,6 +8,7 @@ import Icon from './Icon.jsx';
 import Keys from './Keys.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
+import { BackupSection } from './Backup.jsx';
 
 export const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
 export const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
@@ -51,7 +52,7 @@ export function SettingsDialog({ close }) {
         <span>Suggest names as you type (Ctrl+Space also turns this on)</span>
       </label>
       {!persistent && <div className="notice">This browser is not letting the page save data, so progress will be lost when you close the tab.</div>}
-      <p className="muted">Runs, drafts and stats are saved in this browser only. Clearing site data removes them.</p>
+      <BackupSection />
     </Modal>
   );
 }

@@ -11,6 +11,7 @@ import { Modal, useDialogs } from '../../components/Dialogs.jsx';
 import { SettingsDialog, HelpDialog, THEME_ICON, THEME_LABEL } from '../../components/Shell.jsx';
 import ModePicker, { defaultChoice } from '../../components/ModePicker.jsx';
 import { toast } from '../../components/Toasts.jsx';
+import { backupNote } from '../../lib/backup.js';
 import Sidebar, { questionStatus } from './Sidebar.jsx';
 import TaskPane from './TaskPane.jsx';
 import EditorPane from './EditorPane.jsx';
@@ -265,7 +266,7 @@ export default function RunView({ runId, param, theme }) {
     'sep',
     { label: 'Abandon run', icon: 'trash', danger: true, onClick: async () => {
       const ok = await dialogs.confirm({
-        title: 'Abandon this run?', body: `This deletes the run, its ${sum.passed} passed question${sum.passed === 1 ? '' : 's'} and your drafts. Your lifetime stats are kept.`,
+        title: 'Abandon this run?', body: `This deletes the run, its ${sum.passed} passed question${sum.passed === 1 ? '' : 's'} and your drafts. Your lifetime stats are kept.${backupNote()}`,
         confirmText: 'Abandon run', danger: true,
       });
       if (ok) { editor.current.discard(); deleteRun(run.id); window.location.hash = '#/'; }
