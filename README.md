@@ -1,4 +1,4 @@
-﻿# Code Practice
+# Code Practice
 
 A web interface for practising coding questions, with test modes, an in-browser editor, test output with highlighted diffs, saved progress and stats. Questions come in **sets**: folders under `sets/` that follow a fixed format, so adding more questions or a whole new set means adding files, not changing the app.
 
@@ -6,7 +6,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 
 ## Open it
 
-- **Published page:** `https://<github-user>.github.io/code-practice/`. Nothing to install. It compiles on wandbox.org.
+- **Published page:** `https://martin-jin.github.io/code-practice/`. Nothing to install. It compiles on wandbox.org.
 - **Locally, with your own g++:** run `app/start.ps1` in PowerShell. It opens http://localhost:5270.
 - **From the command line only:** see [Doing a question without the app](#doing-a-question-without-the-app).
 

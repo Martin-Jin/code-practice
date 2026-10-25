@@ -6,7 +6,7 @@ Two ways to use the app: the published page (GitHub Pages) and the local server.
 
 **Why:** you can open the app from any browser without starting anything.
 
-**What gets published:** `app/dist`, the built app plus `catalog.json` (questions without solutions). The address is `https://<your-github-user>.github.io/<repo-name>/`.
+**What gets published:** `app/dist`, the built app plus `catalog.json` (questions without solutions). The address is `https://martin-jin.github.io/code-practice/`.
 
 ### One-time setup
 
