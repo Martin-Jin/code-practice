@@ -3,8 +3,8 @@
 //   local  - POST to the local server (npm run serve), which compiles with g++
 //   online - Wandbox (https://wandbox.org), a free public compile service
 export const RUNNERS = {
-  local: { label: 'Local g++', detail: 'Compiles on this computer with the local server' },
-  online: { label: 'Online (wandbox.org)', detail: 'Sends your answer and the tests to wandbox.org' },
+  local: { label: 'Local g++', short: 'Local', detail: 'Compiles on this computer with the local server' },
+  online: { label: 'Online (wandbox.org)', short: 'Online', detail: 'Sends your answer and the tests to wandbox.org' },
 };
 
 export class RunnerError extends Error {}

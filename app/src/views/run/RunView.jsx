@@ -230,16 +230,15 @@ export default function RunView({ runId, param, theme }) {
   return (
     <div className="run">
       <header className="run-top">
-        <a className="btn ghost" href="#/" title="Back to the dashboard. Your progress is kept."><Icon name="back" /> Dashboard</a>
+        <a className="btn ghost icon-only" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
         <button type="button" className="btn ghost icon-only" onClick={toggleSide} aria-pressed={sideOpen} title="Show or hide the question list (Alt+B)" aria-label="Toggle question list">
           <Icon name="sidebar" />
         </button>
-        <h1 title={run.name}>{run.name}</h1>
-        <span className="chip accent">{MODE_LABELS[run.mode]}</span>
+        <h1 title={`${run.name} (${MODE_LABELS[run.mode]})`}>{run.name}</h1>
         <span className="spacer" />
         <div className="progress" title={`${sum.passed} of ${sum.total} questions pass`}>
           <div className={`bar${run.completedAt ? ' ok' : ''}`}><i style={{ width: `${(sum.passed / sum.total) * 100}%` }} /></div>
-          <span>{sum.passed}/{sum.total} passed</span>
+          <span>{sum.passed}/{sum.total}</span>
         </div>
         {run.completedAt && <button type="button" className="btn" onClick={() => { setCelebrate(false); setFinishOpen(true); }}>Results</button>}
         <RunMenu items={menu} />
@@ -260,21 +259,21 @@ export default function RunView({ runId, param, theme }) {
           <section className={`right${outputOpen ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
             <div className="editor-bar">
               <span className="qt" title={q.title}>Q{n} · {q.title}</span>
-              {stq.attempts > 0 && <span className="chip">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
+              {stq.attempts > 0 && <span className="muted small">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
               {status === 'passed' && <span className="chip ok">Passed</span>}
-              <button type="button" className="btn" aria-pressed={taskOpen} onClick={toggleTask} title="Show or hide the task text next to the editor (Alt+T)">
+              <button type="button" className="btn ghost" aria-pressed={taskOpen} onClick={toggleTask} title="Show or hide the task text next to the editor (Alt+T)">
                 <Icon name="task" /> Task
               </button>
-              <button type="button" className="btn" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)">
+              <button type="button" className="btn ghost" aria-pressed={outputOpen} onClick={toggleOutput} title="Show or hide the test output under the editor (Alt+O)">
                 <Icon name="stats" /> Output
               </button>
-              <button type="button" className="btn icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
-              <button type="button" className="btn icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
+              <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
+              <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
                 <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
               </button>
-              <button type="button" className="btn icon-only" onClick={resetCurrentCode} title="Reset code: put the starter code back" aria-label="Reset code"><Icon name="refresh" /></button>
+              <button type="button" className="btn ghost icon-only" onClick={resetCurrentCode} title="Reset code: put the starter code back" aria-label="Reset code"><Icon name="refresh" /></button>
               <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Enter)">
-                <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'} <span className="kbd">Ctrl+Enter</span>
+                <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'}
               </button>
             </div>
             <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} />

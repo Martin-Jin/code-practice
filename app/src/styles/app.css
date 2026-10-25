@@ -79,7 +79,11 @@ svg.icon.solid { fill: currentColor; stroke: none; }
 .btn.icon-only { padding: 0; width: 32px; justify-content: center; }
 .btn.lg { height: 38px; padding: 0 18px; font-size: 14px; }
 .btn.sm { height: 26px; padding: 0 8px; font-size: 12px; }
-.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.btn:not(.ghost)[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+/* Panel toggles: normal text while the panel is shown, muted while hidden. No highlight. */
+.btn.ghost[aria-pressed="true"] { color: var(--text); }
+.btn.ghost[aria-pressed="false"] { color: var(--muted); }
+.small { font-size: 12.5px; white-space: nowrap; }
 input[type=text], input[type=number], select {
   height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px;
   background: var(--surface); color: var(--text); font: inherit;
@@ -174,10 +178,10 @@ table.stats tr.zero td { color: var(--muted); }
 .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 
 /* ---------- run workspace ---------- */
-.run { height: 100vh; display: grid; grid-template-rows: 48px 1fr; min-height: 0; }
-.run-top { display: flex; align-items: center; gap: 12px; padding: 0 12px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
+.run { height: 100vh; display: grid; grid-template-rows: 42px 1fr; min-height: 0; }
+.run-top { display: flex; align-items: center; gap: 6px; padding: 0 10px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
 .run-top h1 { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.run-top .progress { display: flex; align-items: center; gap: 10px; width: 220px; font-size: 12px; color: var(--muted); }
+.run-top .progress { display: flex; align-items: center; gap: 8px; width: 150px; margin: 0 6px; font-size: 12px; color: var(--muted); }
 .run-top .progress .bar { flex: 1; }
 .run-body { display: grid; grid-template-columns: var(--side-w, 290px) minmax(0, 1fr); min-height: 0; }
 /* The hidden sidebar is display:none, so it leaves the grid: the workspace must then be the
@@ -220,7 +224,7 @@ table.stats tr.zero td { color: var(--muted); }
 .peek { position: absolute; top: 0; bottom: 0; left: 34px; width: min(640px, calc(100% - 60px)); z-index: 15; display: grid; background: var(--surface); border-right: 1px solid var(--border); box-shadow: 8px 0 30px rgb(0 0 0 / 25%); }
 .qpane { display: grid; grid-template-rows: auto 1fr; min-height: 0; min-width: 0; background: var(--surface); }
 .tabs { display: flex; gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--border); background: var(--surface); align-items: center; }
-.tabs button.tab { border: 0; background: none; padding: 10px 12px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; gap: 6px; align-items: center; }
+.tabs button.tab { white-space: nowrap; border: 0; background: none; padding: 10px 12px; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; gap: 6px; align-items: center; }
 .tabs button.tab:hover { color: var(--text); }
 .tabs button.tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
 .tabs .badge { font-size: 11px; padding: 0 6px; border-radius: 99px; background: var(--warn-soft); color: var(--warn); }
@@ -237,7 +241,7 @@ pre.code { margin: 0; padding: 14px 16px; background: var(--surface-2); border-r
 .splitter.h { cursor: row-resize; height: 6px; }
 
 .right { display: grid; grid-template-rows: auto minmax(120px, 1fr) 6px var(--out-h, 38%); min-width: 0; min-height: 0; background: var(--surface); }
-.editor-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border); min-width: 0; }
+.editor-bar { display: flex; align-items: center; gap: 4px; padding: 5px 10px; border-bottom: 1px solid var(--border); min-width: 0; }
 .editor-bar > * { flex: none; }
 .editor-bar > .qt { flex: 1 1 0; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 60px; }
 .editor-bar .hint { font-size: 12px; color: var(--muted); }

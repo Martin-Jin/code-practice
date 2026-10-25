@@ -17,8 +17,9 @@ export default function RunMenu({ items }) {
 
   return (
     <div className="menu-wrap" ref={wrap}>
-      <button type="button" className="btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <Icon name="more" /> Run options
+      <button type="button" className="btn ghost icon-only" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}
+        title="Run options: rename, reset, new questions, change mode, abandon" aria-label="Run options">
+        <Icon name="more" />
       </button>
       {open && (
         <div className="menu" role="menu">

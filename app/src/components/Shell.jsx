@@ -46,8 +46,9 @@ export function SettingsButton() {
   const { open } = useDialogs();
   const st = useStore();
   return (
-    <button type="button" className="btn ghost" onClick={() => open(({ close }) => <SettingsDialog close={close} />)} title="Settings: where code is compiled">
-      <Icon name="gear" /> {RUNNERS[st.runner].label}
+    <button type="button" className="btn ghost" onClick={() => open(({ close }) => <SettingsDialog close={close} />)}
+      title={`Settings. Code is compiled with: ${RUNNERS[st.runner].label}`} aria-label={`Settings, runner: ${RUNNERS[st.runner].label}`}>
+      <Icon name="gear" /> {RUNNERS[st.runner].short}
     </button>
   );
 }
