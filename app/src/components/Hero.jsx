@@ -21,7 +21,7 @@ const spawn = (z = 1) => ({
 });
 
 // A symbol is faint far away, strongest in the middle of its flight, and fades as it passes the viewer.
-const alphaOf = (z) => Math.min(1, (1 - z) * 5) * Math.min(1, (z - NEAR) * 9) * 0.7;
+const alphaOf = (z) => Math.min(1, (1 - z) * 5) * Math.min(1, (z - NEAR) * 9) * 0.55;
 
 function draw(ctx, w, h, symbols, colour) {
   ctx.clearRect(0, 0, w, h);
@@ -45,7 +45,7 @@ function draw(ctx, w, h, symbols, colour) {
 }
 
 // Maths symbols flying towards the viewer, as if zooming through a tunnel of them. Drawn on a canvas in the
-// theme's accent colour; with reduced motion requested it shows one still frame instead of moving.
+// page's muted text colour; with reduced motion requested it shows one still frame instead of moving.
 function MathZoom() {
   const ref = useRef(null);
   useEffect(() => {
@@ -86,7 +86,7 @@ function MathZoom() {
     resize();
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
-    // the accent colour changes with the theme (the setting, or the system's light/dark), so read it again then
+    // the colour changes with the theme (the setting, or the system's light/dark), so read it again then
     const theme = new MutationObserver(recolour);
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     const scheme = window.matchMedia?.('(prefers-color-scheme: dark)');
