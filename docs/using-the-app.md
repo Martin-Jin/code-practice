@@ -9,6 +9,10 @@ The app is a practice interface for coding questions, modelled on a CodeRunner q
 
 Both versions look and behave the same. The only difference is the **runner** (where your code is compiled). Switch it with the gear button, top right. Local g++ appears there only when the local server is running.
 
+## Theme
+
+The sun, moon and half-circle button (top right) cycles **Auto**, **Light** and **Dark**. Auto follows your system and changes with it; Light and Dark stay fixed. The choice is remembered in this browser.
+
 ## Pages
 
 - **Dashboard** (`#/`): every question set, every run in progress, and finished runs. Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.

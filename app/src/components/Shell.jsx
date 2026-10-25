@@ -5,10 +5,15 @@ import { persistent } from '../lib/db.js';
 import Icon from './Icon.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 
+const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
+const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
+
+// Shows the current mode; a click switches to the next one (auto, light, dark).
 export function ThemeButton({ theme }) {
+  const label = `Theme: ${THEME_LABEL[theme.mode]}. Click for ${THEME_LABEL[theme.next]}.`;
   return (
-    <button type="button" className="btn ghost icon-only" onClick={theme.toggle} title="Switch light / dark theme" aria-label="Switch light or dark theme">
-      <Icon name={theme.dark ? 'sun' : 'moon'} />
+    <button type="button" className="btn ghost icon-only" onClick={theme.toggle} title={label} aria-label={label}>
+      <Icon name={THEME_ICON[theme.mode]} />
     </button>
   );
 }
