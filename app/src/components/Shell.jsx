@@ -57,7 +57,7 @@ export default function Shell({ crumbs = [], theme, children }) {
   return (
     <>
       <nav className="shell-nav">
-        <a className="brand" href="#/"><span className="logo"><Icon name="check" /></span>Code Practice</a>
+        <a className="brand" href="#/"><span className="logo"><Icon name="terminal" /></span>Code Practice</a>
         <div className="crumbs">
           {crumbs.map((c, i) => (
             <span key={i} style={{ display: 'contents' }}>
