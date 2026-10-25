@@ -32,6 +32,9 @@ function mergeStats(a, b) {
 
 const isObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
+const newer = (a, b) => (time(b.updatedAt) > time(a.updatedAt) ? b : a);
+const hasIds = (r) => typeof r.setId === 'string' && typeof r.uid === 'string';
+
 // key: the record's id field. valid: the least the app needs to render the record without
 // crashing. merge(current, incoming) returns the record to keep.
 export const STORES = {
@@ -45,6 +48,11 @@ export const STORES = {
     valid: (r) => isObject(r.questions),
     merge: mergeStats,
   },
+  // Imported question sets (docs/question-set-format.md): progress, the user's answer keys, practice sessions, own questions.
+  libProgress: { key: 'key', valid: (r) => hasIds(r) && isObject(r.answers), merge: newer },
+  libEdits: { key: 'key', valid: hasIds, merge: newer },
+  libRuns: { key: 'id', valid: (r) => typeof r.setId === 'string' && Array.isArray(r.questions) && typeof r.updatedAt === 'string', merge: newer },
+  libMine: { key: 'id', valid: (r) => isObject(r.manifest) && isObject(r.images), merge: newer },
 };
 
 export function buildBackup({ stores, settings, now = new Date() }) {
@@ -93,6 +101,8 @@ export function summarise(backup) {
     finishedRuns: runs.filter((r) => r.completedAt).length,
     sets: [...new Set([...runs.map((r) => r.setId), ...stats.map((s) => s.setId)])].sort(),
     attempts: totalAttempts(stats),
+    libraryQuestions: backup.stores.libProgress.length,
+    libraryRuns: backup.stores.libRuns.length,
     settings: Object.keys(backup.settings).length,
   };
 }

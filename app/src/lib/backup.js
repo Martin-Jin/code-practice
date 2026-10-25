@@ -6,6 +6,7 @@ import {
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { discardPendingSaves } from './service.js';
+import { discardPracticeSaves } from './practice.js';
 
 // When the last backup was made or restored, and how many attempts the data held then.
 // Bookkeeping for the reminder, so it is not part of a backup.
@@ -80,6 +81,7 @@ export function downloadBackup() {
 // (leaving everything as it was) if the browser will not save the data.
 export async function restoreBackup(backup, mode) {
   discardPendingSaves();
+  discardPracticeSaves();
   const replace = mode === 'replace';
   const next = replace ? backup.stores : mergeStores(currentRecords(), backup.stores);
   await db.writeAll(next, { clear: replace });

@@ -8,6 +8,7 @@ import { ACTIONS } from './shortcuts.js';
 import { fetchCatalog, getSet, getQuestion, getSupport } from './catalog.js';
 import { execute, detectLocal } from './runners.js';
 import { loadLibrary } from './library.js';
+import { loadPractice } from './practice.js';
 
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
@@ -25,6 +26,7 @@ export async function boot() {
     for (const r of runs) state.runs[r.id] = r;
     for (const s of stats) state.stats[s.setId] = s;
     await loadLibrary();
+    await loadPractice();
     state.local = await detectLocal();
     let saved = null;
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }

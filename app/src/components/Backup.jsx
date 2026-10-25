@@ -52,6 +52,7 @@ function RestoreDialog({ backup, fileName, close }) {
       <ul className="muted" style={{ paddingLeft: 18 }}>
         <li>{plural(sum.runs, 'run')} ({sum.finishedRuns} finished) and {plural(sum.attempts, 'attempt')} in the stats</li>
         <li>{setNames.length ? setNames.join(', ') : 'No question sets'}</li>
+        {(sum.libraryQuestions > 0 || sum.libraryRuns > 0) && <li>Your library: {plural(sum.libraryQuestions, 'question')} with progress and {plural(sum.libraryRuns, 'practice session')}</li>}
         <li>{plural(sum.settings, 'setting')}</li>
       </ul>
       <div className="modes">

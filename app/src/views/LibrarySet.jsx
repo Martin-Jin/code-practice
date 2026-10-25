@@ -1,9 +1,21 @@
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { removeSet } from '../lib/library.js';
+import { effectiveQuestions, getProgress } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 import { toast } from '../components/Toasts.jsx';
+
+// How a question is going: marked difficult, and the result of the last check.
+function progressChips(p) {
+  if (!p) return null;
+  return (
+    <>
+      {p.difficult && <span className="chip warn">difficult</span>}
+      {p.attempts > 0 && <span className={`chip ${p.lastOverall === 'right' ? 'ok' : 'bad'}`}>{p.right} right · {p.wrong} not right</span>}
+    </>
+  );
+}
 
 const PART_LABEL = { numeric: 'number', mcq: 'choice', self: 'self-mark' };
 
@@ -17,7 +29,7 @@ export default function LibrarySet({ setId, theme }) {
     return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">There is no imported set called "{setId}". <a href="#/">Back to the dashboard</a></div></Shell>;
   }
 
-  const { questions } = record.manifest;
+  const questions = effectiveQuestions(record);
   const sections = [];
   for (const q of questions) {
     let s = sections.find((x) => x.name === q.section);
@@ -58,6 +70,7 @@ export default function LibrarySet({ setId, theme }) {
                     {q.marks !== null && <span className="chip">{plural(q.marks, 'mark')}</span>}
                     {[...new Set(q.parts.map((p) => p.type))].map((t) => <span key={t} className="chip">{PART_LABEL[t]}</span>)}
                     {q.parts.some((p) => (p.type === 'numeric' && p.answer == null) || (p.type === 'mcq' && p.correct.length === 0)) && <span className="chip warn">no answer yet</span>}
+                    {progressChips(getProgress(setId, q.uid))}
                   </div>
                 </div>
               </div>

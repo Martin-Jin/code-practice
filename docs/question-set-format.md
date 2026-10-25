@@ -85,6 +85,8 @@ A **crop** is `{ "page": 12, "box": [x0, y0, x1, y1] }`: a page number from 1 an
 
 ### Parts
 
+How an answer is checked (`app/shared/answers.js`): a number is right when it is within `relTol` of the `answer` (1% if not given), or within half a unit of the last decimal place `dp` asks for, whichever allows more. A `null` answer means the part cannot be checked yet.
+
 - **`numeric`**: `unit` (text, `""` for none; `^` for powers, as in `m/s^2`), `answer` (a number, or `null` until known), optional `dp` (the decimal places the question asks for) and `relTol` (accepted error as a fraction, default 0.01).
 - **`mcq`**: `options` (at least two strings), `correct` (distinct option numbers counting from 0; `[]` until known), `multi` (`true` when more than one can be right; default `false`).
 - **`self`**: no checkable answer. You read the solution and mark yourself.
@@ -107,6 +109,10 @@ If the prompt's layout changes (header height, fonts, margins), `app/shared/pdfi
 A bad question does not stop its set. It is left out, and the import screen says which one and why (a missing title, a part with the wrong shape, a repeated `uid`, an unsafe path). The set itself is refused only when its header is wrong: wrong `format` or `version`, an invalid `id`, no `title`, or no `questions` list.
 
 A file named by the set but missing from the folder does not stop the import either. The question is kept, shown without that file, and the set card says how many files are missing.
+
+## Your changes
+
+The user can add or correct parts, marks, tags and a PDF question's crop box in the app (**Answer key**). Those are saved apart from the set, as an overlay on the question with the same `uid`, so importing the folder again never overwrites them and they are part of a backup. The same goes for answers typed, results and the difficult flag. This is another reason a `uid` must not change.
 
 ## Where the copies live
 

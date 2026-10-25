@@ -7,10 +7,14 @@ export const state = {
   ready: false,
   error: null,
   catalog: null,
-  // The stores that hold progress (runs, stats) are kept here under their own names; backups rely on that (lib/backup.js).
+  // The stores that hold progress (runs, stats, lib*) are kept here under their own names; backups rely on that (lib/backup.js).
   runs: {},            // id -> run (see service.js)
   stats: {},           // setId -> stats
   library: { sets: {} }, // id -> imported question set from the user's folders (see library.js); not backed up
+  libProgress: {},     // "<set id>/<uid>" -> progress on one imported question (see practice.js)
+  libEdits: {},        // "<set id>/<uid>" -> the user's changes to one imported question
+  libRuns: {},         // id -> practice session over an imported set
+  libMine: {},         // id -> the user's own questions made in the app
   runner: 'online',    // 'local' | 'online'
   local: null,         // { compiler } when the local g++ server answered, else null
   shortcuts: {},       // action id -> combo the user chose (defaults are in shortcuts.js)

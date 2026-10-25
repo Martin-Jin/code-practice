@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from './lib/store.js';
 import { boot } from './lib/service.js';
+import { flushPracticeSaves } from './lib/practice.js';
 import useTheme from './components/useTheme.js';
 import { DialogProvider } from './components/Dialogs.jsx';
 import ToastHost from './components/Toasts.jsx';
@@ -37,6 +38,11 @@ export default function App() {
   const st = useStore();
   const theme = useTheme();
   useEffect(() => { boot(); }, []);
+  // Answers are saved a moment after typing; make sure none is lost when the tab closes.
+  useEffect(() => {
+    window.addEventListener('pagehide', flushPracticeSaves);
+    return () => window.removeEventListener('pagehide', flushPracticeSaves);
+  }, []);
   // Ctrl+S is muscle memory from VS Code; the app saves by itself, so stop the browser's save dialog.
   useEffect(() => {
     const onKey = (e) => {

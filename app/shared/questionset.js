@@ -157,6 +157,20 @@ export function parseQuestionSet(text) {
   return validateQuestionSet(raw);
 }
 
+// ---- the user's corrections ----
+
+// A question with the user's edits laid over it. An edit holds only what the user changed:
+// parts (the answer key), marks, tags, and stemBox (a new crop rectangle for a PDF question).
+export function applyEdit(question, edit) {
+  if (!edit) return question;
+  const out = { ...question };
+  if (edit.parts) out.parts = edit.parts;
+  if (edit.marks !== undefined) out.marks = edit.marks;
+  if (edit.tags) out.tags = edit.tags;
+  if (edit.stemBox && question.stem.pdf) out.stem = { ...question.stem, pdf: { ...question.stem.pdf, box: edit.stemBox } };
+  return out;
+}
+
 // ---- files a set needs ----
 
 // Every file the set's questions refer to, as paths relative to the manifest's folder.

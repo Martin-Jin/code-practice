@@ -83,13 +83,19 @@ The dashboard's **Your library** section shows question sets that come from your
    - A PDF with no manifest beside it shows **Find the questions**: the app reads the PDF and lists the questions it finds, with a warning if the count does not match the cover. It takes about half a minute for a 250-page PDF.
 5. After you change files in the folder, choose it again: only changed sets and files are copied.
 
-A question opens with its wording (typed text with maths, an image, or the page region from the PDF) and a **Show solution** panel beside it. Questions of your library are found by the search box (`Ctrl+P` or `/`) through their title, section, source, tags and wording.
+A question opens with its wording (typed text with maths, an image, or the page region from the PDF), an answer box for each part, and a panel beside it.
+
+- **Number parts** take a typed number (`1,234.5`, `0,297` and `1e3` all work). **Check answer** (or Enter in a box) marks it right when it is within 1% of the answer, or within half a unit of the decimal places the question asks for, if that allows more. A wrong answer shows the right one. **Multiple choice** needs exactly the right options. **Self-marked** parts have **I got it** and **Not quite** buttons: read the solution, then mark yourself.
+- A check counts as an attempt only when every part has an answer. The question shows how many times you were right or not right, and the set page shows it in the list.
+- **Mark as difficult** (or `D`) flags a question. The flag is saved with your progress and shows in the set's list.
+- **Solution** (or `S`) shows the worked solution: PDF pages with the blank space trimmed, images, or typed text. `←` and `→` move to the previous and next question.
+- **Answer key** is where you add or correct what the app checks against: parts (number with unit, decimal places and accepted error; multiple choice with its options; self-marked), marks, tags, and for a PDF question the top and bottom of the crop. It is saved in this browser as your own correction (the imported file is not changed), is part of a backup, and **Revert to the imported version** removes it. A question the PDF indexer found starts with one self-marked part, so this is where to add the numeric answer from the solution. Questions of your library are found by the search box (`Ctrl+P` or `/`) through their title, section, source, tags and wording.
 
 The first import asks the browser to protect the storage from automatic clearing (Firefox shows a prompt). The copies are not part of a backup; add the folder again to bring them back.
 
 ## Where your data lives
 
-Runs, drafts and stats are saved in this browser (IndexedDB), automatically as you type. They are not sent anywhere and do not sync between browsers, computers or between the published page and the local server (different addresses count as different sites). Clearing site data deletes them.
+Runs, drafts, stats, your answers to library questions, difficult flags and your answer keys are saved in this browser (IndexedDB), automatically as you type. They are not sent anywhere and do not sync between browsers, computers or between the published page and the local server (different addresses count as different sites). Clearing site data deletes them.
 
 In your browser's "clear browsing data" window, **cached images and files** is safe to clear. **Cookies and site data** deletes your progress, as does a "clear on close" setting or a private window.
 

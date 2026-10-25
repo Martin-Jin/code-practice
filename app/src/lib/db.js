@@ -1,12 +1,16 @@
 // Saved runs and stats, and the copies of the user's own question folders, live in this
 // browser's IndexedDB. If it is unavailable (some private windows), everything still works
 // but is lost on reload; `persistent` says which.
-//   runs, stats       progress (backed up, see shared/backup.js)
+//   runs, stats       progress on the C++ sets (backed up, see shared/backup.js)
+//   libProgress       progress on questions of imported sets: answers, results, the "difficult" flag (backed up)
+//   libEdits          answer keys and corrections the user made to imported questions (backed up)
+//   libRuns           practice sessions over imported sets (backed up)
+//   libMine           the user's own questions made in the app, with their images (backed up)
 //   libSets, libFiles question sets imported from a folder and their PDFs and images (copies
 //                     of files the user still has, so they are not backed up)
 const NAME = 'code-practice';
-const VERSION = 2;
-const STORES = [['runs', 'id'], ['stats', 'setId'], ['libSets', 'id'], ['libFiles', 'key']];
+const VERSION = 3;
+const STORES = [['runs', 'id'], ['stats', 'setId'], ['libSets', 'id'], ['libFiles', 'key'], ['libProgress', 'key'], ['libEdits', 'key'], ['libRuns', 'id'], ['libMine', 'id']];
 let dbPromise = null;
 export let persistent = true;
 export let blocked = false;

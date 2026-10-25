@@ -56,6 +56,26 @@ test('settings that are not strings are dropped', () => {
   assert.deepEqual(Object.keys(parseBackup(JSON.stringify(b)).settings).sort(), ['runner', 'theme']);
 });
 
+test('library progress, edits, runs and own questions are backed up and merged by recency', () => {
+  const progress = (key, updatedAt, extra = {}) => ({ key, setId: 's', uid: key.split('/')[1], answers: {}, difficult: false, updatedAt, ...extra });
+  const stores = {
+    libProgress: [progress('s/q1', '2026-03-01T00:00:00Z', { difficult: true })],
+    libEdits: [{ key: 's/q1', setId: 's', uid: 'q1', parts: [], updatedAt: '2026-03-01T00:00:00Z' }],
+    libRuns: [{ id: 'r', setId: 's', questions: ['q1'], updatedAt: '2026-03-01T00:00:00Z' }],
+    libMine: [{ id: 'mine', manifest: {}, images: {}, updatedAt: '2026-03-01T00:00:00Z' }],
+  };
+  const b = parseBackup(JSON.stringify(buildBackup({ stores, settings: {} })));
+  assert.deepEqual(b.stores.libProgress, stores.libProgress);
+  assert.equal(summarise(b).libraryQuestions, 1);
+  const merged = mergeStores({ libProgress: [progress('s/q1', '2026-03-09T00:00:00Z', { difficult: false })] }, stores);
+  assert.equal(merged.libProgress[0].difficult, false, 'the newer record wins');
+  assert.equal(merged.libEdits.length, 1);
+  assert.equal(merged.libMine.length, 1);
+  const bad = JSON.parse(JSON.stringify(buildBackup({ stores, settings: {} })));
+  delete bad.stores.libProgress[0].answers;
+  assert.throws(() => parseBackup(JSON.stringify(bad)), /Record 1 of "libProgress"/);
+});
+
 test('summary counts what a restore would bring in', () => {
   const s = summarise(sample());
   assert.equal(s.runs, 2);
