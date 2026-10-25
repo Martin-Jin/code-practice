@@ -3,6 +3,7 @@ import 'katex/dist/katex.min.css';
 import { renderMarkup } from '../../shared/markup.js';
 import { getFile } from '../lib/library.js';
 import { openPdf, drawCrop, trimmedBox } from '../lib/pdf.js';
+import { Enlargeable } from './Lightbox.jsx';
 
 export function Markup({ text, className = '' }) {
   return <div className={`markup ${className}`} dangerouslySetInnerHTML={{ __html: renderMarkup(text) }} />;
@@ -26,24 +27,30 @@ export function LibImage({ setId, path, alt = '' }) {
     return () => { live = false; if (made) URL.revokeObjectURL(made); };
   }, [setId, path]);
   if (missing) return <div className="notice">The image <code>{path}</code> is not in the folder this set was imported from.</div>;
-  return url ? <img className="lib-image" src={url} alt={alt} /> : <div className="pdf-wait"><span className="spinner" /></div>;
+  if (!url) return <div className="pdf-wait"><span className="spinner" /></div>;
+  return (
+    <Enlargeable title={alt || path} render={(width) => <img className="lib-image" src={url} alt={alt} style={{ width, maxWidth: 'none' }} />}>
+      <img className="lib-image" src={url} alt={alt} />
+    </Enlargeable>
+  );
 }
 
-// A rectangle of a PDF page, drawn at the width of its container (up to 1.7x its natural size).
-// trim: cut the blank space below the last ink, for solution pages.
-export function PdfCrop({ setId, pdf, crop, trim = false, label }) {
+// A rectangle of a PDF page, drawn at the width of its container (up to 1.7x its natural size), or at `fixedWidth`
+// CSS pixels when given (the enlarged view). trim: cut the blank space below the last ink, for solution pages.
+function PdfCanvas({ setId, pdf, crop, trim = false, label, fixedWidth = 0 }) {
   const box = useRef(null);
   const canvas = useRef(null);
   const [width, setWidth] = useState(0);
   const [state, setState] = useState({ phase: 'loading', error: '' });
 
   useEffect(() => {
+    if (fixedWidth) { setWidth(fixedWidth); return undefined; }
     const el = box.current;
     const observer = new ResizeObserver(() => setWidth(Math.floor(el.clientWidth)));
     observer.observe(el);
     setWidth(Math.floor(el.clientWidth));
     return () => observer.disconnect();
-  }, []);
+  }, [fixedWidth]);
 
   useEffect(() => {
     if (!width) return undefined;
@@ -55,7 +62,9 @@ export function PdfCrop({ setId, pdf, crop, trim = false, label }) {
         const shown = trim ? { ...crop, box: await trimmedBox(doc, setId, pdf, crop) } : crop;
         if (!live) return;
         const natural = shown.box[2] - shown.box[0];
-        await drawCrop(doc, shown, canvas.current, Math.min(width, Math.round(natural * 1.7)), (t) => { task = t; });
+        // a canvas has a size limit, so the enlarged view stops short of it
+        const cap = fixedWidth ? Math.floor(8000 / (window.devicePixelRatio || 1)) : Math.round(natural * 1.7);
+        await drawCrop(doc, shown, canvas.current, Math.min(width, cap), (t) => { task = t; });
         if (live) setState({ phase: 'done', error: '' });
       } catch (e) {
         if (live && !(e && e.name === 'RenderingCancelledException')) setState({ phase: 'failed', error: e.message || String(e) });
@@ -65,11 +74,19 @@ export function PdfCrop({ setId, pdf, crop, trim = false, label }) {
   }, [setId, pdf, crop, trim, width]);
 
   return (
-    <div ref={box} className="pdf-crop" role="img" aria-label={label}>
+    <div ref={box} className={`pdf-crop${fixedWidth ? ' fixed' : ''}`} role="img" aria-label={label}>
       {state.phase === 'loading' && <div className="pdf-wait"><span className="spinner" /></div>}
       {state.phase === 'failed' && <div className="notice" role="alert">Could not draw this part of the PDF: {state.error}</div>}
       <canvas ref={canvas} hidden={state.phase !== 'done'} />
     </div>
+  );
+}
+
+export function PdfCrop(props) {
+  return (
+    <Enlargeable title={props.label} render={(width) => <PdfCanvas {...props} fixedWidth={width} />}>
+      <PdfCanvas {...props} />
+    </Enlargeable>
   );
 }
 

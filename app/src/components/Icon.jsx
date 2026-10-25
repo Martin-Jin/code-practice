@@ -22,6 +22,7 @@ const PATHS = {
   quiz: <><rect x="2.5" y="2.5" width="11" height="11" rx="2.6" /><path d="M6.3 6.4a1.7 1.7 0 1 1 2.4 1.5c-.5.3-.7.6-.7 1.1M8 11.2v.01" /></>,
   flag: <path d="M3.5 14V2.5M3.5 3h8.5l-2 3 2 3H3.5" />,
   terminal: <path d="M3.5 4.5L7 8l-3.5 3.5M8.5 11.5h4" strokeWidth="2" />,
+  expand: <path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5L9 7M2.5 13.5L7 9" />,
   help: <><circle cx="8" cy="8" r="6" /><path d="M6.2 6.4a1.8 1.8 0 1 1 2.6 1.6c-.5.3-.8.7-.8 1.3M8 11.4v.01" /></>,
   exit: <path d="M6.5 2.5h-3v11h3M9.5 5.5L12.5 8l-3 2.5M12.5 8H6" />,
   questions: <path d="M6 4h8M6 8h8M6 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01" strokeWidth="2" />,

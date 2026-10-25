@@ -1,7 +1,7 @@
 // The question-set manifest (`<name>.questions.json`) that the practice app reads from the
 // user's own folders, and the rules for finding a set's files. Pure functions, shared by the
 // browser app and the unit tests. The format is described in docs/question-set-format.md and
-// in the vault's "Add question prompt"; all three must agree.
+// any prompt given to an agent for adding questions; keep them in step.
 export const FORMAT = 'practice-question-set';
 export const VERSION = 1;
 export const MANIFEST_SUFFIX = '.questions.json';

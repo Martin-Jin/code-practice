@@ -38,6 +38,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 | [docs/using-the-app.md](docs/using-the-app.md) | Learn the app: modes, runs, editor shortcuts, output, stats, where data is stored, backup and restore. |
 | [docs/adding-questions.md](docs/adding-questions.md) | Set up after cloning, and add more coding questions, a whole coding set, or your own practice questions. Start here. |
 | [docs/question-format.md](docs/question-format.md) | Add a question or a whole set, and check it. Describes the file layout the app depends on. |
+| [docs/practice-pdf-prompt.md](docs/practice-pdf-prompt.md) | The layout a practice PDF must have for the app to find its questions, and an agent prompt that builds one. |
 | [docs/question-set-format.md](docs/question-set-format.md) | Add practice PDFs or quiz screenshots from your own folders: the `.questions.json` manifest and how sets are found. |
 | [docs/architecture.md](docs/architecture.md) | Change the app: how a Run works, why it is built this way, limits. |
 | [docs/deploying.md](docs/deploying.md) | Publish to GitHub Pages, run the local server, develop the app, see CI. |

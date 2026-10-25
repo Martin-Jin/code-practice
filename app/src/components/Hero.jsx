@@ -1,55 +1,114 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { pickGreeting } from '../../shared/greetings.js';
 
-// A damped oscillation, drawn once: the shape of a vibrations question.
-const wave = (base, amp, decay, period, phase = 0) => {
-  let d = '';
-  for (let x = 0; x <= 1200; x += 6) d += `${x ? 'L' : 'M'}${x} ${(base + amp * Math.exp(-x / decay) * Math.sin(x / period + phase)).toFixed(1)}`;
-  return d;
-};
-const WAVE_A = wave(300, 70, 750, 38);
-const WAVE_B = wave(335, 28, 4000, 90, 1);
-
-const EQUATIONS = [
-  [90, 96, 'F = ma', 30], [330, 96, 'ΔS ≥ 0', 24], [560, 110, 'Re = ρvD/μ', 26], [800, 70, 'q = −kA dT/dx', 22],
-  [1010, 150, '∮ E·dA = Q/ε₀', 22], [700, 250, 'I = ∫ r² dm', 26], [940, 392, 'O(n log n)', 24], [470, 215, 'p + ½ρv² = const', 22],
+const SYMBOLS = [
+  '∫', '∑', 'π', '√', '∂', '∇', 'Δ', 'θ', 'λ', 'μ', 'ρ', 'ω', '∞', '≈', '≠', '±', '×', '÷', 'σ', 'τ', 'φ', 'ε', 'α', 'β', 'γ', '∮',
+  'F = ma', 'dx/dt', 'e^iπ', 'sin θ', 'cos θ', 'ln x', 'lim', 'x²', '∫∫', 'ΔS ≥ 0', 'Re', 'Σ F = 0', 'f(x)', 'dy/dx', 'PV = nRT', 'O(n)',
 ];
+const COUNT = 150;
+const NEAR = 0.07; // a symbol is replaced once it is this close to the viewer
+const SPEED = 0.3; // depth covered per second: a symbol takes about three seconds to fly past
 
-// The landing page's picture: a blueprint grid with the shapes of the courses on it (a vibration trace, a
-// projectile path, vectors, a polar plot, a few equations), faint enough to sit behind text. It takes its colours
-// from the theme. The greeting is picked once per visit.
+// One symbol at a random spot in the tunnel. `z` is its distance from the viewer, 1 (far) down to NEAR.
+const spawn = (z = 1) => ({
+  text: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+  x: (Math.random() - 0.5) * 1.6,
+  y: (Math.random() - 0.5) * 1.6,
+  z,
+  size: 16 + Math.random() * 14,
+  tilt: (Math.random() - 0.5) * 0.7,
+  italic: Math.random() < 0.6,
+});
+
+// A symbol is faint far away, strongest in the middle of its flight, and fades as it passes the viewer.
+const alphaOf = (z) => Math.min(1, (1 - z) * 5) * Math.min(1, (z - NEAR) * 9) * 0.7;
+
+function draw(ctx, w, h, symbols, colour) {
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = colour;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const focal = Math.max(w, h) * 0.5;
+  for (const s of symbols) {
+    const a = alphaOf(s.z);
+    if (a <= 0.01) continue;
+    const scale = 1 / s.z;
+    ctx.globalAlpha = a;
+    ctx.save();
+    ctx.translate(w / 2 + s.x * focal * scale, h / 2 + s.y * focal * scale);
+    ctx.rotate(s.tilt);
+    ctx.font = `${s.italic ? 'italic ' : ''}${Math.round(s.size * scale)}px Georgia, 'Times New Roman', serif`;
+    ctx.fillText(s.text, 0, 0);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Maths symbols flying towards the viewer, as if zooming through a tunnel of them. Drawn on a canvas in the
+// theme's accent colour; with reduced motion requested it shows one still frame instead of moving.
+function MathZoom() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas.getContext('2d');
+    const symbols = Array.from({ length: COUNT }, () => spawn(NEAR + Math.random() * (1 - NEAR)));
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    let w = 0;
+    let h = 0;
+    let colour = '#888';
+    let frame = 0;
+    let last = 0;
+
+    const paint = () => { if (still) draw(ctx, w, h, symbols, colour); };
+    const recolour = () => { colour = getComputedStyle(canvas).color; paint(); };
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      w = canvas.clientWidth;
+      h = canvas.clientHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      recolour();
+    };
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000 || 0);
+      last = now;
+      for (let i = 0; i < symbols.length; i++) {
+        const s = symbols[i];
+        s.z -= SPEED * dt;
+        // gone past the viewer, or flown off the edge of the picture
+        if (s.z < NEAR || (Math.abs(s.x / s.z) > 2.2 && Math.abs(s.y / s.z) > 2.2)) symbols[i] = spawn();
+      }
+      draw(ctx, w, h, symbols, colour);
+      frame = requestAnimationFrame(tick);
+    };
+
+    resize();
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+    // the accent colour changes with the theme (the setting, or the system's light/dark), so read it again then
+    const theme = new MutationObserver(recolour);
+    theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    const scheme = window.matchMedia?.('(prefers-color-scheme: dark)');
+    scheme?.addEventListener?.('change', recolour);
+    if (!still) frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      theme.disconnect();
+      scheme?.removeEventListener?.('change', recolour);
+    };
+  }, []);
+  return <canvas ref={ref} className="art" aria-hidden="true" />;
+}
+
+// The landing page's picture: maths symbols zooming towards you, faint enough to sit behind text. The greeting is
+// picked once per visit.
 export default function Hero({ action }) {
   const { hello, message } = useMemo(() => pickGreeting(), []);
   return (
     <header className="hero">
-      <svg className="art" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-        <defs>
-          <pattern id="hero-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="currentColor" strokeWidth="1" opacity=".12" /></pattern>
-          <radialGradient id="hero-glow-a" cx="85%" cy="15%" r="45%"><stop offset="0" stopColor="currentColor" stopOpacity=".28" /><stop offset="1" stopColor="currentColor" stopOpacity="0" /></radialGradient>
-          <radialGradient id="hero-glow-b" cx="10%" cy="90%" r="40%"><stop offset="0" stopColor="currentColor" stopOpacity=".18" /><stop offset="1" stopColor="currentColor" stopOpacity="0" /></radialGradient>
-          <marker id="hero-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor" /></marker>
-        </defs>
-        <rect width="1200" height="420" fill="url(#hero-grid)" />
-        <rect width="1200" height="420" fill="url(#hero-glow-a)" />
-        <rect width="1200" height="420" fill="url(#hero-glow-b)" />
-        <path d={WAVE_A} fill="none" stroke="currentColor" strokeWidth="2.5" opacity=".5" />
-        <path d={WAVE_B} fill="none" stroke="currentColor" strokeWidth="1.5" opacity=".28" />
-        <path d="M70 380Q250 -10 430 380" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 7" opacity=".4" />
-        <g stroke="currentColor" strokeWidth="2.5" opacity=".5" markerEnd="url(#hero-arrow)">
-          <line x1="860" y1="190" x2="1010" y2="110" markerEnd="url(#hero-arrow)" />
-          <line x1="860" y1="190" x2="990" y2="215" markerEnd="url(#hero-arrow)" />
-          <line x1="860" y1="190" x2="880" y2="70" markerEnd="url(#hero-arrow)" />
-        </g>
-        <g fill="none" stroke="currentColor" opacity=".32" strokeWidth="1.8">
-          <circle cx="1040" cy="310" r="64" />
-          <circle cx="1040" cy="310" r="32" strokeDasharray="4 6" />
-          <line x1="1040" y1="310" x2="1086" y2="266" />
-          <path d="M1040 310h40" strokeDasharray="2 5" />
-        </g>
-        <g fill="currentColor" opacity=".3" fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic">
-          {EQUATIONS.map(([x, y, text, size]) => <text key={text} x={x} y={y} fontSize={size}>{text}</text>)}
-        </g>
-      </svg>
+      <MathZoom />
       <div className="copy">
         <p className="eyebrow">{hello}</p>
         <h1>{message}</h1>

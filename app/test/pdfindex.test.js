@@ -7,7 +7,7 @@ const W = 595.28;
 const H = 841.89;
 const it = (str, x, y, w, h) => ({ str, x, y, w, h });
 
-// Items for a question page, laid out like the Combined questions prompt's PDFs.
+// Items for a question page, laid out like the practice PDFs in docs/practice-pdf-prompt.md.
 const questionPage = (n, section, title, source, extra = []) => [
   it(section, 36, 26, 110, 8.5), it(`Question ${n}`, 513.4, 26, 45.8, 8.5),
   it(`Q${n}. ${title}`, 36, 55.4, 300, 12.5),

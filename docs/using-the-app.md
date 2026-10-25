@@ -104,7 +104,7 @@ Press **How to add questions** beside **Your library** for a short guide to ever
 3. Add the parts to answer: a number with its unit, multiple choice, or self-marked. Add a solution image or text if you have one.
 4. **Save question** puts it in **My questions**, a set of its own on the dashboard that behaves like any other (practice sessions, answers, difficult flag, search). Its questions and images are kept in this browser and are part of a backup (unlike sets copied from a folder, there is no folder to get them back from). **Delete** on a question in the list, or **Delete all my questions**, removes them.
 
-Questions can also be added to a folder's manifest by an agent: see the vault's Add question prompt.
+Questions can also be added to a folder's manifest by an AI agent: give it [question-set-format.md](question-set-format.md). A practice PDF must be laid out in a particular way for **Find the questions** to work: see [practice-pdf-prompt.md](practice-pdf-prompt.md).
 
 ### Practising a library set
 
@@ -120,6 +120,7 @@ A question opens with its wording (typed text with maths, an image, or the page 
 - A check counts as an attempt only when every part has an answer. The question shows how many times you were right or not right, and the set page shows it in the list.
 - **Mark as difficult** (or `D`) flags a question. The flag is saved with your progress and shows in the set's list.
 - **Solution** (or `S`) shows the worked solution: PDF pages with the blank space trimmed, images, or typed text. `←` and `→` move to the previous and next question.
+- **Enlarge a figure:** click any question or solution image or PDF crop (or its **Enlarge** button) to open it full window. A click on the figure toggles 200%, **+** and **−** (or the keys) step through 100%, 150%, 200%, 300% and 400%, `0` fits the window, drag to move around when zoomed, and `Esc` or a click outside closes it. PDF crops are redrawn at the new size, so they stay sharp.
 - **Answer key** is where you add or correct what the app checks against: parts (number with unit, decimal places and accepted error; multiple choice with its options; self-marked), marks, tags, and for a PDF question the top and bottom of the crop. It is saved in this browser as your own correction (the imported file is not changed), is part of a backup, and **Revert to the imported version** removes it. A question the PDF indexer found starts with one self-marked part, so this is where to add the numeric answer from the solution. Questions of your library are found by the search box (`Ctrl+P` or `/`) through their title, section, source, tags and wording.
 
 The first import asks the browser to protect the storage from automatic clearing (Firefox shows a prompt). The copies are not part of a backup; add the folder again to bring them back.

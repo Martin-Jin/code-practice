@@ -1,6 +1,6 @@
 // Turns the text and drawing operators of a practice-questions PDF into a question-set
 // manifest (shared/questionset.js), with no AI. It relies on the fixed layout of the PDFs the
-// vault's "Combined questions prompt" builds:
+// practice PDFs in docs/practice-pdf-prompt.md have:
 //   question page   header: section on the left, "Question N" on the right; title "QN. Topic - what is asked";
 //                   the question; a dashed rule; blank working space; footer "Source: ..."
 //   solution page   header: "Section | QN: title" and "Worked solution (i/n)"; the solution; the same footer

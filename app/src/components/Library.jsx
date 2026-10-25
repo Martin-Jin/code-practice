@@ -142,7 +142,7 @@ function ImportDialog({ files, close }) {
           {scan.pdfs.length > 0 && (
             <div className="card pad" style={{ display: 'grid', gap: 8 }}>
               <b>{plural(scan.pdfs.length, 'PDF')} without a question set file</b>
-              <span className="muted">The app can read a practice-questions PDF made by the vault's Combined questions prompt and find its questions itself. It takes about half a minute. To keep the result beside the PDF instead, run <code>node tools/index-pdf.js</code> from the repo.</span>
+              <span className="muted">The app can find the questions in a practice PDF itself if the PDF is laid out the way the app expects (see How to add questions). It takes about half a minute. To keep the result beside the PDF instead, run <code>node tools/index-pdf.js</code> from the repo.</span>
               {scan.pdfs.map((p) => (
                 <div key={p.path} className="row" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
                   <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{p.path} <span className="muted">({mb(p.size)})</span></span>
@@ -172,7 +172,8 @@ function HelpDialog({ close }) {
         <li>Press <b>Find the questions</b> next to it. The app reads the PDF (about half a minute) and lists what it found, checked against the PDF's cover.</li>
         <li>Tick it and press <b>Import</b>. Open it from <b>Your library</b> with <b>Browse</b>.</li>
       </ol>
-      <p className="muted">The PDF must come from the vault's <i>Combined questions prompt</i>. To keep the result beside the PDF, run <code>node tools/index-pdf.js "file.pdf"</code> in the repo's <code>app</code> folder, then import the folder. Nothing is uploaded; your folder is not changed.</p>
+      <p>The PDF has to be laid out a certain way (a cover that lists the questions, then each question page followed by its worked solution), because the app finds the questions from the layout. Build it with the <a href={`${DOCS}/practice-pdf-prompt.md`} target="_blank" rel="noreferrer">agent prompt</a> that does it for you, or format it by hand to the same rules.</p>
+      <p className="muted">To keep the result beside the PDF, run <code>node tools/index-pdf.js "file.pdf"</code> in the repo's <code>app</code> folder, then import the folder. Nothing is uploaded; your folder is not changed.</p>
 
       <h3>A screenshot, or a question you write</h3>
       <ol className="steps">
@@ -182,7 +183,7 @@ function HelpDialog({ close }) {
       </ol>
 
       <h3>Let an agent do it</h3>
-      <p>The vault's <i>Add question prompt</i> adds one question to a <code>.questions.json</code> file from a screenshot, from any folder. The <i>Combined questions prompt</i> builds the practice PDFs.</p>
+      <p>An AI agent can build the practice PDF from your tutorial sheets (<a href={`${DOCS}/practice-pdf-prompt.md`} target="_blank" rel="noreferrer">prompt and layout</a>), or add one question to a <code>.questions.json</code> file from a screenshot, following <a href={FORMAT_DOC} target="_blank" rel="noreferrer">the question set format</a>.</p>
 
       <h3>After importing</h3>
       <ul>
@@ -237,7 +238,7 @@ export function LibrarySection() {
 
   return (
     <section>
-      <div className="section-title">
+      <div className="section-title with-action">
         <h2>Your library</h2><span className="muted">{sets.length}</span>
         <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
       </div>

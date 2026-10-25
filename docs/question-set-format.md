@@ -2,7 +2,7 @@
 
 The app can read question sets from folders on your computer, such as practice PDFs and quiz screenshots. These are separate from the C++ sets under `sets/`, which are described in [question-format.md](question-format.md). Nothing from your folders is ever committed or uploaded: the app copies the sets you choose into the browser's storage.
 
-The code that checks this format is `app/shared/questionset.js`. The vault's "Add question prompt" gives agents the same rules, so change all three together.
+The code that checks this format is `app/shared/questionset.js`. It is the format an agent writes when asked to add a question, so keep this doc, the code and any prompt you give an agent in step.
 
 ## How a set is found
 
@@ -93,7 +93,7 @@ How an answer is checked (`app/shared/answers.js`): a number is right when it is
 
 ## Practice-question PDFs
 
-A PDF built by the vault's Combined questions prompt has a fixed layout: a cover with a table of contents, then for each question a question page (header with the section and `Question N`, a title `QN. Topic - what is asked`, the question, a dashed rule, blank working space, and a footer `Source: ...`) followed by its worked solution pages (header `Section | QN: title` and `Worked solution (i/n)`). The app finds the questions from that layout with no AI:
+A practice PDF has to follow a fixed layout (the exact positions and an agent prompt that builds it are in [practice-pdf-prompt.md](practice-pdf-prompt.md)): a cover with a table of contents, then for each question a question page (header with the section and `Question N`, a title `QN. Topic - what is asked`, the question, a dashed rule, blank working space, and a footer `Source: ...`) followed by its worked solution pages (header `Section | QN: title` and `Worked solution (i/n)`). The app finds the questions from that layout with no AI:
 
 - **Find the questions** (in the import dialog) reads the PDF in the browser, with about half a minute of work for a 250-page file, and imports the result as a set. It shows how many questions it found, warns if the cover lists a different number, and lists pages it could not place.
 - `node tools/index-pdf.js "<file.pdf>"` (from the `app` folder of the repo) does the same and writes `<pdf name>.questions.json` beside the PDF. Run it again after the PDF changes: questions are matched by `uid`, so answers, marks and tags already in the manifest are kept. Add `--dry-run` to see the report only.
