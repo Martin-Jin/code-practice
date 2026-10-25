@@ -4,6 +4,8 @@
 // store.notify(). Data is saved to IndexedDB (see db.js) and is part of a backup.
 import { checkQuestion } from '../../shared/answers.js';
 import { applyEdit } from '../../shared/questionset.js';
+import { pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes.js';
+import { weightOf, libraryTrouble } from '../../shared/weights.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 
@@ -121,4 +123,60 @@ export function clearEdit(setId, uid) {
   delete state.libEdits[key];
   db.remove('libEdits', key);
   notify();
+}
+
+// ---- practice sessions over an imported set ----
+
+const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => b.toString(16).padStart(2, '0')).join('');
+
+function autoName(mode) {
+  const when = new Date().toLocaleString('en-NZ', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+  return `${LIB_MODE_LABELS[mode]} · ${when}`;
+}
+
+// Starts a session: the uids it covers are fixed now. With "draw questions I struggle with more often"
+// on, Random leans towards questions marked difficult or often not right.
+export function createLibRun({ setId, mode, options = {}, name }) {
+  const set = state.library.sets[setId];
+  const weight = state.prioritise ? (q) => weightOf(libraryTrouble(getProgress(setId, q.uid))) : undefined;
+  const questions = pickLibraryQuestions(effectiveQuestions(set), (uid) => getProgress(setId, uid), mode, options, Math.random, weight);
+  const stamp = now();
+  const run = {
+    id: newId(), setId, name: (name && name.trim().slice(0, 80)) || autoName(mode), mode, options,
+    questions, current: questions[0], createdAt: stamp, updatedAt: stamp, completedAt: null,
+  };
+  state.libRuns[run.id] = run;
+  db.put('libRuns', run);
+  notify();
+  return run;
+}
+
+export function deleteLibRun(id) {
+  delete state.libRuns[id];
+  db.remove('libRuns', id);
+  notify();
+}
+
+export function setLibCurrent(id, uid) {
+  const run = state.libRuns[id];
+  if (!run || run.current === uid) return;
+  run.current = uid;
+  run.updatedAt = now();
+  persist('libRuns', run, 300);
+}
+
+export function finishLibRun(id) {
+  const run = state.libRuns[id];
+  if (!run) return;
+  run.completedAt = run.completedAt || now();
+  run.updatedAt = now();
+  db.put('libRuns', run);
+  notify();
+}
+
+// How a question went in this session: 'right' or 'wrong' from its latest counted check since the
+// session began, or null if it has not been checked in this session.
+export function runStatus(run, uid) {
+  const p = getProgress(run.setId, uid);
+  return p && p.lastAt && p.lastAt >= run.createdAt ? p.lastOverall : null;
 }

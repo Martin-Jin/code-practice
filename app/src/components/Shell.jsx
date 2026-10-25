@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
-import { setRunner, setAutoSuggest, setShortcut, resetShortcuts } from '../lib/service.js';
+import { setRunner, setAutoSuggest, setPrioritise, setShortcut, resetShortcuts } from '../lib/service.js';
 import { ACTIONS, FIXED, comboFor, eventCombo, checkCombo } from '../lib/shortcuts.js';
 import { RUNNERS } from '../lib/runners.js';
 import { persistent } from '../lib/db.js';
@@ -51,6 +51,14 @@ export function SettingsDialog({ close }) {
         <input type="checkbox" checked={st.autoSuggest} onChange={(e) => setAutoSuggest(e.target.checked)} />
         <span>Suggest names as you type (Ctrl+Space also turns this on)</span>
       </label>
+      <h3>Practice</h3>
+      <label className="check">
+        <input type="checkbox" checked={st.prioritise} onChange={(e) => setPrioritise(e.target.checked)} />
+        <span>Draw questions I struggle with more often</span>
+      </label>
+      <p className="muted">
+        Applies to random picks: the practice test, Random mode, and random sessions in your library. C++ questions you fail often come up more; library questions you marked difficult or got wrong come up more. Every question can still appear.
+      </p>
       {!persistent && <div className="notice">This browser is not letting the page save data, so progress will be lost when you close the tab.</div>}
       <BackupSection />
     </Modal>

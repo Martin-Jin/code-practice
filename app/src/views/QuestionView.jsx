@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, setLibCurrent, finishLibRun, runStatus } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
@@ -17,20 +17,26 @@ const BANNER = {
 };
 
 // One question of an imported set: the question, an answer box for each part, and a side panel
-// with the solution and the answer key editor.
-export default function QuestionView({ setId, uid, theme }) {
+// with the solution and the answer key editor. Inside a practice session (`run`), Previous and Next
+// follow the session's questions and a strip along the top shows how each one went.
+export default function QuestionView({ setId, uid, run, theme }) {
   const st = useStore();
   const set = st.library.sets[setId];
-  const questions = set ? effectiveQuestions(set) : [];
+  const all = set ? effectiveQuestions(set) : [];
+  const questions = run ? run.questions.map((id) => all.find((q) => q.uid === id)).filter(Boolean) : all;
   const index = questions.findIndex((q) => q.uid === uid);
   const question = questions[index];
   const progress = getProgress(setId, uid);
   const [panel, setPanel] = useState(null);   // 'solution' | 'key' | null
   const [result, setResult] = useState(null); // the last check's overall result
 
-  useEffect(() => { setPanel(null); setResult(null); window.scrollTo(0, 0); if (question) visit(setId, uid); }, [setId, uid, !!question]);
+  useEffect(() => {
+    setPanel(null); setResult(null); window.scrollTo(0, 0);
+    if (question) { visit(setId, uid); if (run) setLibCurrent(run.id, uid); }
+  }, [setId, uid, !!question]);
 
-  const go = (i) => `#/q/${encodeURIComponent(setId)}/${encodeURIComponent(questions[i].uid)}`;
+  const go = (i) => (run ? `#/practice/${run.id}/${encodeURIComponent(questions[i].uid)}` : `#/q/${encodeURIComponent(setId)}/${encodeURIComponent(questions[i].uid)}`);
+  const finish = () => { finishLibRun(run.id); window.location.hash = `#/practice/${run.id}/summary`; };
   const answers = progress ? progress.answers : {};
 
   const runCheck = () => setResult(check(setId, uid, question).overall);
@@ -67,7 +73,19 @@ export default function QuestionView({ setId, uid, theme }) {
   const edited = !!st.libEdits[keyOf(setId, uid)];
 
   return (
-    <Shell theme={theme} crumbs={[{ label: set.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: question.section }]}>
+    <Shell theme={theme} crumbs={[{ label: set.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: run ? run.name : question.section }]}>
+      {run && (
+        <nav className="qstrip" aria-label="Questions in this session">
+          {questions.map((q, i) => {
+            const status = runStatus(run, q.uid);
+            const p = getProgress(setId, q.uid);
+            return (
+              <a key={q.uid} href={go(i)} title={q.title} aria-current={q.uid === uid ? 'step' : undefined}
+                className={`qdot${q.uid === uid ? ' cur' : ''}${status ? ` ${status}` : ''}${p && p.difficult ? ' diff' : ''}`}>{i + 1}</a>
+            );
+          })}
+        </nav>
+      )}
       <div className="qview">
         <article className="card pad qmain">
           <div className="sub" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -90,7 +108,8 @@ export default function QuestionView({ setId, uid, theme }) {
             {Object.keys(answers).length > 0 && <button type="button" className="btn" onClick={reset}>Reset</button>}
             <span className="spacer" />
             {index > 0 && <a className="btn" href={go(index - 1)}><Icon name="back" /> Previous</a>}
-            {index < questions.length - 1 && <a className="btn" href={go(index + 1)}>Next</a>}
+            {index < questions.length - 1 && <a className="btn primary" href={go(index + 1)}>Next</a>}
+            {run && index === questions.length - 1 && <button type="button" className="btn primary" onClick={finish}>Finish</button>}
           </div>
           {progress && progress.attempts > 0 && (
             <p className="muted" style={{ marginTop: 10 }}>Checked {plural(progress.attempts, 'time')}: {progress.right} right, {progress.wrong} not right.</p>

@@ -4,6 +4,7 @@ import { removeSet } from '../lib/library.js';
 import { effectiveQuestions, getProgress } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
+import { LibraryPracticePicker, LibRunRow } from '../components/LibraryPractice.jsx';
 import { toast } from '../components/Toasts.jsx';
 
 // How a question is going: marked difficult, and the result of the last check.
@@ -37,6 +38,8 @@ export default function LibrarySet({ setId, theme }) {
     s.questions.push(q);
   }
 
+  const runs = Object.values(st.libRuns).filter((r) => r.setId === setId).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+
   const remove = async () => {
     const ok = await confirm({
       title: `Remove ${record.title}?`,
@@ -56,6 +59,14 @@ export default function LibrarySet({ setId, theme }) {
         </p>
         <div className="row"><button type="button" className="btn danger" onClick={remove}>Remove from this browser</button></div>
       </div>
+
+      <LibraryPracticePicker set={record} />
+      {runs.length > 0 && (
+        <section>
+          <div className="section-title"><h2>Your sessions in this set</h2><span className="muted">{runs.length}</span></div>
+          <div className="run-list">{runs.map((r) => <LibRunRow key={r.id} run={r} showSet={false} />)}</div>
+        </section>
+      )}
 
       {sections.map((s) => (
         <section key={s.name}>

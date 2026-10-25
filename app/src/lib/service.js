@@ -2,6 +2,7 @@
 // re-render through store.notify(). Data is saved to IndexedDB (see db.js).
 import { buildProgram, analyse } from '../../shared/program.js';
 import { pickQuestions, MODE_LABELS } from '../../shared/modes.js';
+import { weightOf, codingTrouble } from '../../shared/weights.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { ACTIONS } from './shortcuts.js';
@@ -13,6 +14,7 @@ import { loadPractice } from './practice.js';
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
 const SUGGEST_KEY = 'autoSuggest';
+const PRIORITISE_KEY = 'prioritise';
 const SHORTCUTS_KEY = 'shortcuts';
 
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -32,6 +34,7 @@ export async function boot() {
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }
     state.runner = saved === 'online' || (saved === 'local' && state.local) ? saved : state.local ? 'local' : 'online';
     try { state.autoSuggest = localStorage.getItem(SUGGEST_KEY) === 'true'; } catch { /* storage blocked */ }
+    try { state.prioritise = localStorage.getItem(PRIORITISE_KEY) === 'true'; } catch { /* storage blocked */ }
     try {
       const saved = JSON.parse(localStorage.getItem(SHORTCUTS_KEY) || '{}');
       for (const a of ACTIONS) if (typeof saved[a.id] === 'string') state.shortcuts[a.id] = saved[a.id];
@@ -46,6 +49,12 @@ export async function boot() {
 export function setRunner(runner) {
   state.runner = runner;
   try { localStorage.setItem(RUNNER_KEY, runner); } catch { /* storage blocked */ }
+  notify();
+}
+
+export function setPrioritise(on) {
+  state.prioritise = on;
+  try { localStorage.setItem(PRIORITISE_KEY, String(on)); } catch { /* storage blocked */ }
   notify();
 }
 
@@ -113,7 +122,10 @@ function autoName(mode) {
 
 function fillRun(run, mode, options) {
   const set = getSet(run.setId);
-  const questions = pickQuestions(set, mode, options);
+  // With "draw questions I struggle with more often" on, random picks lean towards questions failed often.
+  const counters = state.prioritise ? statsFor(run.setId).questions : null;
+  const weight = counters ? (n) => weightOf(codingTrouble(counters[n])) : undefined;
+  const questions = pickQuestions(set, mode, { ...options, weight });
   if (!questions.length) throw new Error('No questions match those options');
   run.mode = mode;
   run.options = options || {};

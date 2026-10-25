@@ -18,6 +18,7 @@ export const state = {
   runner: 'online',    // 'local' | 'online'
   local: null,         // { compiler } when the local g++ server answered, else null
   shortcuts: {},       // action id -> combo the user chose (defaults are in shortcuts.js)
+  prioritise: false,   // random picks lean towards questions the user struggles with (Settings)
   autoSuggest: false,  // editor shows name suggestions as you type (Settings, or Ctrl+Space)
 };
 

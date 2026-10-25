@@ -38,6 +38,14 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 - **Run**: the workspace described below.
 - **Stats**: counters per question for a set (attempts, correct, wrong, compile errors, crashes, pass rate). An *attempt* is one press of Run, so it counts compiles. Stats are lifetime counters: resetting or abandoning a run never changes them. Use **Reset stats** on the stats page to clear them.
 
+## Drawing the questions you struggle with more often
+
+**Settings > Practice > Draw questions I struggle with more often** (off by default) changes how random picks are made. It applies to the C++ practice test and Random mode, and to Random sessions in a library set. It is a weighted draw, not a filter: every question can still come up.
+
+- A C++ question counts as troublesome when many of its runs did not pass (a compile error counts half). The share is smoothed, so one failed run is not a verdict, and halved once your latest run passed.
+- A library question counts as troublesome when you marked it difficult (worth 0.7 on its own) or many of its checks were not right.
+- A question with the most trouble is drawn five times as often as one with none; the constants are in `app/shared/weights.js`.
+
 ## Test modes
 
 - **Practice test:** a short mixed paper. For MECHENG270 it is 7 questions: 2 from complex numbers, DFT and FFT, plus 1 each from 5 topics chosen at random. The recipe lives in `set.json` (`practice`), so each set defines its own.
@@ -82,6 +90,14 @@ The dashboard's **Your library** section shows question sets that come from your
 4. **Browse** shows a set's questions by section; click a title to open it. **Remove** deletes the copy in this browser (not your folder).
    - A PDF with no manifest beside it shows **Find the questions**: the app reads the PDF and lists the questions it finds, with a warning if the count does not match the cover. It takes about half a minute for a 250-page PDF.
 5. After you change files in the folder, choose it again: only changed sets and files are copied.
+
+### Practising a library set
+
+A set's page (**Browse**) has a **Practise** panel. Choose a mode and press **Start**; the session keeps its list of questions, so you can leave and **Resume** it from the dashboard.
+
+- **All questions**, in the order of the set; **Random** (you choose how many, optionally only from some sections); **By section**; **Marked difficult**; **Not seen yet**; **Not right last time**. A mode with nothing to pick says so instead of starting.
+- A strip of numbers along the top shows each question's result in this session (green right, red not right, an orange underline for difficult) and takes you to it. **Finish** on the last question opens a summary with the counts, every question's result, and **Practise the questions not right** to start a retry session.
+- Sessions appear on the dashboard beside C++ runs. Abandoning one keeps your answers, results and flags on the questions.
 
 A question opens with its wording (typed text with maths, an image, or the page region from the PDF), an answer box for each part, and a panel beside it.
 
