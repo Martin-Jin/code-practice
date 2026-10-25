@@ -6,6 +6,8 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker.js?worker';
 
 self.MonacoEnvironment = { getWorker: () => new EditorWorker() };
 
+import { formatCpp } from './format-code.js';
+
 export { monaco };
 
 // model uri -> the question's provided code, so Ctrl+Space can suggest its names too
@@ -68,12 +70,34 @@ function registerCompletions() {
   });
 }
 
+// Shift+Alt+F (Monaco's own binding) and the Format button run clang-format on the whole answer.
+let formatError = () => {};
+export const setFormatErrorHandler = (fn) => { formatError = fn; };
+
+let formatterRegistered = false;
+function registerFormatter() {
+  if (formatterRegistered) return;
+  formatterRegistered = true;
+  monaco.languages.registerDocumentFormattingEditProvider('cpp', {
+    displayName: 'clang-format (Google style)',
+    async provideDocumentFormattingEdits(model) {
+      try {
+        return [{ range: model.getFullModelRange(), text: await formatCpp(model.getValue()) }];
+      } catch (e) {
+        formatError(`Could not format the code: ${e && e.message ? e.message : e}`);
+        return [];
+      }
+    },
+  });
+}
+
 export function setTheme(dark) {
   monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
 }
 
 export function createEditor(container, vscodeOptions, dark) {
   registerCompletions();
+  registerFormatter();
   return monaco.editor.create(container, {
     language: 'cpp',
     theme: dark ? 'vs-dark' : 'vs',
@@ -84,5 +108,7 @@ export function createEditor(container, vscodeOptions, dark) {
     renderWhitespace: 'selection',
     padding: { top: 8 },
     ...vscodeOptions,
+    // Enter accepts a suggestion just like Tab (the VS Code settings turn this off).
+    acceptSuggestionOnEnter: 'on',
   });
 }

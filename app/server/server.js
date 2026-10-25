@@ -15,7 +15,7 @@ const PORT = Number(process.env.PORT) || 5270;
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
-  '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.map': 'application/json',
+  '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.map': 'application/json', '.wasm': 'application/wasm',
 };
 
 class HttpError extends Error {

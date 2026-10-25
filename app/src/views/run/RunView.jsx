@@ -102,6 +102,8 @@ export default function RunView({ runId, param, theme }) {
   const [editorKey, setEditorKey] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [autoSuggest, setAutoSuggestState] = useState(() => load('autoSuggest', false));
+  const setAutoSuggest = useCallback((on) => { setAutoSuggestState(on); save('autoSuggest', on); }, []);
   // On a phone the workspace shows one panel at a time, chosen from a bar at the bottom.
   const mobile = useMediaQuery('(max-width: 820px)');
   const [mtab, setMtab] = useState('task');
@@ -334,15 +336,17 @@ export default function RunView({ runId, param, theme }) {
               <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
                 <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
               </button>
-              <button type="button" className="btn ghost show-mobile" onClick={() => editor.current && editor.current.suggest()} title="Show name suggestions (Ctrl+Space)">
+              <button type="button" className="btn ghost" aria-pressed={autoSuggest} title="Name suggestions as you type. Ctrl+Space turns this on and opens the list; click to switch it off or on."
+                onClick={() => { if (autoSuggest) setAutoSuggest(false); else { setAutoSuggest(true); if (editor.current) editor.current.suggest(); } }}>
                 <Icon name="code" /> Suggest
               </button>
+              <button type="button" className="btn ghost icon-only" onClick={() => editor.current && editor.current.format()} title="Format the code (Shift+Alt+F)" aria-label="Format code"><Icon name="format" /></button>
               <button type="button" className="btn ghost icon-only" onClick={resetCurrentCode} title="Reset code: put the starter code back" aria-label="Reset code"><Icon name="refresh" /></button>
               <button type="button" className="btn primary" onClick={handleRun} disabled={running !== null} title="Compile and run the tests (Ctrl+Enter)">
                 <Icon name="play" solid /> {running === n ? 'Running…' : 'Run'}
               </button>
             </div>
-            <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} />
+            <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} autoSuggest={autoSuggest} onAutoSuggest={setAutoSuggest} />
             {outputOpen && !mobile && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
             <Output
               result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen || mobile} onToggle={toggleOutput}
