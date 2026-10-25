@@ -22,17 +22,41 @@ const load = (key, fallback) => {
 };
 const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage blocked */ } };
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+// Pane sizes in percent, shared by every question and run (saved in this browser).
+const DEFAULT_SIZES = { q: 42, out: 38 };
+const TASK_RANGE = [22, 70];
+const OUT_RANGE = [12, 75];
+// Dragging a divider closer than this to its edge hides the pane when you let go.
+const HIDE_TASK_BELOW = 12;   // % of the workspace width
+const HIDE_OUT_BELOW = 8;     // % of the editor column height
 
 // Draggable divider. onMove receives the pointer position; the parent turns it into a size.
-function Splitter({ horizontal, onMove, onEnd }) {
+// The drag ends however the pointer is released (also outside the window), a double-click
+// resets the size, and a body class stops text selection and the editor stealing the mouse.
+function Splitter({ horizontal, onMove, onEnd, onReset }) {
   const [drag, setDrag] = useState(false);
+  const stop = () => {
+    if (!drag) return;
+    setDrag(false);
+    document.body.classList.remove('resizing', 'resizing-x', 'resizing-y');
+    onEnd();
+  };
   return (
     <div
       className={`splitter ${horizontal ? 'h' : 'v'}${drag ? ' drag' : ''}`}
       role="separator" aria-orientation={horizontal ? 'horizontal' : 'vertical'}
-      onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); setDrag(true); }}
+      title="Drag to resize. Drag to the edge to hide. Double-click to reset."
+      onPointerDown={(e) => {
+        e.preventDefault();
+        e.currentTarget.setPointerCapture(e.pointerId);
+        document.body.classList.add('resizing', horizontal ? 'resizing-y' : 'resizing-x');
+        setDrag(true);
+      }}
       onPointerMove={(e) => { if (drag) onMove(e); }}
-      onPointerUp={() => { setDrag(false); onEnd(); }}
+      onPointerUp={stop}
+      onPointerCancel={stop}
+      onLostPointerCapture={stop}
+      onDoubleClick={onReset}
     />
   );
 }
@@ -62,6 +86,7 @@ export default function RunView({ runId, param, theme }) {
   const editor = useRef(null);
   const workRef = useRef(null);
   const rightRef = useRef(null);
+  const dragRef = useRef(null);  // set while a drag has gone past the hide threshold
 
   const [running, setRunning] = useState(null);       // question number being run
   const [runnerError, setRunnerError] = useState(null);
@@ -69,7 +94,9 @@ export default function RunView({ runId, param, theme }) {
   const [taskOpen, setTaskOpen] = useState(() => load('taskOpen', window.innerWidth > 1100));
   const [sideOpen, setSideOpen] = useState(() => load('sideOpen', true));
   const [outputOpen, setOutputOpen] = useState(() => load('outputOpen', true));
-  const [sizes, setSizes] = useState(() => load('sizes', { q: 42, out: 38 }));
+  const [sizes, setSizes] = useState(() => load('sizes', DEFAULT_SIZES));
+  const sizesRef = useRef(sizes);
+  sizesRef.current = sizes;
   const [editorKey, setEditorKey] = useState(0);
   const [finishOpen, setFinishOpen] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
@@ -212,15 +239,35 @@ export default function RunView({ runId, param, theme }) {
     } },
   ];
 
+  // Below the hide threshold the pane shrinks with the pointer as a preview; letting go there
+  // hides it and brings back the last size that was kept, ready for the next time it opens.
   const startDrag = (axis) => (e) => {
     if (axis === 'x') {
       const r = workRef.current.getBoundingClientRect();
-      setSizes((s) => ({ ...s, q: clamp(((e.clientX - r.left) / r.width) * 100, 22, 70) }));
+      const raw = ((e.clientX - r.left) / r.width) * 100;
+      dragRef.current = raw < HIDE_TASK_BELOW ? 'task' : null;
+      setSizes((s) => ({ ...s, q: raw < HIDE_TASK_BELOW ? Math.max(raw, 2) : clamp(raw, ...TASK_RANGE) }));
     } else {
       const r = rightRef.current.getBoundingClientRect();
-      setSizes((s) => ({ ...s, out: clamp(((r.bottom - e.clientY) / r.height) * 100, 12, 75) }));
+      const raw = ((r.bottom - e.clientY) / r.height) * 100;
+      dragRef.current = raw < HIDE_OUT_BELOW ? 'output' : null;
+      setSizes((s) => ({ ...s, out: raw < HIDE_OUT_BELOW ? Math.max(raw, 1) : clamp(raw, ...OUT_RANGE) }));
     }
   };
+
+  const endDrag = () => {
+    const hide = dragRef.current;
+    dragRef.current = null;
+    if (!hide) { save('sizes', sizesRef.current); return; }
+    const kept = { ...DEFAULT_SIZES, ...load('sizes', DEFAULT_SIZES) };
+    const restored = { ...sizesRef.current, q: clamp(kept.q, ...TASK_RANGE), out: clamp(kept.out, ...OUT_RANGE) };
+    setSizes(restored);
+    save('sizes', restored);
+    if (hide === 'task') { setTaskOpen(false); save('taskOpen', false); }
+    else { setOutputOpen(false); save('outputOpen', false); }
+  };
+
+  const resetSizes = () => { setSizes(DEFAULT_SIZES); save('sizes', DEFAULT_SIZES); };
 
   const taskPane = <TaskPane q={q} onHide={toggleTask} />;
 
@@ -251,7 +298,7 @@ export default function RunView({ runId, param, theme }) {
             <Icon name="task" /><span>TASK</span>
           </button>
           {taskOpen && taskPane}
-          {taskOpen && <Splitter onMove={startDrag('x')} onEnd={() => save('sizes', sizes)} />}
+          {taskOpen && <Splitter onMove={startDrag('x')} onEnd={endDrag} onReset={resetSizes} />}
 
           <section className={`right${outputOpen ? '' : ' out-closed'}`} ref={rightRef} style={{ '--out-h': `${sizes.out}%` }}>
             <div className="editor-bar">
@@ -274,7 +321,7 @@ export default function RunView({ runId, param, theme }) {
               </button>
             </div>
             <EditorPane key={editorKey} ref={editor} run={run} n={n} dark={theme.dark} onRun={handleRun} />
-            {outputOpen && <Splitter horizontal onMove={startDrag('y')} onEnd={() => save('sizes', sizes)} />}
+            {outputOpen && <Splitter horizontal onMove={startDrag('y')} onEnd={endDrag} onReset={resetSizes} />}
             <Output
               result={result} q={q} running={running === n} runnerError={runnerError} open={outputOpen} onToggle={toggleOutput}
               tab={outTabs[n] || 'results'} onTab={(t) => setOutTabs((o) => ({ ...o, [n]: t }))}

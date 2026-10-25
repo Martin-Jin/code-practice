@@ -234,7 +234,14 @@ table.stats tr.zero td { color: var(--muted); }
 .prose h3 { margin: 18px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .prose code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
 pre.code { margin: 0; padding: 14px 16px; background: var(--surface-2); border-radius: 8px; overflow: auto; line-height: 1.5; tab-size: 4; }
-.splitter { background: var(--border); cursor: col-resize; }
+.splitter { position: relative; background: var(--border); cursor: col-resize; touch-action: none; }
+/* A wider invisible grab area than the 6px line you see. */
+.splitter::after { content: ""; position: absolute; inset: 0 -5px; }
+.splitter.h::after { inset: -5px 0; }
+body.resizing { user-select: none; }
+body.resizing-x { cursor: col-resize; }
+body.resizing-y { cursor: row-resize; }
+body.resizing .monaco-editor { pointer-events: none; }
 .splitter:hover, .splitter.drag { background: var(--accent); }
 .splitter.h { cursor: row-resize; height: 6px; }
 
