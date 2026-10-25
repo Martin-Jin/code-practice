@@ -67,7 +67,6 @@ export default function RunView({ runId, param, theme }) {
   const [runnerError, setRunnerError] = useState(null);
   const [outTabs, setOutTabs] = useState({});
   const [taskOpen, setTaskOpen] = useState(() => load('taskOpen', window.innerWidth > 1100));
-  const [peek, setPeek] = useState(false);
   const [sideOpen, setSideOpen] = useState(() => load('sideOpen', true));
   const [outputOpen, setOutputOpen] = useState(() => load('outputOpen', true));
   const [sizes, setSizes] = useState(() => load('sizes', { q: 42, out: 38 }));
@@ -88,7 +87,6 @@ export default function RunView({ runId, param, theme }) {
   useEffect(() => { if (run && String(n) !== param && param !== 'summary') window.location.replace(`#/run/${runId}/${n}`); }, [run, n, param, runId]);
 
   const toggleTask = useCallback(() => {
-    setPeek(false);
     setTaskOpen((open) => { save('taskOpen', !open); return !open; });
   }, []);
   const toggleSide = useCallback(() => setSideOpen((open) => { save('sideOpen', !open); return !open; }), []);
@@ -96,14 +94,13 @@ export default function RunView({ runId, param, theme }) {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 't') { e.preventDefault(); if (taskOpen) toggleTask(); else setPeek((p) => !p); }
+      if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 't') { e.preventDefault(); toggleTask(); }
       else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'b') { e.preventDefault(); toggleSide(); }
       else if (e.altKey && !e.ctrlKey && !e.metaKey && e.key.toLowerCase() === 'o') { e.preventDefault(); toggleOutput(); }
-      else if (e.key === 'Escape') setPeek(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [taskOpen, toggleTask, toggleSide, toggleOutput]);
+  }, [toggleTask, toggleSide, toggleOutput]);
 
   // Write drafts to disk when the tab is hidden or closed.
   useEffect(() => {
@@ -225,7 +222,7 @@ export default function RunView({ runId, param, theme }) {
     }
   };
 
-  const taskPane = <TaskPane q={q} onHide={taskOpen ? toggleTask : () => setPeek(false)} />;
+  const taskPane = <TaskPane q={q} onHide={toggleTask} />;
 
   return (
     <div className="run">
@@ -250,7 +247,7 @@ export default function RunView({ runId, param, theme }) {
         <Sidebar run={run} set={set} current={n} onSelect={goto} />
 
         <div className={`work${taskOpen ? '' : ' task-closed'}`} ref={workRef} style={{ '--q-w': `${sizes.q}%` }}>
-          <button type="button" className="rail" onClick={() => setPeek(true)} title="Show the task (Alt+T)">
+          <button type="button" className="rail" onClick={toggleTask} title="Show the task (Alt+T)">
             <Icon name="task" /><span>TASK</span>
           </button>
           {taskOpen && taskPane}
@@ -285,12 +282,6 @@ export default function RunView({ runId, param, theme }) {
             />
           </section>
 
-          {peek && !taskOpen && (
-            <>
-              <div className="peek-backdrop" onClick={() => setPeek(false)} />
-              <div className="peek">{taskPane}</div>
-            </>
-          )}
         </div>
       </div>
 
