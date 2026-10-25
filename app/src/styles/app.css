@@ -439,3 +439,21 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .shortcuts .rebind { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text); font: inherit; cursor: pointer; }
 .shortcuts .rebind:hover { background: var(--surface-2); border-color: var(--control-border); }
 .shortcuts .rebind.recording { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-size: 12px; }
+
+/* ---------- library questions ---------- */
+.qview { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .qview { grid-template-columns: 1fr; } }
+.qside { position: sticky; top: 16px; display: grid; gap: 12px; }
+@media (max-width: 1000px) { .qside { position: static; } }
+.stem { display: grid; gap: 12px; }
+.markup p + p { margin-top: 10px; }
+.markup { line-height: 1.55; }
+.markup code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
+.pdf-crop { background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; line-height: 0; min-height: 60px; }
+.pdf-crop canvas { display: block; max-width: 100%; }
+.pdf-wait { display: flex; justify-content: center; align-items: center; padding: 24px; color: var(--muted); }
+.lib-image { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
+ol.parts { margin: 16px 0 0 20px; display: grid; gap: 10px; }
+ol.parts li[data-label]::marker { content: attr(data-label) ") "; font-weight: 650; }
+ol.parts li[data-label=""]::marker { content: ""; }
+ol.parts ul { margin: 6px 0 0 18px; }

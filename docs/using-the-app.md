@@ -34,6 +34,7 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 
 - **Dashboard** (`#/`): every question set, every run in progress, and finished runs. Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.
 - **Set page**: choose a test mode and start a run. Also lists your runs in that set and links to its stats.
+- **Library** (on the dashboard): question sets from folders on your computer. See [Your own question sets](#your-own-question-sets).
 - **Run**: the workspace described below.
 - **Stats**: counters per question for a set (attempts, correct, wrong, compile errors, crashes, pass rate). An *attempt* is one press of Run, so it counts compiles. Stats are lifetime counters: resetting or abandoning a run never changes them. Use **Reset stats** on the stats page to clear them.
 
@@ -70,6 +71,21 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 Below 820 px wide the run screen shows one panel at a time, chosen from the bar at the bottom: **Questions**, **Task**, **Code** and **Output**. Picking a question opens its Task, and pressing Run in the Code panel jumps to Output (a coloured dot on the tab shows the last result). The dashboard, set and stats pages simply stack into one column.
 
 It works, but a phone is a cramped place to write C++: the on-screen keyboard covers most of the editor and brackets are awkward to reach. Expect to use it for reading tasks, checking results and light edits; use a laptop for real practice. Pane resizing and the keyboard shortcuts are desktop-only.
+
+## Your own question sets
+
+The dashboard's **Your library** section shows question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it.
+
+1. Press **Add or update a folder…** and choose a folder. It works in Firefox, Edge and Chrome. Firefox and Chrome may say they are "uploading" the files; they are only being read on this computer.
+2. The app lists the sets it found, with how many questions, the size and whether each is new, changed or up to date. Sets with problems say why, and PDFs without a manifest are listed as not imported.
+3. Tick the sets and press **Import**. They are copied into this browser, so the folder is not needed again until it changes. Your folder is never modified.
+4. **Browse** shows a set's questions by section; click a title to open it. **Remove** deletes the copy in this browser (not your folder).
+   - A PDF with no manifest beside it shows **Find the questions**: the app reads the PDF and lists the questions it finds, with a warning if the count does not match the cover. It takes about half a minute for a 250-page PDF.
+5. After you change files in the folder, choose it again: only changed sets and files are copied.
+
+A question opens with its wording (typed text with maths, an image, or the page region from the PDF) and a **Show solution** panel beside it. Questions of your library are found by the search box (`Ctrl+P` or `/`) through their title, section, source, tags and wording.
+
+The first import asks the browser to protect the storage from automatic clearing (Firefox shows a prompt). The copies are not part of a backup; add the folder again to bring them back.
 
 ## Where your data lives
 

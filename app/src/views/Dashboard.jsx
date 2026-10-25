@@ -3,6 +3,7 @@ import { plural } from '../lib/format.js';
 import Shell from '../components/Shell.jsx';
 import RunRow from '../components/RunRow.jsx';
 import { BackupReminder } from '../components/Backup.jsx';
+import { LibrarySection } from '../components/Library.jsx';
 
 const questionCount = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 
@@ -49,6 +50,8 @@ export default function Dashboard({ theme }) {
           })}
         </div>
       </section>
+
+      <LibrarySection />
 
       <section>
         <div className="section-title"><h2>Ongoing runs</h2><span className="muted">{ongoing.length}</span></div>

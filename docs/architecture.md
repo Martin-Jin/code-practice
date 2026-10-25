@@ -30,8 +30,8 @@ flowchart LR
 | Question sets | `sets/<id>/` | Question files, solutions and `set.json`. See [question-format.md](question-format.md). |
 | Test framework | `framework/` | Registers questions, runs tests, prints results and (when asked) structured events. |
 | Catalog builder | `app/server/catalog.js`, `app/tools/build-catalog.js` | Reads every set and writes `catalog.json`: task text, provided code, starter code and the file split around the answer. No solutions. |
-| Shared logic | `app/shared/` | `program.js` (build the program, analyse a result), `modes.js` (pick questions for each mode) and `backup.js` (the backup file format, checks and merge rules). Plain JavaScript used by the browser, the server and the tools. |
-| Browser app | `app/src/` | React views, the editor (Monaco), saved runs and stats (IndexedDB), the two runners. |
+| Shared logic | `app/shared/` | `program.js` (build the program, analyse a result), `modes.js` (pick questions for each mode), `backup.js` (the backup file format, checks and merge rules), `questionset.js` (the user's manifest format), `pdfindex.js` (finds questions in a practice PDF) and `markup.js` (question text with maths). Plain JavaScript used by the browser, the server and the tools. |
+| Browser app | `app/src/` | React views, the editor (Monaco), saved runs and stats (IndexedDB), question sets imported from the user's folders, the two runners. |
 | Local server | `app/server/server.js`, `local-run.js` | Serves the built app and compiles with g++ on `POST /api/execute`. Binds to `127.0.0.1` only. |
 | Tools | `app/tools/` | `verify.js` (check every solution and stub through the real pipeline). |
 | CI | `.github/workflows/pages.yml` | Builds every question, runs the unit tests and `verify`, then publishes `app/dist` to GitHub Pages. |
@@ -83,6 +83,17 @@ Everything above lives only in one browser, so `app/src/lib/backup.js` can write
 - **Replace** clears the stores first. Both write every store in one IndexedDB transaction (`db.writeAll`), so a failure leaves the data as it was, and drop queued draft saves first so none lands afterwards.
 - Settings are the whole of localStorage except the two reminder bookkeeping keys. The file has a `version`; a file from a newer version is refused, and older ones keep loading as stores are added.
 - The page reloads after a restore, because theme, runner and shortcuts are read once at start-up.
+
+### Your own question sets (library)
+
+Besides the C++ sets in `catalog.json`, the app can show sets from folders on the user's computer, described in [question-set-format.md](question-set-format.md). A browser cannot keep a folder open between visits, and Firefox has no folder handles at all, so the plain folder chooser (`<input webkitdirectory>`, which works everywhere) reads the folder once and `app/src/lib/library.js` copies what it needs into IndexedDB.
+
+- **Scan** (`scanFolder`): keeps only manifests, PDFs and images, parses each manifest with `app/shared/questionset.js`, resolves the files it names relative to the manifest's folder, and works out whether the set is new, changed or current. Nothing is stored yet, so the user sees problems before anything is copied.
+- **Import** (`importSet`): one transaction per set writes the manifest to `libSets` and only the changed files to `libFiles` (key `<set id>/<path>`), and deletes files the set no longer names. A full disk aborts the transaction and leaves the earlier copy.
+- **Indexing a PDF** (`indexPdf`, with `app/shared/pdfindex.js`): pdf.js reads every page's text and, on question pages, the drawing operators. The generated PDFs have a fixed layout, so header, title, footer and the dashed rule are found by position and font size (only text where the generator puts its own, because the slide content copied into each crop has text of its own that is clipped when drawn but still present in the text layer). The result is a manifest whose questions carry crops. `tools/index-pdf.js` runs the same code under Node and writes the manifest beside the PDF.
+- **Viewing** (`app/src/lib/pdf.js`, `components/Question.jsx`): a PDF is read from IndexedDB into pdf.js (the last two stay open), and a crop is drawn by offsetting the page render. Typed text goes through `shared/markup.js` (a small Markdown subset with KaTeX, everything else escaped). pdf.js and its worker load only when a PDF is first needed.
+- **Not backed up:** the library stores are copies of files the user still has. Progress on those questions will live in its own stores and is backed up.
+- **Database version:** the schema is version 2. Upgrading only adds stores, so existing runs and stats are untouched. A page still open on the old version blocks the upgrade; the new page then says so instead of showing an empty app.
 
 ### Why React and Vite
 

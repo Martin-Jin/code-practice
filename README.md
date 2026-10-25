@@ -21,6 +21,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 | [`sets/mecheng270/INDEX.md`](sets/mecheng270/INDEX.md) | Every MECHENG270 question with title, marks and topic. |
 | `framework/` | The small C++ test framework every question uses. You never need to edit it. |
 | `templates/example-set/` | A two-question example set. Copy it to start a new set. |
+| `app/tools/index-pdf.js` | Reads a practice-questions PDF and writes its `.questions.json` beside it (see [question-set-format.md](docs/question-set-format.md)). |
 | `main.cpp`, `CMakeLists.txt` | Command-line build and runner (see below). |
 | `.github/workflows/pages.yml` | Checks every question and publishes the app to GitHub Pages. |
 | `docs/` | The guides listed below. |
@@ -31,6 +32,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 |---|---|
 | [docs/using-the-app.md](docs/using-the-app.md) | Learn the app: modes, runs, editor shortcuts, output, stats, where data is stored, backup and restore. |
 | [docs/question-format.md](docs/question-format.md) | Add a question or a whole set, and check it. Describes the file layout the app depends on. |
+| [docs/question-set-format.md](docs/question-set-format.md) | Add practice PDFs or quiz screenshots from your own folders: the `.questions.json` manifest and how sets are found. |
 | [docs/architecture.md](docs/architecture.md) | Change the app: how a Run works, why it is built this way, limits. |
 | [docs/deploying.md](docs/deploying.md) | Publish to GitHub Pages, run the local server, develop the app, see CI. |
 | [sets/mecheng270/INDEX.md](sets/mecheng270/INDEX.md) | Pick a MECHENG270 question by topic and marks. |

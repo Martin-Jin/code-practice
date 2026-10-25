@@ -5,6 +5,7 @@ import Icon from './Icon.jsx';
 import QuickSearch from './QuickSearch.jsx';
 import { toast } from './Toasts.jsx';
 import { eventCombo, actionFor } from '../lib/shortcuts.js';
+import { searchText } from '../../shared/markup.js';
 
 const count = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 const typing = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
@@ -53,8 +54,24 @@ export default function GlobalSearch() {
         }
       }
     }
+    // Questions of imported sets (PDFs, quiz screenshots): found by title, section, source, tags and wording.
+    for (const set of Object.values(st.library.sets)) {
+      out.push({
+        key: `lib:${set.id}`, label: set.title, rank: 10, badge: 'Set', sub: `Your library · ${set.manifest.questions.length} questions`,
+        keywords: `${set.course} ${[...new Set(set.manifest.questions.map((q) => q.section))].join(' ')}`,
+        onSelect: () => { window.location.hash = `#/lib/${encodeURIComponent(set.id)}`; },
+      });
+      for (const q of set.manifest.questions) {
+        out.push({
+          key: `lq:${set.id}:${q.uid}`, label: q.title, showWhenEmpty: false, badge: q.marks !== null ? `${q.marks}m` : undefined,
+          sub: `${set.title} · ${q.section}`,
+          keywords: [q.source, q.tags.join(' '), searchText(q.stem.text), ...q.parts.map((p) => searchText(p.prompt))].join(' '),
+          onSelect: () => { window.location.hash = `#/q/${encodeURIComponent(set.id)}/${encodeURIComponent(q.uid)}`; },
+        });
+      }
+    }
     return out;
-  }, [st.catalog]);
+  }, [st.catalog, st.library]);
 
   return (
     <>
@@ -65,7 +82,7 @@ export default function GlobalSearch() {
         <QuickSearch
           items={items} onClose={() => setOpen(false)}
           placeholder="Search question sets and questions…"
-          emptyHint={`Type to search ${items.filter((i) => i.showWhenEmpty === false).length} questions in ${st.catalog.sets.length} set(s).`}
+          emptyHint={`Type to search ${items.filter((i) => i.showWhenEmpty === false).length} questions in ${st.catalog.sets.length + Object.keys(st.library.sets).length} set(s).`}
         />
       )}
     </>

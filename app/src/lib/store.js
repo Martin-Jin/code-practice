@@ -7,9 +7,10 @@ export const state = {
   ready: false,
   error: null,
   catalog: null,
+  // The stores that hold progress (runs, stats) are kept here under their own names; backups rely on that (lib/backup.js).
   runs: {},            // id -> run (see service.js)
   stats: {},           // setId -> stats
-  // Each IndexedDB store is kept here under its own name; backups rely on that (lib/backup.js).
+  library: { sets: {} }, // id -> imported question set from the user's folders (see library.js); not backed up
   runner: 'online',    // 'local' | 'online'
   local: null,         // { compiler } when the local g++ server answered, else null
   shortcuts: {},       // action id -> combo the user chose (defaults are in shortcuts.js)

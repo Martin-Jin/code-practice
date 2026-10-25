@@ -7,9 +7,11 @@ import ToastHost from './components/Toasts.jsx';
 import Dashboard from './views/Dashboard.jsx';
 import SetPage from './views/SetPage.jsx';
 import Stats from './views/Stats.jsx';
+import LibrarySet from './views/LibrarySet.jsx';
+import QuestionView from './views/QuestionView.jsx';
 import RunView from './views/run/RunView.jsx';
 
-// #/  #/set/<id>  #/set/<id>/stats  #/run/<id>  #/run/<id>/<question>  #/run/<id>/summary
+// #/  #/set/<id>  #/set/<id>/stats  #/lib/<id>  #/q/<set id>/<uid>  #/run/<id>  #/run/<id>/<question>  #/run/<id>/summary
 function useRoute() {
   const read = () => window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   const [parts, setParts] = useState(read);
@@ -26,6 +28,8 @@ function Screen({ theme }) {
   if (view === 'run' && id) return <RunView key={id} runId={id} param={extra} theme={theme} />;
   if (view === 'set' && id && extra === 'stats') return <Stats setId={id} theme={theme} />;
   if (view === 'set' && id) return <SetPage setId={id} theme={theme} />;
+  if (view === 'lib' && id) return <LibrarySet setId={id} theme={theme} />;
+  if (view === 'q' && id && extra) return <QuestionView key={`${id}/${extra}`} setId={id} uid={extra} theme={theme} />;
   return <Dashboard theme={theme} />;
 }
 

@@ -7,6 +7,7 @@ import { state, notify } from './store.js';
 import { ACTIONS } from './shortcuts.js';
 import { fetchCatalog, getSet, getQuestion, getSupport } from './catalog.js';
 import { execute, detectLocal } from './runners.js';
+import { loadLibrary } from './library.js';
 
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
@@ -19,9 +20,11 @@ const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) =>
 export async function boot() {
   try {
     state.catalog = await fetchCatalog();
+    await db.ensureOpen();
     const [runs, stats] = await Promise.all([db.getAll('runs'), db.getAll('stats')]);
     for (const r of runs) state.runs[r.id] = r;
     for (const s of stats) state.stats[s.setId] = s;
+    await loadLibrary();
     state.local = await detectLocal();
     let saved = null;
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }
