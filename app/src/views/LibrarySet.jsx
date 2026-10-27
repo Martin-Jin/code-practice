@@ -5,6 +5,7 @@ import { removeSet, deleteOwnQuestion } from '../lib/library.js';
 import { deleteMine, deleteMineQuestion } from '../lib/mine.js';
 import AddQuestionDialog from '../components/AddQuestion.jsx';
 import { effectiveQuestions, getProgress } from '../lib/practice.js';
+import Icon from '../components/Icon.jsx';
 import Shell from '../components/Shell.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 import { LibraryPracticePicker, LibRunRow } from '../components/LibraryPractice.jsx';
@@ -159,12 +160,11 @@ export default function LibrarySet({ setId, theme }) {
   return (
     <Shell theme={theme} crumbs={[{ label: record.title }]}>
       <div className="page-head">
-        <h1>{record.title}</h1>
+        <h1 className="title-with-icon">{record.title} <a className="btn ghost icon-only" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /></a></h1>
         <p className="muted">
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
         <div className="row">
-          <a className="btn" href={`#/lib/${encodeURIComponent(setId)}/stats`}>Stats</a>
           {foldersSorted().length > 0 && (
             <select aria-label="Folder" value={(folderOf(setId) || { id: '' }).id} onChange={(e) => moveSet(setId, e.target.value || null)}>
               <option value="">Not in a folder</option>

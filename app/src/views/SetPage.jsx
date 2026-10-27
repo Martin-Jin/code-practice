@@ -3,6 +3,7 @@ import { useStore } from '../lib/store.js';
 import { getSet } from '../lib/catalog.js';
 import { createRun } from '../lib/service.js';
 import { plural } from '../lib/format.js';
+import Icon from '../components/Icon.jsx';
 import Shell from '../components/Shell.jsx';
 import RunRow from '../components/RunRow.jsx';
 import ModePicker, { defaultChoice } from '../components/ModePicker.jsx';
@@ -32,9 +33,8 @@ export default function SetPage({ setId, theme }) {
   return (
     <Shell theme={theme} crumbs={[{ label: set.name }]}>
       <div className="page-head">
-        <h1>{set.name}</h1>
+        <h1 className="title-with-icon">{set.name} <a className="btn ghost icon-only" href={`#/set/${setId}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /></a></h1>
         <p className="muted">{set.description}</p>
-        <div className="row"><a className="btn" href={`#/set/${setId}/stats`}>View stats</a></div>
       </div>
 
       <div className="two-col">

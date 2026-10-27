@@ -618,3 +618,5 @@ dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center
 
 .edit-toggle { color: var(--muted); }
 .edit-toggle.on { color: var(--accent); background: var(--surface-2); }
+.title-with-icon { display: flex; align-items: center; gap: 10px; }
+.title-with-icon .btn { flex: none; }
