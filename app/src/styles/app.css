@@ -593,7 +593,8 @@ input.line:focus, select.line:focus { outline: 0; border-bottom-color: var(--acc
 .title-row { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 12px; align-items: end; }
 @media (max-width: 600px) { .title-row { grid-template-columns: minmax(0, 1fr); } }
 
-.edit-row { display: flex; align-items: center; gap: 6px; font-weight: 650; }
+.edit-row { display: flex; align-items: center; gap: 6px; font-weight: 650; margin: 0 0 12px; }
+.edit-row.before-answers { margin-top: 28px; }
 .edit-pencil { color: var(--accent); flex: none; }
 .title-with-icon .edit-pencil { margin-left: 4px; }
 

@@ -130,7 +130,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
           )}
           {editMode && <div className="edit-row">Question {pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</div>}
           <Stem set={set} question={question} />
-          {editMode && <div className="edit-row">Answers {pencil(`Edit the answer key${edited ? ' (changed)' : ''}`, () => setPanel('key'))}</div>}
+          {editMode && <div className="edit-row before-answers">Answers {pencil(`Edit the answer key${edited ? ' (changed)' : ''}`, () => setPanel('key'))}</div>}
           <ol className="parts">
             {question.parts.map((p) => (
               <PartAnswer key={p.label} uid={uid} part={p} value={answers[p.label]} status={live[p.label]}
