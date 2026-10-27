@@ -483,8 +483,8 @@ ul.choices { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; }
 label.choice { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 label.choice:hover { background: var(--surface-2); }
 label.choice input { margin-top: 4px; }
-fieldset.part-edit { display: grid; gap: 10px; border: 1px solid var(--border); }
-fieldset.part-edit legend { font-weight: 650; padding: 0 6px; }
+.part-edit { display: grid; gap: 10px; text-align: left; }
+.part-edit .part-title { font-weight: 650; }
 .notice.ok { background: var(--ok-soft); color: var(--ok); } .notice.bad { background: var(--bad-soft); color: var(--bad); }
 .qstrip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .qdot { min-width: 34px; height: 30px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; }
@@ -577,3 +577,12 @@ a.tile:hover { text-decoration: none; border-color: var(--accent); }
 /* ---------- command palette: the page behind it is dimmed and blurred a little ---------- */
 dialog.palette::backdrop { background: rgb(8 12 18 / 38%); backdrop-filter: blur(3px); }
 dialog.palette .chip { flex: none; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Text boxes have no drag handle: they grow with what is typed (field-sizing where supported, else App.jsx does it). */
+textarea { resize: none; field-sizing: content; min-height: 4.5em; max-height: 60vh; overflow-y: auto; }
+
+/* Quiet inputs: just an underline marks the field. */
+input.line, select.line { height: 28px; padding: 0 2px; border: 0; border-bottom: 1px solid var(--control-border); border-radius: 0; background: transparent; }
+input.line:focus, select.line:focus { outline: 0; border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
+.title-row { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 12px; align-items: end; }
+@media (max-width: 600px) { .title-row { grid-template-columns: minmax(0, 1fr); } }

@@ -121,12 +121,12 @@ function PartEditor({ draft, index, onChange, onRemove }) {
   const options = draft.options.split('\n').map((o) => o.trim()).filter(Boolean);
   const toggleCorrect = (i) => set({ correct: draft.correct.includes(i) ? draft.correct.filter((n) => n !== i) : [...draft.correct, i] });
   return (
-    <fieldset className="card pad part-edit">
-      <legend>Part {index + 1}</legend>
+    <div className="card pad part-edit">
+      <b className="part-title">Part {index + 1}</b>
       <div className="row">
-        <label>Label <input type="text" value={draft.label} maxLength={4} style={{ width: 56 }} onChange={(e) => set({ label: e.target.value })} /></label>
+        <label>Label <input type="text" className="line" value={draft.label} maxLength={4} style={{ width: 48 }} onChange={(e) => set({ label: e.target.value })} /></label>
         <label>Type{' '}
-          <select value={draft.type} onChange={(e) => set({ type: e.target.value })}>
+          <select className="line" value={draft.type} onChange={(e) => set({ type: e.target.value })}>
             <option value="numeric">Number</option>
             <option value="mcq">Multiple choice</option>
             <option value="self">Self-mark</option>
@@ -139,10 +139,10 @@ function PartEditor({ draft, index, onChange, onRemove }) {
       </label>
       {draft.type === 'numeric' && (
         <div className="row">
-          <label>Answer <input type="text" inputMode="decimal" value={draft.answer} style={{ width: 110 }} onChange={(e) => set({ answer: e.target.value })} /></label>
-          <label>Unit <input type="text" value={draft.unit} placeholder="kg, m/s^2" style={{ width: 90 }} onChange={(e) => set({ unit: e.target.value })} /></label>
-          <label title="Decimal places the question asks for">Decimal places <input type="number" min="0" max="15" value={draft.dp} style={{ width: 60 }} onChange={(e) => set({ dp: e.target.value })} /></label>
-          <label title="How far off an answer may be, as a percentage of the answer. Blank means 1%.">Accepted error % <input type="number" min="0" step="any" value={draft.tol} placeholder="1" style={{ width: 70 }} onChange={(e) => set({ tol: e.target.value })} /></label>
+          <label>Answer <input type="text" inputMode="decimal" className="line" value={draft.answer} style={{ width: 110 }} onChange={(e) => set({ answer: e.target.value })} /></label>
+          <label>Unit <input type="text" className="line" value={draft.unit} placeholder="kg, m/s^2" style={{ width: 90 }} onChange={(e) => set({ unit: e.target.value })} /></label>
+          <label title="Decimal places the question asks for">Decimal places <input type="number" className="line" min="0" max="15" value={draft.dp} style={{ width: 60 }} onChange={(e) => set({ dp: e.target.value })} /></label>
+          <label title="How far off an answer may be, as a percentage of the answer. Blank means 1%.">Accepted error % <input type="number" className="line" min="0" step="any" value={draft.tol} placeholder="1" style={{ width: 70 }} onChange={(e) => set({ tol: e.target.value })} /></label>
         </div>
       )}
       {draft.type === 'mcq' && (
@@ -161,7 +161,7 @@ function PartEditor({ draft, index, onChange, onRemove }) {
           <label className="check"><input type="checkbox" checked={draft.multi} onChange={(e) => set({ multi: e.target.checked })} /> More than one can be right (select one or more)</label>
         </>
       )}
-    </fieldset>
+    </div>
   );
 }
 

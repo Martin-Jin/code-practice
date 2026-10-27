@@ -253,13 +253,15 @@ export default function AddQuestionDialog({ close, setId }) {
           <label className="stack">Typed wording (optional; maths between $ signs)
             <textarea rows={3} value={wording} onChange={(e) => setWording(e.target.value)} />
           </label>
-          <label className="stack">Title (this is what search finds)
-            <input type="text" value={title} placeholder="Topic - what is asked" onChange={(e) => setTitle(e.target.value)} />
-          </label>
-          <label className="stack">Section
-            <input type="text" list="section-choices" value={section} onChange={(e) => typed('section', setSection)(e.target.value)} />
-            <datalist id="section-choices">{sections.map((x) => <option key={x} value={x} />)}</datalist>
-          </label>
+          <div className="title-row">
+            <label className="stack">Title (this is what search finds)
+              <input type="text" value={title} placeholder="Topic - what is asked" onChange={(e) => setTitle(e.target.value)} />
+            </label>
+            <label className="stack">Section
+              <input type="text" list="section-choices" value={section} placeholder="Pick or type" onChange={(e) => typed('section', setSection)(e.target.value)} />
+              <datalist id="section-choices">{sections.map((x) => <option key={x} value={x} />)}</datalist>
+            </label>
+          </div>
           <h3>Answers</h3>
           <PartsEditor drafts={parts} onChange={setParts} />
           <details>
