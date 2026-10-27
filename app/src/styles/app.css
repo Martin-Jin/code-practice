@@ -432,6 +432,9 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
   .top-tabs { min-width: 0; }
   .top-tabs a { white-space: nowrap; }
   .top-tabs a { gap: 4px; font-size: 13px; }
+  /* the current tab shows its name, the others only an icon */
+  .top-tabs a:not([aria-current="page"]) .tab-label { display: none; }
+  .top-tabs a[aria-current="page"] .icon { display: none; }
   .top-tabs a .icon { display: block; width: 20px; height: 20px; }
   .top-tabs a { padding: 0 8px; }
   .nav-search { min-width: 0; width: 40px; justify-content: center; padding: 0; }
@@ -517,7 +520,7 @@ label.choice input { margin-top: 4px; }
 .hero .copy { position: relative; z-index: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 24px 40px; display: grid; gap: 10px; justify-items: start; }
 .hero .eyebrow { margin: 0; font-size: 13px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .hero h1 { font-size: clamp(26px, 4.2vw, 44px); letter-spacing: -0.02em; max-width: 18em; text-wrap: balance; }
-@media (max-width: 760px) { .hero .copy { padding: 0 16px 28px; } }
+@media (max-width: 760px) { .hero { min-height: 0; padding-top: 56px; } .hero .copy { padding: 0 16px 22px; } }
 ol.steps { margin: 0 0 6px; padding-left: 20px; display: grid; gap: 4px; }
 
 /* ---------- enlarge a figure ---------- */
