@@ -68,26 +68,35 @@ function ImportDialog({ files, close }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [indexing, setIndexing] = useState(null);   // { path, page, pages } while a PDF is being read
+  const [auto, setAuto] = useState(false);          // true while the PDFs found are being read one after another
+  const [failed, setFailed] = useState({});         // PDF path -> why it could not be read
+  const alive = useRef(true);
 
   useEffect(() => {
     let live = true;
-    scanFolder(files).then((s) => {
+    alive.current = true;
+    scanFolder(files).then(async (s) => {
       if (!live) return;
       setScan(s);
       setPicked(Object.fromEntries(s.sets.filter((x) => x.set && x.status !== 'current').map((x) => [x.path, true])));
       setPhase('review');
+      // A PDF with no manifest beside it is read straight away, one at a time (each takes a while).
+      setAuto(true);
+      for (const pdf of s.pdfs.filter((p) => !p.indexed || p.changed)) { if (!alive.current) return; await index(pdf); }
+      if (alive.current) setAuto(false);
     }).catch((e) => { if (live) { setError(`Could not read the folder: ${e.message}`); setPhase('failed'); } });
-    return () => { live = false; };
+    return () => { live = false; alive.current = false; };
   }, [files]);
 
   const todo = scan ? scan.sets.filter((x) => x.set && picked[x.path]) : [];
 
   // Reads a PDF with no manifest beside it and adds the questions it finds to the list.
-  const index = async (pdf) => {
-    setError('');
+  async function index(pdf) {
+    setFailed((f) => { const { [pdf.path]: _, ...rest } = f; return rest; });
     setIndexing({ path: pdf.path, page: 0, pages: 0 });
     try {
-      const item = await indexPdf(pdf, (page, pages) => setIndexing({ path: pdf.path, page, pages }));
+      const item = await indexPdf(pdf, (page, pages) => { if (alive.current) setIndexing({ path: pdf.path, page, pages }); });
+      if (!alive.current) return;
       setScan((s) => ({
         ...s,
         sets: [...s.sets.filter((x) => x.path !== item.path), item].sort((a, b) => a.path.localeCompare(b.path)),
@@ -95,10 +104,10 @@ function ImportDialog({ files, close }) {
       }));
       setPicked((p) => ({ ...p, [item.path]: true }));
     } catch (e) {
-      setError(`Could not read ${pdf.path}: ${e.message}`);
+      if (alive.current) setFailed((f) => ({ ...f, [pdf.path]: e.message }));
     }
-    setIndexing(null);
-  };
+    if (alive.current) setIndexing(null);
+  }
   const toggle = (path) => setPicked((p) => ({ ...p, [path]: !p[path] }));
 
   const run = async () => {
@@ -119,7 +128,7 @@ function ImportDialog({ files, close }) {
     }
   };
 
-  const busy = phase === 'scanning' || phase === 'importing' || !!indexing;
+  const busy = phase === 'scanning' || phase === 'importing' || !!indexing || auto;
   return (
     <Modal
       wide title="Add questions from a folder" onClose={() => !busy && close(false)}
@@ -149,15 +158,20 @@ function ImportDialog({ files, close }) {
           {scan.pdfs.length > 0 && (
             <div className="card pad" style={{ display: 'grid', gap: 8 }}>
               <b>{plural(scan.pdfs.length, 'PDF')} without a question set file</b>
-              <span className="muted">The app can find the questions in a practice PDF itself if the PDF is laid out the way the app expects (see How to add questions). It takes about half a minute. To keep the result beside the PDF instead, run <code>node tools/index-pdf.js</code> from the repo.</span>
+              <span className="muted">The app reads each practice PDF itself and lists its questions, one after another (about half a minute each), provided the PDF is laid out the way the app expects (see How to add questions). To keep the result beside the PDF instead, run <code>node tools/index-pdf.js</code> from the repo.</span>
               {scan.pdfs.map((p) => (
-                <div key={p.path} className="row" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
-                  <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{p.path} <span className="muted">({mb(p.size)})</span></span>
-                  {indexing && indexing.path === p.path
-                    ? <span className="running"><span className="spinner" /> Page {indexing.page} of {indexing.pages || '…'}</span>
-                    : p.indexed && !p.changed
-                      ? <span className="chip ok">Indexed</span>
-                      : <button type="button" className="btn sm" disabled={busy} onClick={() => index(p)}>{p.indexed ? 'Index again (file changed)' : 'Find the questions'}</button>}
+                <div key={p.path} style={{ display: 'grid', gap: 4 }}>
+                  <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
+                    <span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{p.path} <span className="muted">({mb(p.size)})</span></span>
+                    {indexing && indexing.path === p.path
+                      ? <span className="running"><span className="spinner" /> Page {indexing.page} of {indexing.pages || '…'}</span>
+                      : failed[p.path]
+                        ? <button type="button" className="btn sm" disabled={busy} onClick={() => index(p)}>Try again</button>
+                        : p.indexed && !p.changed
+                          ? <span className="chip ok">Indexed</span>
+                          : <span className="muted">Waiting…</span>}
+                  </div>
+                  {failed[p.path] && <div className="notice" role="alert">Could not read it: {failed[p.path]}</div>}
                 </div>
               ))}
             </div>
@@ -220,20 +234,10 @@ function StorageNote() {
   );
 }
 
-// Dashboard section: the sets imported from the user's folders, and the button that adds more.
-export function LibrarySection() {
-  const st = useStore();
+// One imported set as a card (Browse, Stats, Remove or Add a question).
+export function LibrarySetCard({ set }) {
   const { open, confirm } = useDialogs();
-  const input = useRef(null);
-  const sets = Object.values(st.library.sets).sort((a, b) => a.title.localeCompare(b.title));
-
-  const onChoose = (e) => {
-    const files = [...e.target.files];
-    e.target.value = '';   // so choosing the same folder again still fires
-    if (files.length) open(({ close }) => <ImportDialog files={files} close={close} />);
-  };
-
-  const remove = async (set) => {
+  const remove = async () => {
     const ok = await confirm({
       title: `Remove ${set.title}?`,
       body: 'This deletes the copy kept in this browser. Your folder is not touched, and you can add it again later.',
@@ -242,45 +246,45 @@ export function LibrarySection() {
     if (!ok) return;
     try { await removeSet(set.id); } catch (e) { toast(`Could not remove it: ${e.message}`, 'bad'); }
   };
+  return (
+    <div className="card set-card">
+      <div>
+        <h2>{set.title}</h2>
+        {set.course && <p className="muted" style={{ marginTop: 4 }}>{set.course}</p>}
+      </div>
+      <div className="meta">
+        <span className="chip">{plural(set.manifest.questions.length, 'question')}</span>
+        <span className="chip">{plural(new Set(set.manifest.questions.map((q) => q.section)).size, 'section')}</span>
+        <span className="chip">{mb(set.bytes)}</span>
+        {set.missing.length > 0 && <span className="chip warn">{plural(set.missing.length, 'file')} missing</span>}
+      </div>
+      <div className="actions">
+        <a className="btn primary" href={`#/lib/${encodeURIComponent(set.id)}`}>Browse</a>
+        <a className="btn" href={`#/lib/${encodeURIComponent(set.id)}/stats`}>Stats</a>
+        {set.userOwned
+          ? <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} setId={set.id} />)}><Icon name="plus" /> Add a question</button>
+          : <button type="button" className="btn" onClick={remove}><Icon name="trash" /> Remove</button>}
+      </div>
+    </div>
+  );
+}
 
+// The buttons that bring sets in: choose a folder of sets, or make a question from a screenshot.
+export function LibraryTools() {
+  const { open } = useDialogs();
+  const input = useRef(null);
+  const onChoose = (e) => {
+    const files = [...e.target.files];
+    e.target.value = '';   // so choosing the same folder again still fires
+    if (files.length) open(({ close }) => <ImportDialog files={files} close={close} />);
+  };
   return (
     <section>
       <div className="section-title with-action">
-        <h2>Your library</h2><span className="muted">{sets.length}</span>
+        <h2>Add to your library</h2>
         <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
       </div>
-      {sets.length === 0
-        ? (
-          <div className="empty">
-            Question sets from folders on this computer (practice PDFs, quiz screenshots) show up here. Nothing is uploaded: the app keeps a copy in this browser. Press <b>How to add questions</b> to get started.
-          </div>
-        )
-        : (
-          <div className="grid">
-            {sets.map((set) => (
-              <div key={set.id} className="card set-card">
-                <div>
-                  <h2>{set.title}</h2>
-                  {set.course && <p className="muted" style={{ marginTop: 4 }}>{set.course}</p>}
-                </div>
-                <div className="meta">
-                  <span className="chip">{plural(set.manifest.questions.length, 'question')}</span>
-                  <span className="chip">{plural(new Set(set.manifest.questions.map((q) => q.section)).size, 'section')}</span>
-                  <span className="chip">{mb(set.bytes)}</span>
-                  {set.missing.length > 0 && <span className="chip warn">{plural(set.missing.length, 'file')} missing</span>}
-                </div>
-                <div className="actions">
-                  <a className="btn primary" href={`#/lib/${encodeURIComponent(set.id)}`}>Browse</a>
-                  <a className="btn" href={`#/lib/${encodeURIComponent(set.id)}/stats`}>Stats</a>
-                  {set.userOwned
-                    ? <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}><Icon name="plus" /> Add a question</button>
-                    : <button type="button" className="btn" onClick={() => remove(set)}><Icon name="trash" /> Remove</button>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      <div className="row" style={{ marginTop: 12 }}>
+      <div className="row">
         <button type="button" className="btn" onClick={() => input.current.click()}><Icon name="plus" /> Add or update a folder…</button>
         <input ref={input} type="file" webkitdirectory="" multiple hidden onChange={onChoose} />
         <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}><Icon name="plus" /> Add a question…</button>

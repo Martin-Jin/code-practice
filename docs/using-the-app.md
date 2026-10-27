@@ -151,4 +151,4 @@ In your browser's "clear browsing data" window, **cached images and files** is s
 
 ## Folders
 
-**Folders** (top bar) holds your own collections of questions, taken from any set in your library. On a set's page, drag a question row onto a folder in the panel at the right, or use the **Folder…** menu on the row. On the Folders page, drag a question within a folder to reorder it, or onto another folder in the list to move it; **Remove** takes it out of the folder. A folder only lists questions: they stay in their sets with their stats. Folders are part of a backup.
+On **Question sets**, **New folder** makes a folder to sort your sets into (the coding sets and the sets in your library alike). Drag a set's card onto a folder to file it there, drag it onto **Not in a folder** to take it out, or use the menu under the card. A set is in one folder at a time. Deleting a folder only deletes the folder: its sets go back to **Not in a folder** with all their questions and stats. Folders are part of a backup.

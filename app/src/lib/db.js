@@ -5,7 +5,7 @@
 //   libProgress       progress on questions of imported sets: answers, results, the "difficult" flag (backed up)
 //   libEdits          answer keys and corrections the user made to imported questions (backed up)
 //   libRuns           practice sessions over imported sets (backed up)
-//   libFolders        the user's own folders of questions (backed up)
+//   libFolders        the user's folders of question sets (backed up)
 //   libMine           the user's own questions made in the app, with their images (backed up)
 //   libFormulas       the formula sheets added to a set (the files are in libFiles under "<set id>/formulas/"; not backed up)
 //   libHandles        the file handle of a PDF the user linked to a set, so edits can be written back (not backed up)

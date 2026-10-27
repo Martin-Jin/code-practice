@@ -1,6 +1,7 @@
-// Folders: the user's own collections of questions, taken from any imported set, for organising by hand (drag a
-// question onto a folder, drag within a folder to reorder). A folder only lists questions ({ setId, uid }); the
-// questions stay in their sets, with their stats. Saved to IndexedDB (store libFolders) and part of a backup.
+// Folders: the user's own way of sorting question sets (both the coding sets and the sets in their library) on the
+// Question sets page. A set is in at most one folder; sets in none are listed under "Not in a folder". A folder only
+// lists set ids, so removing a set or deleting a folder never touches the questions or their stats. Saved to
+// IndexedDB (store libFolders) and part of a backup.
 import * as db from './db.js';
 import { state, notify } from './store.js';
 
@@ -8,8 +9,7 @@ const now = () => new Date().toISOString();
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => b.toString(16).padStart(2, '0')).join('');
 
 export const foldersSorted = () => Object.values(state.libFolders).sort((a, b) => a.name.localeCompare(b.name));
-export const sameItem = (a, b) => a.setId === b.setId && a.uid === b.uid;
-export const folderHas = (folder, setId, uid) => folder.items.some((i) => i.setId === setId && i.uid === uid);
+export const folderOf = (setId) => foldersSorted().find((f) => f.items.some((i) => i.setId === setId)) || null;
 
 async function save(folder) {
   folder.updatedAt = now();
@@ -18,21 +18,20 @@ async function save(folder) {
   notify();
 }
 
-export async function createFolder(name) {
+const cleanName = (name, except = null) => {
   const clean = String(name || '').trim().slice(0, 60);
   if (!clean) throw new Error('Give the folder a name.');
-  if (foldersSorted().some((f) => f.name.toLowerCase() === clean.toLowerCase())) throw new Error(`There is already a folder called "${clean}".`);
-  const folder = { id: newId(), name: clean, items: [], updatedAt: now() };
+  if (foldersSorted().some((f) => f.id !== except && f.name.toLowerCase() === clean.toLowerCase())) throw new Error(`There is already a folder called "${clean}".`);
+  return clean;
+};
+
+export async function createFolder(name) {
+  const folder = { id: newId(), name: cleanName(name), items: [], updatedAt: now() };
   await save(folder);
   return folder;
 }
 
-export async function renameFolder(id, name) {
-  const clean = String(name || '').trim().slice(0, 60);
-  if (!clean) throw new Error('Give the folder a name.');
-  if (foldersSorted().some((f) => f.id !== id && f.name.toLowerCase() === clean.toLowerCase())) throw new Error(`There is already a folder called "${clean}".`);
-  await save({ ...state.libFolders[id], name: clean });
-}
+export const renameFolder = (id, name) => save({ ...state.libFolders[id], name: cleanName(name, id) });
 
 export async function deleteFolder(id) {
   await db.transact(['libFolders'], (t) => t.objectStore('libFolders').delete(id));
@@ -40,38 +39,20 @@ export async function deleteFolder(id) {
   notify();
 }
 
-// Adds a question to the end of a folder. Returns false if it was already there.
-export async function addToFolder(id, setId, uid) {
-  const folder = state.libFolders[id];
-  if (!folder || folderHas(folder, setId, uid)) return false;
-  await save({ ...folder, items: [...folder.items, { setId, uid }] });
-  return true;
+// Puts a set in a folder (taking it out of any other), or in none when folderId is null.
+export async function moveSet(setId, folderId) {
+  for (const f of foldersSorted()) {
+    const has = f.items.some((i) => i.setId === setId);
+    if (f.id === folderId && !has) await save({ ...f, items: [...f.items, { setId }] });
+    else if (f.id !== folderId && has) await save({ ...f, items: f.items.filter((i) => i.setId !== setId) });
+  }
 }
 
-export async function removeFromFolder(id, setId, uid) {
-  const folder = state.libFolders[id];
-  if (folder) await save({ ...folder, items: folder.items.filter((i) => !(i.setId === setId && i.uid === uid)) });
-}
-
-// Moves a question to another folder (or puts it first into one), before the item `beforeUid` of `beforeSetId`, or at the end.
-export async function moveItem(fromId, toId, item, before = null) {
-  const to = state.libFolders[toId];
-  if (!to) return;
-  const without = (list) => list.filter((i) => !sameItem(i, item));
-  const target = fromId === toId ? without(to.items) : to.items.filter((i) => !sameItem(i, item));
-  const at = before ? target.findIndex((i) => sameItem(i, before)) : -1;
-  target.splice(at < 0 ? target.length : at, 0, { setId: item.setId, uid: item.uid });
-  if (fromId && fromId !== toId && state.libFolders[fromId]) await save({ ...state.libFolders[fromId], items: without(state.libFolders[fromId].items) });
-  await save({ ...to, items: target });
-}
-
-// ---- drag and drop: what travels with a dragged question ----
-export const DRAG_TYPE = 'application/x-practice-question';
-export function startDrag(e, item, fromId = null) {
-  e.dataTransfer.setData(DRAG_TYPE, JSON.stringify({ setId: item.setId, uid: item.uid, from: fromId }));
-  e.dataTransfer.effectAllowed = 'copyMove';
+// ---- drag and drop: what travels with a dragged set card ----
+export const DRAG_TYPE = 'application/x-practice-set';
+export function startDrag(e, setId) {
+  e.dataTransfer.setData(DRAG_TYPE, setId);
+  e.dataTransfer.effectAllowed = 'move';
 }
 export const hasDrag = (e) => [...e.dataTransfer.types].includes(DRAG_TYPE);
-export function readDrag(e) {
-  try { return JSON.parse(e.dataTransfer.getData(DRAG_TYPE)); } catch { return null; }
-}
+export const readDrag = (e) => e.dataTransfer.getData(DRAG_TYPE) || null;

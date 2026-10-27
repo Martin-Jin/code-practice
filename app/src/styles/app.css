@@ -538,14 +538,14 @@ dialog.lightbox::backdrop { background: rgb(8 12 18 / 94%); }
 .formula-frame { width: 100%; height: 100%; border: 0; }
 .formula-body .empty { display: grid; gap: 6px; justify-items: center; margin-top: 24px; }
 
-/* ---------- folders ---------- */
-.with-dock { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 20px; align-items: start; }
-.folder-dock { position: sticky; top: 72px; display: grid; gap: 8px; }
-.drop { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 1px dashed var(--control-border); border-radius: 8px; }
-.drop.over, .run-row.over { border-color: var(--accent); background: var(--surface-2); outline: 2px solid var(--accent); }
-.drop.current { border-style: solid; font-weight: 650; }
-.draggable { cursor: grab; }
-.folders-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start; }
-.folder-list { display: grid; gap: 8px; }
-.folder-pick { max-width: 130px; }
-@media (max-width: 900px) { .with-dock, .folders-layout { grid-template-columns: 1fr; } .folder-dock { position: static; } }
+/* ---------- folders of question sets ---------- */
+.folder-zone { border: 1px dashed var(--control-border); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
+.folder-zone.over { border-color: var(--accent); background: var(--surface-2); outline: 2px solid var(--accent); }
+.folder-zone .grid { min-height: 40px; }
+.folder-zone .zone-hint { margin: 0; color: var(--muted); }
+.set-tile { display: grid; gap: 6px; cursor: grab; }
+.set-tile:active { cursor: grabbing; }
+.set-tile .move { justify-self: start; max-width: 100%; }
+
+/* Text boxes have no drag handle: they grow with what is typed (field-sizing where supported, else App.jsx does it). */
+textarea { resize: none; field-sizing: content; min-height: 4.5em; max-height: 60vh; overflow-y: auto; }
