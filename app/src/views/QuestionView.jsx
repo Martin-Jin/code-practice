@@ -118,6 +118,9 @@ export default function QuestionView({ setId, uid, run, theme }) {
             <button type="button" className={`btn ghost sm icon-only edit-toggle${editMode ? ' on' : ''}`} aria-pressed={editMode} onClick={toggleEdit}
               title={editMode ? 'Leave edit mode' : 'Edit this question'} aria-label={editMode ? 'Leave edit mode' : 'Edit this question'}><Icon name="pencil" /></button>
           </h1>
+          {progress && progress.attempts > 0 && (
+            <p className="muted" style={{ margin: '-6px 0 24px' }}>Checked {plural(progress.attempts, 'time')}: {progress.right} right, {progress.wrong} not right.</p>
+          )}
           {editMode && <div className="edit-row">Question {pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</div>}
           <Stem set={set} question={question} />
           {editMode && <div className="edit-row">Answers {pencil(`Edit the answer key${edited ? ' (changed)' : ''}`, () => setPanel('key'))}</div>}
@@ -139,9 +142,6 @@ export default function QuestionView({ setId, uid, run, theme }) {
           </div>
           {run && pending > 0 && index === questions.length - 1 && (
             <p className="muted" style={{ marginTop: 10 }}>{plural(pending, 'question')} still to check before this session can finish: check each numbered question above that is not yet green or red (a question with no answer key cannot be checked, so it does not count).</p>
-          )}
-          {progress && progress.attempts > 0 && (
-            <p className="muted" style={{ marginTop: 10 }}>Checked {plural(progress.attempts, 'time')}: {progress.right} right, {progress.wrong} not right.</p>
           )}
         </article>
 
