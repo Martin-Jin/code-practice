@@ -61,7 +61,7 @@ test('bad questions are skipped and reported, the rest still load', () => {
     question('q-1'),
     question('q-2', { title: '' }),
     question('q-1', { title: 'Duplicate uid' }),
-    question('q-4', { parts: [] }),
+    question('q-4', { parts: 'none' }),
     question('q-5', { stem: {} }),
     question('q-6', { stem: { pdf: { page: 1, box: [0, 0, 10, 10] } } }),
     question('q-7'),
@@ -71,6 +71,12 @@ test('bad questions are skipped and reported, the rest still load', () => {
   assert.deepEqual(skipped.map((s) => s.number), [2, 3, 4, 5, 6]);
   assert.match(skipped[1].problems[0], /already used/);
   assert.match(skipped[4].problems[0], /names no pdf/);
+});
+
+test('a question with no parts is allowed: it is only read', () => {
+  const { set, skipped } = validateQuestionSet(manifest({ questions: [question('q-1', { parts: [] })] }));
+  assert.equal(skipped.length, 0);
+  assert.deepEqual(set.questions[0].parts, []);
 });
 
 test('part checks: numeric, mcq and self', () => {

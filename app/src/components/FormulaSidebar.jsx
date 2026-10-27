@@ -26,6 +26,10 @@ function Sheet({ setId, sheet }) {
     : <ZoomPan><img className="lib-image" src={url} alt={sheet.name} /></ZoomPan>;
 }
 
+const MIN_WIDTH = 280;
+const DEFAULT_WIDTH = 520;
+const loadWidth = () => { try { const w = Number(localStorage.getItem('formulaWidth')); return w >= MIN_WIDTH ? w : DEFAULT_WIDTH; } catch { return DEFAULT_WIDTH; } };
+
 // A side panel of the set's formula sheets, one tab each. With none, it offers the upload.
 export default function FormulaSidebar({ setId, onClose }) {
   const st = useStore();
@@ -33,6 +37,8 @@ export default function FormulaSidebar({ setId, onClose }) {
   const sheets = sheetsOf(setId);
   const [path, setPath] = useState(null);
   const input = useRef(null);
+  const [width, setWidth] = useState(loadWidth);
+  const [drag, setDrag] = useState(false);
   const current = sheets.find((s) => s.path === path) || sheets[0];
 
   const onChoose = async (e) => {
@@ -47,9 +53,22 @@ export default function FormulaSidebar({ setId, onClose }) {
     if (await confirm({ title: `Remove ${current.name}?`, body: 'The copy kept in this browser is deleted. Your own file is not touched.', confirmText: 'Remove', danger: true })) await removeFormulaSheet(setId, current.path);
   };
 
+  // Drag the left edge to resize, like the task pane in the coding questions; double-click puts it back.
+  const move = (e) => setWidth(Math.round(Math.min(window.innerWidth - 120, Math.max(MIN_WIDTH, window.innerWidth - e.clientX))));
+  const stop = () => {
+    if (!drag) return;
+    setDrag(false);
+    document.body.classList.remove('resizing', 'resizing-x');
+    try { localStorage.setItem('formulaWidth', String(width)); } catch { /* storage blocked */ }
+  };
+
   return (
-    <aside className="formula-side" aria-label="Formula sheets">
-      <div className="tabs" role="tablist">
+    <aside className="formula-side" aria-label="Formula sheets" style={{ width }}>
+      <div className={`splitter v formula-handle${drag ? ' drag' : ''}`} role="separator" aria-orientation="vertical" title="Drag to resize. Double-click to reset."
+        onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); document.body.classList.add('resizing', 'resizing-x'); setDrag(true); }}
+        onPointerMove={(e) => { if (drag) move(e); }} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}
+        onDoubleClick={() => { setWidth(DEFAULT_WIDTH); try { localStorage.removeItem('formulaWidth'); } catch { /* storage blocked */ } }} />
+      <div className={`tabs${sheets.length ? '' : ' bare'}`} role="tablist">
         {sheets.map((s) => <button key={s.path} type="button" role="tab" className="tab" aria-selected={current === s} onClick={() => setPath(s.path)} title={s.name}>{s.name.replace(/\.[^.]+$/, '')}</button>)}
         <span className="spacer" />
         {sheets.length > 0 && <button type="button" className="btn ghost sm icon-only" onClick={() => input.current.click()} aria-label="Add a formula sheet" title="Add a formula sheet"><Icon name="plus" /></button>}

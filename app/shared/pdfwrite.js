@@ -3,6 +3,7 @@
 // a crop box, and removes pages. Pure functions over bytes (pdf-lib), so the browser and the
 // Node tests both use them. Positions are in points from the top-left of the page, like the
 // indexer's, and are converted to PDF's bottom-left origin only at the point of drawing.
+import { HEADER_OVERRIDE_MIN, HEADER_SIZE_MAX } from './pdfindex.js';
 import {
   PDFDocument, StandardFonts, rgb, pushGraphicsState, popGraphicsState, setLineWidth, setStrokingColor,
   setDashPattern, moveTo, lineTo, stroke,
@@ -248,6 +249,50 @@ export async function paintBox(pdfBytes, page, box, content) {
     drawLines(s, wrap(font, TEXT_SIZE, content.text, x1 - x0), x0, top0, Math.floor((top1 - top0) / LINE));
   }
   return doc.save();
+}
+
+// Changes the section named in the header of question and solution pages. The old header text cannot be deleted, only
+// covered (it stays in the text layer), so each header is redrawn larger than any text already there, and the indexer takes
+// the largest (see headerItems in pdfindex.js). edits: [{ page, kind: 'question' | 'solution', section, right, rest, size }]:
+// `right` is the right-hand header text to redraw ("Question 5", "Worked solution (1/2)"), `rest` for a solution page the
+// "Q5: title" after the bar, and `size` the text size, from nextHeaderSize.
+export async function setSections(pdfBytes, edits) {
+  const doc = await PDFDocument.load(pdfBytes, { updateMetadata: false });
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  for (const e of edits) {
+    if (!Number.isInteger(e.page) || e.page < 1 || e.page > doc.getPageCount()) throw new Error(`No page ${e.page} in this PDF.`);
+    const s = surface(doc.getPage(e.page - 1), font);
+    s.rect(LEFT - 3, HEADER_Y - 11, RIGHT + 3, HEADER_Y + 5, rgb(1, 1, 1));   // the band the header sits in, above the thin rule
+    s.right(clean(font, e.right), RIGHT, HEADER_Y, e.size);
+    const room = RIGHT - LEFT - widthOf(font, e.size, clean(font, e.right)) - 12;
+    if (e.kind === 'solution') {
+      const section = fit(font, e.size, e.section, room * 0.4);
+      const lead = `${section ? `${section}  ` : ''}|  `;
+      s.text(lead + fit(font, e.size, e.rest || '', room - widthOf(font, e.size, lead)), LEFT, HEADER_Y, { size: e.size });
+    } else {
+      s.text(fit(font, e.size, e.section, room), LEFT, HEADER_Y, { size: e.size });
+    }
+  }
+  return doc.save();
+}
+
+// Works out the edits for setSections from what the pages' headers say now. heads: [{ page, text, size }] for the question
+// page first, then its solution pages, with `text` the header as the indexer reads it and `size` the largest header text
+// size there. Throws if the header has been changed too many times to make a larger one that the indexer still accepts.
+export function sectionEdits(heads, section) {
+  const biggest = Math.max(...heads.map((h) => h.size));
+  const size = biggest >= HEADER_OVERRIDE_MIN ? Math.round((biggest + 0.1) * 10) / 10 : 8.8;
+  if (size > HEADER_SIZE_MAX) throw new Error("This question's section has been changed in the PDF too many times. Change it in the PDF itself.");
+  return heads.map((h, i) => {
+    const text = h.text.replace(/\s+/g, ' ');
+    if (i === 0) {
+      const m = /Question\s*(\d+)/.exec(text);
+      return { page: h.page, kind: 'question', section, right: `Question ${m ? m[1] : ''}`.trim(), size };
+    }
+    const m = /Worked\s*solution\s*\((\d+)\/(\d+)\)/i.exec(text);
+    const rest = /\|\s*(Q\d+:.*?)\s*Worked\s*solution/i.exec(text);
+    return { page: h.page, kind: 'solution', section, right: m ? `Worked solution (${m[1]}/${m[2]})` : 'Worked solution', rest: rest ? rest[1] : '', size };
+  });
 }
 
 // Removes the given pages (1-based). Pages outside the document and repeats are ignored.

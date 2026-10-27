@@ -16,6 +16,7 @@ const PATHS = {
   search: <path d="M7 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM10.4 10.4L14 14" />,
   zoom: <path d="M7 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM10.4 10.4L14 14M7 5v4M5 7h4" />,
   folder: <path d="M2 4.5h4l1.5 1.5H14v6.5H2z" />,
+  move: <path d="M3 5h8M8.5 2.5L11 5 8.5 7.5M13 11H5M7.5 8.5L5 11l2.5 2.5" />,
   stats: <path d="M3 13V8M8 13V3M13 13V6" />,
   pencil: <path d="M3 13l.7-3L10.5 3.2l2.3 2.3L6 12.3z" />,
   sidebar: <path d="M2.5 3h11v10h-11zM6 3v10" />,

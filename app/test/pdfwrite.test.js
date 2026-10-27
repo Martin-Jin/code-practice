@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import zlib from 'node:zlib';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { appendQuestion, paintBox, removePages, dataUrlToImage } from '../shared/pdfwrite.js';
-import { readPages, buildIndex } from '../shared/pdfindex.js';
+import { appendQuestion, paintBox, removePages, dataUrlToImage, setSections, sectionEdits } from '../shared/pdfwrite.js';
+import { readPages, buildIndex, headerItems, groupLines } from '../shared/pdfindex.js';
 
 // ---- fixtures ----
 
@@ -180,4 +180,55 @@ test('dataUrlToImage reads png and jpeg data URLs and refuses other types', () =
   assert.equal(dataUrlToImage('data:image/jpeg;base64,/9j/4A==').type, 'jpg');
   assert.throws(() => dataUrlToImage('data:image/webp;base64,AAAA'), /Unsupported image type "image\/webp"/);
   assert.throws(() => dataUrlToImage('hello'), /Not a data URL/);
+});
+
+test('setSections moves a question to another section, again and again, and the indexer follows', async () => {
+  const q = { number: 1, section: 'Statics', title: 'Beam - reactions', source: 'Tut 1, Q1', stem: { text: 'Find the reactions.' }, solution: { text: 'Take moments.' } };
+  const added = await appendQuestion(await coverOnly(), q);
+  assert.equal((await indexOf(added.bytes)).questions[0].section, 'Statics');
+  const edit = (section, size) => [
+    { page: added.firstPage, kind: 'question', section, right: 'Question 1', size },
+    { page: added.firstPage + 1, kind: 'solution', section, right: 'Worked solution (1/1)', rest: 'Q1: Beam - reactions', size },
+  ];
+  const once = await setSections(added.bytes, edit('Dynamics', 8.8));
+  const a = (await indexOf(once)).questions[0];
+  assert.equal(a.section, 'Dynamics');
+  assert.equal(a.title, 'Beam - reactions');
+  assert.ok(a.solution && a.solution.pdf.length === 1, 'the solution page is still paired with the question');
+  const twice = await setSections(once, edit('Fluids', 8.9));
+  const b = (await indexOf(twice)).questions[0];
+  assert.equal(b.section, 'Fluids');
+  assert.equal(b.solution.pdf.length, 1);
+  assert.equal((await indexOf(twice)).report.unplaced.length, 0);
+});
+
+// What the app does to move a question: read each page's header, plan the edits, write them.
+async function moveVia(bytes, pages, section) {
+  const doc = await pdfjs.getDocument({ data: new Uint8Array(bytes), verbosity: 0 }).promise;
+  const heads = [];
+  for (const n of pages) {
+    const page = await doc.getPage(n);
+    const [x0, , x1, y1] = page.view;
+    const content = await page.getTextContent();
+    const items = content.items.filter((i) => typeof i.str === 'string').map((i) => ({ str: i.str, x: i.transform[4] - x0, y: y1 - i.transform[5], w: i.width, h: i.height }));
+    const used = headerItems(items, x1 - x0);
+    heads.push({ page: n, text: groupLines(used).map((l) => l.text).join(' '), size: Math.round(Math.max(0, ...used.map((i) => i.h)) * 10) / 10 });
+  }
+  await doc.destroy();
+  return setSections(bytes, sectionEdits(heads, section));
+}
+
+test('moving a question reads the headers it finds, keeps its number and title, and survives repeated moves', async () => {
+  const added = await appendQuestion(await coverOnly(), { number: 7, section: 'Statics', title: 'Beam - reactions', source: 'Tut 1, Q1', stem: { text: 'Find them.' }, solution: { text: 'Moments.' } });
+  const pages = [added.firstPage, added.firstPage + 1];
+  let bytes = added.bytes;
+  for (const section of ['Dynamics', 'Fluids', 'Thermo', 'Heat', 'Statics']) {
+    bytes = await moveVia(bytes, pages, section);
+    const { questions, report } = await indexOf(bytes);
+    assert.equal(questions[0].section, section);
+    assert.equal(questions[0].title, 'Beam - reactions');
+    assert.equal(questions[0].solution.pdf.length, 1);
+    assert.equal(report.unplaced.length, 0);
+  }
+  await assert.rejects(() => moveVia(bytes, pages, 'Optics'), /too many times/);
 });

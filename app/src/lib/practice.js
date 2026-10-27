@@ -112,6 +112,17 @@ export function resetLibStats(setId) {
   notify();
 }
 
+// Forgets how often a question was checked and how it went (the "Checked 4 times" line), for when its answer key goes
+// back to the imported one: those checks were against the key the user had changed. Typed answers and the difficult
+// flag stay.
+export function resetChecks(setId, uid) {
+  const rec = getProgress(setId, uid);
+  if (!rec) return;
+  rec.attempts = 0; rec.right = 0; rec.wrong = 0; rec.lastAt = null; rec.checked = null;
+  delete rec.lastOverall;
+  touch(rec, 0);
+}
+
 export function resetAnswers(setId, uid) {
   const rec = ensure(setId, uid);
   rec.answers = {};
@@ -147,6 +158,17 @@ export function clearEdit(setId, uid) {
     delete state.libEdits[key];
     db.remove('libEdits', key);
   }
+  notify();
+}
+
+// Drops one correction the user made (say a section they chose) without touching the others.
+export function clearEditField(setId, uid, field) {
+  const key = keyOf(setId, uid);
+  const old = state.libEdits[key];
+  if (!old || !(field in old)) return;
+  const { [field]: _, ...rest } = old;
+  const left = Object.keys(rest).filter((k) => !['key', 'setId', 'uid', 'updatedAt'].includes(k));
+  if (left.length) { state.libEdits[key] = { ...rest, updatedAt: now() }; db.put('libEdits', state.libEdits[key]); } else { delete state.libEdits[key]; db.remove('libEdits', key); }
   notify();
 }
 

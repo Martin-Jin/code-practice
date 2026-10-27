@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-export function Modal({ title, children, footer, onClose, wide }) {
+// `compact` is for short questions (confirm, prompt): a narrow box with centred text and buttons.
+export function Modal({ title, children, footer, onClose, wide, compact }) {
   const ref = useRef(null);
   useEffect(() => {
     const d = ref.current;
@@ -10,7 +11,7 @@ export function Modal({ title, children, footer, onClose, wide }) {
   return (
     <dialog
       ref={ref}
-      className={`modal${wide ? ' wide' : ''}`}
+      className={`modal${wide ? ' wide' : ''}${compact ? ' compact' : ''}`}
       onCancel={(e) => { e.preventDefault(); onClose && onClose(); }}
       onMouseDown={(e) => { if (e.target === ref.current && onClose) onClose(); }}
     >
@@ -62,6 +63,7 @@ export function DialogProvider({ children }) {
   const confirm = useCallback(({ title, body, confirmText = 'Confirm', danger = false, cancelText = 'Cancel' }) =>
     open(({ close: done }) => (
       <Modal
+        compact
         title={title}
         onClose={() => done(false)}
         footer={(
@@ -81,6 +83,7 @@ export function DialogProvider({ children }) {
       holder.confirm = () => done(holder.current);
       return (
         <Modal
+          compact
           title={title}
           onClose={() => done(null)}
           footer={(

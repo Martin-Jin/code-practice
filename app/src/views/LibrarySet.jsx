@@ -10,8 +10,9 @@ import { useDialogs } from '../components/Dialogs.jsx';
 import { LibraryPracticePicker, LibRunRow } from '../components/LibraryPractice.jsx';
 import { toast } from '../components/Toasts.jsx';
 import { Modal } from '../components/Dialogs.jsx';
-import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf } from '../lib/pdfsync.js';
-import { saveEdit } from '../lib/practice.js';
+import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf, moveQuestionInPdf } from '../lib/pdfsync.js';
+import KebabMenu from '../components/KebabMenu.jsx';
+import { saveEdit, clearEditField } from '../lib/practice.js';
 import { foldersSorted, folderOf, moveSet } from '../lib/folders.js';
 
 const reportText = (r) => (r ? `${r.kept} questions kept their progress, ${r.added} new${r.droppedTitles.length ? `, ${r.droppedTitles.length} no longer in the PDF` : ''}.` : 'The PDF has not changed.');
@@ -42,6 +43,30 @@ function PdfBar({ record }) {
       {link && <button type="button" className="btn sm" disabled={busy} onClick={() => run(() => checkForUpdate(record.id, true), reportText)}>Check for changes</button>}
       {link && <button type="button" className="btn ghost sm" onClick={() => unlinkPdf(record.id)}>Unlink</button>}
     </div>
+  );
+}
+
+// Moving a question of an indexed PDF to another section: in the app only, or in the PDF's headers too.
+function MoveQuestion({ record, question, section, close }) {
+  const [inPdf, setInPdf] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    try {
+      if (inPdf) {
+        const { written } = await moveQuestionInPdf(record.id, question, section);
+        clearEditField(record.id, question.uid, 'section');
+        toast(written ? `Moved to ${section}, and written into the PDF.` : `Moved to ${section}. The updated PDF was downloaded: replace your original with it.`);
+      } else { saveEdit(record.id, question.uid, { section }); toast(`Moved to ${section} in the app. The PDF is unchanged.`); }
+      close(true);
+    } catch (e) { toast(`Could not move it: ${e.message}`, 'bad'); setBusy(false); }
+  };
+  return (
+    <Modal title="Move this question?" onClose={() => !busy && close(false)}
+      footer={<><button type="button" className="btn" disabled={busy} onClick={() => close(false)}>Cancel</button><button type="button" className="btn primary" disabled={busy} onClick={go}>Move</button></>}>
+      <p>"{question.title}" moves from {question.section} to <b>{section}</b>. A section with no questions left disappears by itself.</p>
+      <label className="check"><input type="checkbox" checked={inPdf} onChange={(e) => setInPdf(e.target.checked)} /> Also change it in the PDF (the section in the headers of its question and solution pages)</label>
+    </Modal>
   );
 }
 
@@ -85,7 +110,7 @@ const PART_LABEL = { numeric: 'number', mcq: 'choice', self: 'self-mark' };
 // An imported set: its questions grouped by section, in the order the manifest lists them.
 export default function LibrarySet({ setId, theme }) {
   const st = useStore();
-  const { confirm, open } = useDialogs();
+  const { confirm, open, prompt } = useDialogs();
   const record = st.library.sets[setId];
 
   if (!record) {
@@ -112,6 +137,16 @@ export default function LibrarySet({ setId, theme }) {
     });
     if (!ok) return;
     try { await (mine ? deleteMine(setId) : removeSet(setId)); window.location.hash = '#/'; } catch (e) { toast(`Could not remove it: ${e.message}`, 'bad'); }
+  };
+
+  const moveQuestion = async (q, section) => {
+    if (canSync(record) && q.stem.pdf) { open(({ close }) => <MoveQuestion record={record} question={q} section={section} close={close} />); return; }
+    saveEdit(setId, q.uid, { section });
+    toast(`Moved to ${section}.`);
+  };
+  const newSection = async (q) => {
+    const name = await prompt({ title: 'New section', label: 'Section name' });
+    if (name && name.trim()) moveQuestion(q, name.trim());
   };
 
   const removeQuestion = async (q) => {
@@ -155,7 +190,7 @@ export default function LibrarySet({ setId, theme }) {
           <div className="section-title"><h2>{s.name}</h2><span className="muted">{s.questions.length}</span></div>
           <div className="run-list">
             {s.questions.map((q) => (
-              <div key={q.uid} className="card run-row" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto' }}>
+              <div key={q.uid} className="card run-row" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto auto' }}>
                 <div style={{ minWidth: 0 }}>
                   <div className="title" title={q.title}><a href={`#/q/${encodeURIComponent(setId)}/${encodeURIComponent(q.uid)}`}>{q.title}</a></div>
                   <div className="sub">
@@ -166,6 +201,10 @@ export default function LibrarySet({ setId, theme }) {
                     {progressChips(getProgress(setId, q.uid))}
                   </div>
                 </div>
+                <KebabMenu icon="move" label="Move to another section" items={[
+                  ...sections.filter((x) => x.name !== q.section).map((x) => ({ label: x.name, onClick: () => moveQuestion(q, x.name) })),
+                  { label: 'New section…', icon: 'plus', onClick: () => newSection(q) },
+                ]} />
                 {(record.userOwned || q.own || (canSync(record) && q.stem.pdf)) && <button type="button" className="btn ghost sm" onClick={() => removeQuestion(q)} aria-label={`Delete ${q.title}`}>Delete</button>}
               </div>
             ))}

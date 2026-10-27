@@ -6,6 +6,7 @@ import { canSync, addQuestionToPdf } from '../lib/pdfsync.js';
 import { Modal } from './Dialogs.jsx';
 import { PartsEditor, blankDrafts, partsOf } from './Parts.jsx';
 import { toast } from './Toasts.jsx';
+import TagInput, { knownTags } from './TagInput.jsx';
 
 const MAX_WIDTH = 1400;   // stored images are scaled down to this width
 const VIEW_WIDTH = 540;   // the cropping canvas
@@ -143,7 +144,7 @@ export default function AddQuestionDialog({ close, setId }) {
   const named = setName.trim() !== '';
   const known = target ? target.manifest.questions : all.flatMap((x) => x.manifest.questions);
   const sections = [...new Set(known.map((q) => q.section))];
-  const knownTags = [...new Set(known.flatMap((q) => q.tags))].slice(0, 16);
+  const tagChoices = knownTags(st, target && target.id);
 
   // Naming an existing set fills what its latest question had, unless the field has been typed in already.
   useEffect(() => {
@@ -156,11 +157,6 @@ export default function AddQuestionDialog({ close, setId }) {
   }, [target && target.id]);
 
   const typed = (field, set) => (value) => { touched.current.add(field); set(value); };
-  const addTag = (tag) => {
-    const have = tags.split(',').map((t) => t.trim()).filter(Boolean);
-    if (!have.includes(tag)) typed('tags', setTags)([...have, tag].join(', '));
-  };
-
   // Ctrl+V anywhere in the dialog fills the question's image first, then the solution's.
   useEffect(() => {
     const onPaste = (e) => {
@@ -272,9 +268,8 @@ export default function AddQuestionDialog({ close, setId }) {
                 <label>Marks <input type="number" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => setMarks(e.target.value)} /></label>
               </div>
               <label className="stack">Tags (comma separated search words)
-                <input type="text" value={tags} onChange={(e) => typed('tags', setTags)(e.target.value)} />
+                <TagInput value={tags} tags={tagChoices} onChange={typed('tags', setTags)} />
               </label>
-              {knownTags.length > 0 && <div className="filters" aria-label="Tags used in this set">{knownTags.map((t) => <button key={t} type="button" onClick={() => addTag(t)}>+ {t}</button>)}</div>}
               <ImagePicker label="Solution image" hint="Paste or drop a screenshot of the worked solution." value={solImage} onChange={setSolImage} file={pasted.sol} />
               <label className="stack">Solution text
                 <textarea rows={2} value={solText} onChange={(e) => setSolText(e.target.value)} />

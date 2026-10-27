@@ -41,6 +41,20 @@ export function groupLines(items, tolerance = 2) {
 
 const near = (a, b, tolerance) => Math.abs(a - b) <= tolerance;
 
+// The generator's header text is 8.5 pt. When the app changes a header (a question moved to another section) it cannot
+// delete the old text, only cover it, and the old text stays in the PDF's text layer. So it draws the new header slightly
+// larger, 8.8 pt for the first change and 0.1 pt more for each later one, and the largest header text on the baseline wins.
+export const HEADER_SIZE = 8.5;
+export const HEADER_OVERRIDE_MIN = 8.75;
+export const HEADER_SIZE_MAX = 9.2;
+
+// The header text of a page: items on the header baseline, minus any that a later change has covered.
+export function headerItems(items, width) {
+  const band = items.filter((i) => near(i.y, 26, 1.5) && i.h >= 8 && i.h <= HEADER_SIZE_MAX && i.x >= LEFT - 1 && (near(i.x, LEFT, 1) || i.x + i.w <= width - LEFT + 2));
+  const top = Math.max(0, ...band.map((i) => i.h));
+  return top >= HEADER_OVERRIDE_MIN ? band.filter((i) => i.h >= top - 0.03) : band;
+}
+
 // What kind of page this is, and what it says. null for a page that is neither (the cover).
 // Only text where the generator puts its own header, title and footer counts: the slide
 // content copied into the crops has text of its own near the page edges (clipped away when
@@ -48,7 +62,7 @@ const near = (a, b, tolerance) => Math.abs(a - b) <= tolerance;
 // items: { str, x, y, w, h } with h the font height.
 export function classifyPage(items, width, height) {
   const text = (list) => groupLines(list).map((l) => l.text).join(' ');
-  const header = text(items.filter((i) => near(i.y, 26, 1.5) && i.h >= 8 && i.h <= 9.2 && i.x >= LEFT - 1 && (near(i.x, LEFT, 1) || i.x + i.w <= width - LEFT + 2)));   // a long left title runs under the right text
+  const header = text(headerItems(items, width));   // a long left title runs under the right text
   const footerLine = groupLines(items.filter((i) => i.y > height - 40 && i.h >= 6.8 && i.h <= 8.4 && i.x >= LEFT - 1 && i.x <= width - LEFT)).find((l) => /^Source:/i.test(l.text));
   const footer = footerLine ? { source: footerLine.text.replace(/^Source:\s*/i, '').replace(/\s+\d+$/, '').trim(), y: footerLine.y } : null;
 

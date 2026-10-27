@@ -88,7 +88,8 @@ export function questionProblems(q) {
     if (pdf !== undefined) checkCrop(pdf, 'stem pdf', problems);
   }
 
-  if (!Array.isArray(q.parts) || !q.parts.length) problems.push('it needs at least one part');
+  // No parts is allowed: a question with nothing to answer, which is just read (and its solution looked at).
+  if (!Array.isArray(q.parts)) problems.push('parts must be a list (it may be empty)');
   else {
     q.parts.forEach((p, i) => checkPart(p, i, problems));
     const labels = q.parts.map((p) => (isObject(p) ? p.label : undefined));
@@ -161,7 +162,7 @@ export function parseQuestionSet(text) {
 // ---- the user's corrections ----
 
 // A question with the user's edits laid over it. An edit holds only what the user changed:
-// parts (the answer key), marks, tags, notes, hidden, title, stemText/stemImage and solutionText/solutionImage (a replacement
+// parts (the answer key), marks, tags, notes, hidden, section, title, stemText/stemImage and solutionText/solutionImage (a replacement
 // as text or a data URL), and stemBox (a new crop rectangle for a PDF question).
 export function applyEdit(question, edit) {
   if (!edit) return question;
@@ -171,6 +172,7 @@ export function applyEdit(question, edit) {
   if (edit.tags) out.tags = edit.tags;
   if (edit.notes !== undefined) out.notes = edit.notes;
   if (edit.hidden) out.hidden = true;
+  if (edit.section) out.section = edit.section;
   if (edit.title) out.title = edit.title;
   if (edit.stemText !== undefined || edit.stemImage) {
     out.stem = { text: edit.stemText !== undefined ? edit.stemText : question.stem.text, ...(edit.stemImage ? { imageData: edit.stemImage } : { image: question.stem.image, pdf: question.stem.pdf }) };

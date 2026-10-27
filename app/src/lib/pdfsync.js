@@ -7,7 +7,9 @@
 //                PDF is downloaded to replace the original with. Either way the app's stored copy is updated too.
 // Only sets the app indexed itself from a PDF ("generated" sets) can sync: a set with a hand-made .questions.json
 // takes its questions from that file.
-import { appendQuestion, paintBox, removePages, dataUrlToImage } from '../../shared/pdfwrite.js';
+import { appendQuestion, paintBox, removePages, dataUrlToImage, setSections, sectionEdits } from '../../shared/pdfwrite.js';
+import { groupLines, headerItems } from '../../shared/pdfindex.js';
+import { loadPdfjs } from './pdfjs.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { indexPdf, importSet, getFile } from './library.js';
@@ -145,4 +147,32 @@ export async function replaceInPdf(setId, question, what, content) {
 export async function deleteQuestionFromPdf(setId, question) {
   const pages = [question.stem.pdf && question.stem.pdf.page, ...((question.solution && question.solution.pdf) || []).map((c) => c.page)].filter(Boolean);
   return applyToPdf(setId, (bytes) => removePages(bytes, pages));
+}
+
+// The header text of one page as the indexer would read it, and its size.
+async function headerOf(doc, number) {
+  const page = await doc.getPage(number);
+  const [x0, , x1, y1] = page.view;
+  const content = await page.getTextContent();
+  const items = content.items.filter((i) => typeof i.str === 'string').map((i) => ({ str: i.str, x: i.transform[4] - x0, y: y1 - i.transform[5], w: i.width, h: i.height }));
+  const used = headerItems(items, x1 - x0);
+  page.cleanup();
+  return { text: groupLines(used).map((l) => l.text).join(' '), size: Math.round(Math.max(0, ...used.map((i) => i.h)) * 10) / 10 };
+}
+
+// Moves a question to another section: its question page and solution pages get the new section in their headers.
+export async function moveQuestionInPdf(setId, question, section) {
+  const pages = [question.stem.pdf && question.stem.pdf.page, ...((question.solution && question.solution.pdf) || []).map((c) => c.page)].filter(Boolean);
+  return applyToPdf(setId, async (bytes) => {
+    const pdfjs = await loadPdfjs();
+    const doc = await pdfjs.getDocument({ data: bytes.slice() }).promise;
+    try {
+      const heads = [];
+      for (const n of pages) heads.push({ page: n, ...(await headerOf(doc, n)) });
+      const edits = sectionEdits(heads, section);
+      return await setSections(bytes, edits);
+    } finally {
+      doc.destroy();
+    }
+  });
 }

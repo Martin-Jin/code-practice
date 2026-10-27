@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
 import { PartAnswer, AnswerKeyEditor } from '../components/Parts.jsx';
+import { knownTags } from '../components/TagInput.jsx';
 import FormulaSidebar from '../components/FormulaSidebar.jsx';
 import EditContent from '../components/EditContent.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
@@ -40,6 +41,9 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const [editMode, setEditMode] = useState(() => loadFlag('editMode', false));   // shows the controls that change the question
   const [formulaOpen, setFormulaOpen] = useState(() => loadFlag('formulaOpen', false));
   const toggleEdit = () => setEditMode((on) => { saveFlag('editMode', !on); if (on) setPanel((p) => (p === 'key' ? null : p)); return !on; });
+  const openEdit = (what) => open(({ close }) => <EditContent set={set} question={question} what={what} close={close} />);
+  // In edit mode a small pencil sits beside each thing that can be changed.
+  const pencil = (label, onClick) => <button type="button" className="btn ghost sm icon-only edit-pencil" onClick={onClick} title={label} aria-label={label}><Icon name="pencil" /></button>;
   const toggleFormula = () => setFormulaOpen((on) => { saveFlag('formulaOpen', !on); return !on; });
 
   useEffect(() => {
@@ -110,8 +114,9 @@ export default function QuestionView({ setId, uid, run, theme }) {
             {difficult && <span className="chip warn">Difficult</span>}
             {question.source && <span className="muted">{question.source}</span>}
           </div>
-          <h1 style={{ margin: '8px 0 14px' }}>{question.title}</h1>
+          <h1 className="title-with-icon" style={{ margin: '8px 0 14px' }}>{question.title}{editMode && pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</h1>
           <Stem set={set} question={question} />
+          {editMode && <div className="edit-row">Answers {pencil(`Edit the answer key${edited ? ' (changed)' : ''}`, () => setPanel('key'))}</div>}
           <ol className="parts">
             {question.parts.map((p) => (
               <PartAnswer key={p.label} uid={uid} part={p} value={answers[p.label]} status={live[p.label]}
@@ -145,19 +150,21 @@ export default function QuestionView({ setId, uid, run, theme }) {
               <button type="button" className="btn" aria-pressed={panel === 'solution'} onClick={() => setPanel(panel === 'solution' ? null : 'solution')} title="Show or hide the solution (S)">Solution</button>
               <button type="button" className="btn" aria-pressed={editMode} onClick={toggleEdit} title="Edit mode shows the controls that change this question, such as the answer key"><Icon name="pencil" /> Edit mode</button>
               <button type="button" className="btn" aria-pressed={formulaOpen} onClick={toggleFormula} title="Show or hide the formula sheets (Alt+T)">Formulas{sheetsOf(setId).length ? ` (${sheetsOf(setId).length})` : ''}</button>
-              {editMode && <button type="button" className="btn" onClick={() => open(({ close }) => <EditContent set={set} question={question} what="stem" close={close} />)}>Edit question</button>}
-              {editMode && <button type="button" className="btn" onClick={() => open(({ close }) => <EditContent set={set} question={question} what="solution" close={close} />)}>Edit solution</button>}
-              {editMode && <button type="button" className="btn" aria-pressed={panel === 'key'} onClick={() => setPanel(panel === 'key' ? null : 'key')}>Edit answer key{edited ? ' ·' : ''}</button>}
             </div>
             <label className="stack" style={{ gap: 4 }}>
               <b>Notes</b>
               <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(setId, uid, e.target.value)} />
             </label>
-            {panel === 'solution' && <Solution set={set} question={question} />}
+            {panel === 'solution' && (
+              <>
+                {editMode && <div className="edit-row">Solution {pencil('Edit the solution: wording, image', () => openEdit('solution'))}</div>}
+                <Solution set={set} question={question} />
+              </>
+            )}
             {editMode && panel === 'key' && (
-              <AnswerKeyEditor key={uid} question={question} edited={edited}
+              <AnswerKeyEditor key={uid} question={question} edited={edited} tagChoices={knownTags(st, setId)}
                 onSave={(edit) => { saveEdit(setId, uid, edit); setResult(null); }}
-                onRevert={() => { clearEdit(setId, uid); setResult(null); }} />
+                onRevert={() => { clearEdit(setId, uid); resetChecks(setId, uid); setResult(null); }} />
             )}
             {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
           </div>

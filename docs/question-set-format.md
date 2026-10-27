@@ -77,7 +77,7 @@ Only files the manifest names are copied. Everything else in the folder (slides,
 | `marks` | The total, a number from 0. Optional. |
 | `tags` | Extra search phrases. Optional. |
 | `stem` | Required. At least one of `text` (Markdown, maths between `$...$`), `image` (a file) or `pdf` (a crop). |
-| `parts` | Required, at least one, with distinct `label`s (use `""` for a single part). |
+| `parts` | Required, but it may be empty (a question with nothing to answer, which is just read). Otherwise distinct `label`s (use `""` for a single part). |
 | `solution` | Optional: `images` (files), `pdf` (a list of crops) and `text`. `null` when there is none. |
 | `notes` | Optional text (Markdown) shown in the question's **Notes** box: what went wrong last time, a reminder. You can also type notes in the app; those are kept apart from the set and are part of a backup. |
 | `flags` | Optional notes for you: `needs-crop`, `check-text`, `no-answer`. |

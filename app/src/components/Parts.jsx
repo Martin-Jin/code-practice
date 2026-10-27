@@ -3,6 +3,7 @@ import { parseNumber, expectedText } from '../../shared/answers.js';
 import { questionProblems } from '../../shared/questionset.js';
 import { Markup } from './Question.jsx';
 import Icon from './Icon.jsx';
+import TagInput from './TagInput.jsx';
 
 const SUPERSCRIPT = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
 // "m/s^2" is shown as "m/s²".
@@ -121,33 +122,35 @@ function PartEditor({ draft, index, onChange, onRemove }) {
   const options = draft.options.split('\n').map((o) => o.trim()).filter(Boolean);
   const toggleCorrect = (i) => set({ correct: draft.correct.includes(i) ? draft.correct.filter((n) => n !== i) : [...draft.correct, i] });
   return (
-    <div className="card pad part-edit">
-      <b className="part-title">Part {index + 1}</b>
-      <div className="row">
-        <label>Label <input type="text" className="line" value={draft.label} maxLength={4} style={{ width: 48 }} onChange={(e) => set({ label: e.target.value })} /></label>
-        <label>Type{' '}
+    <div className="part-edit">
+      <div className="part-head">
+        <b className="part-title">Part {index + 1}</b>
+        <button type="button" className="btn ghost sm icon-only" onClick={onRemove} title="Remove this part" aria-label={`Remove part ${index + 1}`}><Icon name="trash" /></button>
+      </div>
+      <div className="fields">
+        <label className="field">Label <input type="text" className="line" value={draft.label} maxLength={4} style={{ width: 48 }} onChange={(e) => set({ label: e.target.value })} /></label>
+        <label className="field">Type
           <select className="line" value={draft.type} onChange={(e) => set({ type: e.target.value })}>
             <option value="numeric">Number</option>
             <option value="mcq">Multiple choice</option>
             <option value="self">Self-mark</option>
           </select>
         </label>
-        <button type="button" className="btn ghost sm" onClick={onRemove}><Icon name="trash" /> Remove</button>
       </div>
-      <label className="stack">Wording (optional; maths between $ signs)
+      <label className="field">Wording (optional; maths between $ signs)
         <textarea rows={2} value={draft.prompt} onChange={(e) => set({ prompt: e.target.value })} />
       </label>
       {draft.type === 'numeric' && (
-        <div className="row">
-          <label>Answer <input type="text" inputMode="decimal" className="line" value={draft.answer} style={{ width: 110 }} onChange={(e) => set({ answer: e.target.value })} /></label>
-          <label>Unit <input type="text" className="line" value={draft.unit} placeholder="kg, m/s^2" style={{ width: 90 }} onChange={(e) => set({ unit: e.target.value })} /></label>
-          <label title="Decimal places the question asks for">Decimal places <input type="number" className="line" min="0" max="15" value={draft.dp} style={{ width: 60 }} onChange={(e) => set({ dp: e.target.value })} /></label>
-          <label title="How far off an answer may be, as a percentage of the answer. Blank means 1%.">Accepted error % <input type="number" className="line" min="0" step="any" value={draft.tol} placeholder="1" style={{ width: 70 }} onChange={(e) => set({ tol: e.target.value })} /></label>
+        <div className="fields">
+          <label className="field">Answer <input type="text" inputMode="decimal" className="line" value={draft.answer} style={{ width: 110 }} onChange={(e) => set({ answer: e.target.value })} /></label>
+          <label className="field">Unit <input type="text" className="line" value={draft.unit} placeholder="kg, m/s^2" style={{ width: 90 }} onChange={(e) => set({ unit: e.target.value })} /></label>
+          <label className="field" title="Decimal places the question asks for">Decimal places <input type="number" className="line" min="0" max="15" value={draft.dp} style={{ width: 60 }} onChange={(e) => set({ dp: e.target.value })} /></label>
+          <label className="field" title="How far off an answer may be, as a percentage of the answer. Blank means 1%.">Accepted error % <input type="number" className="line" min="0" step="any" value={draft.tol} placeholder="1" style={{ width: 70 }} onChange={(e) => set({ tol: e.target.value })} /></label>
         </div>
       )}
       {draft.type === 'mcq' && (
         <>
-          <label className="stack">Options, one per line
+          <label className="field">Options, one per line
             <textarea rows={Math.max(3, options.length + 1)} value={draft.options} onChange={(e) => set({ options: e.target.value })} />
           </label>
           {options.length > 0 && (
@@ -167,7 +170,7 @@ function PartEditor({ draft, index, onChange, onRemove }) {
 
 export const draftsOf = (parts) => parts.map(toDraft);
 export const partsOf = (drafts) => drafts.map(fromDraft);   // throws an Error saying what is wrong
-export const blankDrafts = () => [toDraft({ label: '', type: 'self' })];
+export const blankDrafts = () => [];   // a new question starts with nothing to answer; parts are added when wanted
 
 // The list of part forms with "Add a part". drafts and onChange work on the drafts from draftsOf.
 export function PartsEditor({ drafts, onChange }) {
@@ -187,7 +190,7 @@ export function PartsEditor({ drafts, onChange }) {
 
 // Edit a question's parts, marks, tags and (for a PDF question) crop. `onSave(edit)` receives only
 // what the user can change; `onRevert` puts the imported version back.
-export function AnswerKeyEditor({ question, edited, onSave, onRevert }) {
+export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices = [] }) {
   const [parts, setParts] = useState(() => question.parts.map(toDraft));
   const [marks, setMarks] = useState(question.marks === null ? '' : String(question.marks));
   const [tags, setTags] = useState(question.tags.join(', '));
@@ -211,25 +214,22 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert }) {
 
   return (
     <div className="stack" style={{ gap: 12 }}>
-      <p className="muted">
-        Add what the app needs to check your answers. This is saved in this browser and is part of a backup; the imported file is not changed.
-      </p>
+      <p className="muted small">Saved in this browser and in backups. The imported file is not changed.</p>
       <PartsEditor drafts={parts} onChange={(next) => change(() => setParts(next))} />
-      <div className="row">
-        <label>Marks <input type="number" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => change(() => setMarks(e.target.value))} /></label>
-        <label className="grow">Tags <input type="text" value={tags} placeholder="comma separated search words" style={{ width: '100%' }} onChange={(e) => change(() => setTags(e.target.value))} /></label>
+      <div className="fields">
+        <label className="field">Marks <input type="number" className="line" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => change(() => setMarks(e.target.value))} /></label>
+        <label className="field grow">Tags <TagInput className="line" value={tags} tags={tagChoices} placeholder="comma separated" style={{ width: '100%' }} onChange={(v) => change(() => setTags(v))} /></label>
       </div>
       {box && (
-        <div className="row" title="Moves the edges of the part of the PDF page that is shown, in points (72 to an inch)">
-          <span>Crop (points)</span>
-          <label>Top <input type="number" step="5" value={box[1]} style={{ width: 80 }} onChange={(e) => change(() => setBox([box[0], Number(e.target.value), box[2], box[3]]))} /></label>
-          <label>Bottom <input type="number" step="5" value={box[3]} style={{ width: 80 }} onChange={(e) => change(() => setBox([box[0], box[1], box[2], Number(e.target.value)]))} /></label>
+        <div className="fields" title="Moves the edges of the part of the PDF page that is shown, in points (72 to an inch)">
+          <label className="field">Top <input type="number" className="line" step="5" value={box[1]} style={{ width: 80 }} onChange={(e) => change(() => setBox([box[0], Number(e.target.value), box[2], box[3]]))} /></label>
+          <label className="field">Bottom <input type="number" className="line" step="5" value={box[3]} style={{ width: 80 }} onChange={(e) => change(() => setBox([box[0], box[1], box[2], Number(e.target.value)]))} /></label>
         </div>
       )}
       {error && <div className="notice" role="alert">{error}</div>}
       <div className="row">
-        <button type="button" className="btn primary" onClick={save}>Save answer key</button>
-        {edited && <button type="button" className="btn" onClick={onRevert}>Revert to the imported version</button>}
+        <button type="button" className="btn primary" onClick={save}>Save</button>
+        {edited && <button type="button" className="btn ghost" onClick={onRevert}>Revert</button>}
         {saved && <span className="fb ok"><Icon name="check" /> Saved</span>}
       </div>
     </div>

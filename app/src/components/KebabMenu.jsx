@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 
 // A three-dot button that opens a small menu. items: [{ label, icon, onClick, danger }]. `label` names it for screen readers.
-export default function KebabMenu({ items, label = 'More actions', className = '' }) {
+export default function KebabMenu({ items, label = 'More actions', icon = 'more', className = '' }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef(null);
   useEffect(() => {
@@ -16,13 +16,13 @@ export default function KebabMenu({ items, label = 'More actions', className = '
   return (
     <div className={`menu-wrap kebab${className ? ` ${className}` : ''}`} ref={wrap}>
       <button type="button" className="btn ghost icon-only" aria-haspopup="menu" aria-expanded={open} aria-label={label} title={label} onClick={() => setOpen(!open)}>
-        <Icon name="more" />
+        <Icon name={icon} />
       </button>
       {open && (
-        <div className="menu" role="menu" style={{ minWidth: 170 }}>
+        <div className="menu" role="menu" style={{ minWidth: 190, maxHeight: 320, overflowY: 'auto' }}>
           {items.map((it) => (
             <button key={it.label} type="button" role="menuitem" className={it.danger ? 'danger' : ''} onClick={() => { setOpen(false); it.onClick(); }}>
-              <Icon name={it.icon} /> {it.label}
+              {it.icon && <Icon name={it.icon} />} {it.label}
             </button>
           ))}
         </div>

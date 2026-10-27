@@ -483,8 +483,14 @@ ul.choices { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; }
 label.choice { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 label.choice:hover { background: var(--surface-2); }
 label.choice input { margin-top: 4px; }
-.part-edit { display: grid; gap: 10px; text-align: left; }
+.part-edit { display: grid; gap: 10px; text-align: left; padding: 12px 0 6px; border-top: 1px solid var(--border); }
+.part-edit .part-head { display: flex; align-items: center; justify-content: space-between; }
 .part-edit .part-title { font-weight: 650; }
+.fields { display: flex; flex-wrap: wrap; align-items: end; gap: 6px 16px; }
+.field { display: grid; gap: 2px; font-size: 12px; color: var(--muted); text-align: left; }
+.field input, .field select { color: var(--text); font-size: 14px; }
+.field.grow { flex: 1; min-width: 120px; }
+.small { font-size: 12.5px; }
 .notice.ok { background: var(--ok-soft); color: var(--ok); } .notice.bad { background: var(--bad-soft); color: var(--bad); }
 .qstrip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .qdot { min-width: 34px; height: 30px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; }
@@ -532,7 +538,7 @@ dialog.lightbox::backdrop { background: rgb(8 12 18 / 94%); }
 .lb-figure img, .lb-figure canvas { display: block; user-select: none; -webkit-user-drag: none; }
 .lb-hint { padding: 6px 16px 10px; text-align: center; font-size: 12px; color: #9aa3b2; }
 /* ---------- formula sheets sidebar ---------- */
-.formula-side { position: fixed; top: 56px; right: 0; bottom: 0; width: min(520px, 92vw); z-index: 20; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--border); box-shadow: -4px 0 18px rgb(0 0 0 / 14%); }
+.formula-side { position: fixed; top: 56px; right: 0; bottom: 0; max-width: 92vw; z-index: 20; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--border); box-shadow: -4px 0 18px rgb(0 0 0 / 14%); }
 .formula-side .tabs { overflow-x: auto; flex: none; }
 .formula-body { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
 .formula-frame { width: 100%; height: 100%; border: 0; }
@@ -586,3 +592,26 @@ input.line, select.line { height: 28px; padding: 0 2px; border: 0; border-bottom
 input.line:focus, select.line:focus { outline: 0; border-bottom-color: var(--accent); box-shadow: 0 1px 0 var(--accent); }
 .title-row { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 12px; align-items: end; }
 @media (max-width: 600px) { .title-row { grid-template-columns: minmax(0, 1fr); } }
+
+.edit-row { display: flex; align-items: center; gap: 6px; font-weight: 650; }
+.edit-pencil { color: var(--accent); flex: none; }
+.title-with-icon .edit-pencil { margin-left: 4px; }
+
+.formula-handle { position: absolute; left: -3px; top: 0; bottom: 0; width: 7px; z-index: 3; cursor: col-resize; background: transparent; }
+.formula-handle:hover, .formula-handle.drag { background: var(--accent); opacity: .5; }
+body.resizing-x .formula-frame { pointer-events: none; }
+
+/* confirm and prompt dialogs: narrow, text wraps, everything centred */
+dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center; }
+.modal.compact .m-foot { justify-content: center; }
+.modal.compact .m-body { justify-items: center; }
+.modal.compact .m-body input { width: 100%; text-align: center; }
+
+/* formula sheet panel: roomier close button, and no divider line when there are no tabs */
+.formula-side .tabs { padding: 6px 10px; }
+.formula-side .tabs.bare { border-bottom: 0; justify-content: flex-end; }
+.formula-body .empty { border: 0; background: none; padding: 8px 12px; }
+
+.tag-options { position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 40; list-style: none; margin: 0; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); }
+.tag-options li { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--text); }
+.tag-options li.active { background: var(--surface-2); }
