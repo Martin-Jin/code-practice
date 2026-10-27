@@ -431,7 +431,7 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
   .shell-nav { min-width: 0; }
   .top-tabs { min-width: 0; }
   .top-tabs a { white-space: nowrap; }
-  .top-tabs .tab-label { display: none; }
+  .top-tabs a { gap: 4px; font-size: 13px; }
   .top-tabs a .icon { display: block; width: 20px; height: 20px; }
   .top-tabs a { padding: 0 8px; }
   .nav-search { min-width: 0; width: 40px; justify-content: center; padding: 0; }
