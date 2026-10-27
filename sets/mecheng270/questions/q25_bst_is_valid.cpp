@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 25  (7 marks)  -  Binary tree: IsValidBST()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary tree: IsValidBST()
 //

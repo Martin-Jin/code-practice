@@ -11,3 +11,5 @@ app/dist/
 app/.work/
 app/public/catalog.json
 TODO.md
+
+code-practice-backup-*.json

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 38  (8 marks)  -  Fast Fourier transform: ditfft2()
 // Topic: Complex arithmetic & FFT
+// Restrict: recursive
 //
 // Requirements for Fast Fourier transform: ditfft2()
 //

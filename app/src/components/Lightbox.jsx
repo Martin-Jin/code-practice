@@ -73,13 +73,70 @@ export function Lightbox({ title, render, onClose }) {
   );
 }
 
-// Wraps a figure so a click (or the Enlarge button, for the keyboard) opens it in a Lightbox.
+const MAX_ZOOM = 8;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+// Lets a figure be zoomed in place: Ctrl + scroll zooms around the pointer, and with the left button held, dragging
+// moves the figure around inside its frame. Double-click puts it back. Plain scrolling is left to the page.
+export function ZoomPan({ children }) {
+  const box = useRef(null);
+  const drag = useRef(null);
+  const [view, setView] = useState({ k: 1, x: 0, y: 0 });   // scale, and where the figure's top-left corner sits in the frame
+
+  useEffect(() => {
+    const el = box.current;
+    const onWheel = (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      const px = e.clientX - r.left;
+      const py = e.clientY - r.top;
+      setView((v) => {
+        const k = clamp(v.k * Math.exp(-e.deltaY * 0.002), 1, MAX_ZOOM);
+        const grow = k / v.k;
+        return { k, x: clamp(px - (px - v.x) * grow, r.width * (1 - k), 0), y: clamp(py - (py - v.y) * grow, r.height * (1 - k), 0) };
+      });
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });   // a passive listener cannot stop the browser zooming the page
+    return () => el.removeEventListener('wheel', onWheel);
+  }, []);
+
+  const onPointerDown = (e) => {
+    if (e.button !== 0 || view.k === 1) return;
+    e.preventDefault();
+    box.current.setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX - view.x, y: e.clientY - view.y };
+  };
+  const onPointerMove = (e) => {
+    const d = drag.current;
+    if (!d) return;
+    const r = box.current.getBoundingClientRect();
+    setView((v) => ({ k: v.k, x: clamp(e.clientX - d.x, r.width * (1 - v.k), 0), y: clamp(e.clientY - d.y, r.height * (1 - v.k), 0) }));
+  };
+  const reset = () => setView({ k: 1, x: 0, y: 0 });
+
+  return (
+    <div
+      ref={box} className={`zoompan${view.k > 1 ? ' zoomed' : ''}`} title="Ctrl + scroll to zoom, drag to move, double-click to reset"
+      onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
+      onDoubleClick={reset}
+    >
+      <div className="zoompan-inner" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})` }}>{children}</div>
+      {view.k > 1 && <button type="button" className="btn sm zoompan-reset" onClick={reset} onDoubleClick={(e) => e.stopPropagation()}>{Math.round(view.k * 100)}% · Reset</button>}
+    </div>
+  );
+}
+
+// Wraps a figure so it can be zoomed and moved in place, with a magnifying-glass button in its corner (shown on
+// hover, or when focused with the keyboard) that opens it in a Lightbox. Clicking the figure itself does nothing.
 export function Enlargeable({ title, render, children }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="enlarge">
-      <div className="enlarge-body" onClick={() => setOpen(true)} title="Click to enlarge">{children}</div>
-      <button type="button" className="btn sm enlarge-btn" onClick={() => setOpen(true)} aria-label={`Enlarge: ${title}`}><Icon name="expand" /> Enlarge</button>
+      <ZoomPan>{children}</ZoomPan>
+      <button type="button" className="btn sm icon-only enlarge-btn" onClick={() => setOpen(true)} aria-label={`Enlarge: ${title}`} title="Open larger">
+        <Icon name="zoom" />
+      </button>
       {open && <Lightbox title={title} render={render} onClose={() => setOpen(false)} />}
     </div>
   );

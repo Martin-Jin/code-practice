@@ -1,6 +1,6 @@
 // Runs and stats: everything that changes saved progress. Components call these and
 // re-render through store.notify(). Data is saved to IndexedDB (see db.js).
-import { buildProgram, analyse } from '../../shared/program.js';
+import { buildProgram, analyse, isUntouched } from '../../shared/program.js';
 import { pickQuestions, MODE_LABELS } from '../../shared/modes.js';
 import { weightOf, codingTrouble } from '../../shared/weights.js';
 import * as db from './db.js';
@@ -10,6 +10,7 @@ import { fetchCatalog, getSet, getQuestion, getSupport } from './catalog.js';
 import { execute, detectLocal } from './runners.js';
 import { loadLibrary } from './library.js';
 import { loadPractice } from './practice.js';
+import { loadFormulas } from './formulas.js';
 
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
@@ -29,6 +30,7 @@ export async function boot() {
     for (const s of stats) state.stats[s.setId] = s;
     await loadLibrary();
     await loadPractice();
+    await loadFormulas();
     state.local = await detectLocal();
     let saved = null;
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }
@@ -242,6 +244,15 @@ export async function runQuestion(id, n, code) {
     }
   }
 
+  // Running the untouched starter code still shows its result (the tests are worth a look), but it is not an
+  // attempt: nothing is counted and the question keeps its status.
+  if (isUntouched(q, code)) {
+    st.lastResult = result;
+    saveRun(run, 0);
+    notify();
+    return { result, justCompleted: false, counted: false };
+  }
+
   const now = new Date().toISOString();
   const stats = statsFor(run.setId);
   const qs = (stats.questions[n] = stats.questions[n] || freshQuestionStats());
@@ -271,7 +282,7 @@ export async function runQuestion(id, n, code) {
   saveRun(run, 0);
   saveStats(run.setId);
   notify();
-  return { result, justCompleted };
+  return { result, justCompleted, counted: true };
 }
 
 export function resetStats(setId) {

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 42  (6 marks)  -  AVL tree: InsertValue()
 // Topic: AVL trees
+// Restrict: recursive
 //
 // Requirements for AVL tree: InsertValue()
 //

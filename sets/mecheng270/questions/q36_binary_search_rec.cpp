@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 36  (5 marks)  -  Recursion: BinarySearchRec()
 // Topic: Recursion, Algorithms and search
+// Restrict: recursive
 //
 // Requirements for Recursion: BinarySearchRec()
 //

@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
 import { PartAnswer, AnswerKeyEditor } from '../components/Parts.jsx';
+import FormulaSidebar from '../components/FormulaSidebar.jsx';
+import EditContent from '../components/EditContent.jsx';
+import { useDialogs } from '../components/Dialogs.jsx';
+import { sheetsOf } from '../lib/formulas.js';
+
+const loadFlag = (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true'; } catch { return fallback; } };
+const saveFlag = (key, value) => { try { localStorage.setItem(key, String(value)); } catch { /* storage blocked */ } };
 
 const typing = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
@@ -21,6 +28,7 @@ const BANNER = {
 // follow the session's questions and a strip along the top shows how each one went.
 export default function QuestionView({ setId, uid, run, theme }) {
   const st = useStore();
+  const { open } = useDialogs();
   const set = st.library.sets[setId];
   const all = set ? effectiveQuestions(set) : [];
   const questions = run ? run.questions.map((id) => all.find((q) => q.uid === id)).filter(Boolean) : all;
@@ -29,6 +37,10 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const progress = getProgress(setId, uid);
   const [panel, setPanel] = useState(null);   // 'solution' | 'key' | null
   const [result, setResult] = useState(null); // the last check's overall result
+  const [editMode, setEditMode] = useState(() => loadFlag('editMode', false));   // shows the controls that change the question
+  const [formulaOpen, setFormulaOpen] = useState(() => loadFlag('formulaOpen', false));
+  const toggleEdit = () => setEditMode((on) => { saveFlag('editMode', !on); if (on) setPanel((p) => (p === 'key' ? null : p)); return !on; });
+  const toggleFormula = () => setFormulaOpen((on) => { saveFlag('formulaOpen', !on); return !on; });
 
   useEffect(() => {
     setPanel(null); setResult(null); window.scrollTo(0, 0);
@@ -54,6 +66,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
   useEffect(() => {
     if (!question) return undefined;
     const onKey = (e) => {
+      if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'KeyT') { e.preventDefault(); toggleFormula(); return; }
       if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]')) return;
       if (e.key === 'd') { e.preventDefault(); toggleDifficult(); }
       else if (e.key === 's') { e.preventDefault(); setPanel((p) => (p === 'solution' ? null : 'solution')); }
@@ -72,7 +85,8 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const checkable = question.parts.some((p) => p.type !== 'self');
   const difficult = !!(progress && progress.difficult);
   const banner = result && BANNER[result];
-  const edited = !!st.libEdits[keyOf(setId, uid)];
+  const edited = hasCorrections(setId, uid);
+  const notes = (st.libEdits[keyOf(setId, uid)] || {}).notes ?? question.notes ?? '';
 
   return (
     <Shell theme={theme} crumbs={[{ label: set.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: run ? run.name : question.section }]}>
@@ -129,18 +143,27 @@ export default function QuestionView({ setId, uid, run, theme }) {
                 <Icon name="flag" /> {difficult ? 'Marked difficult' : 'Mark as difficult'}
               </button>
               <button type="button" className="btn" aria-pressed={panel === 'solution'} onClick={() => setPanel(panel === 'solution' ? null : 'solution')} title="Show or hide the solution (S)">Solution</button>
-              <button type="button" className="btn" aria-pressed={panel === 'key'} onClick={() => setPanel(panel === 'key' ? null : 'key')}>Answer key{edited ? ' ·' : ''}</button>
+              <button type="button" className="btn" aria-pressed={editMode} onClick={toggleEdit} title="Edit mode shows the controls that change this question, such as the answer key"><Icon name="pencil" /> Edit mode</button>
+              <button type="button" className="btn" aria-pressed={formulaOpen} onClick={toggleFormula} title="Show or hide the formula sheets (Alt+T)">Formulas{sheetsOf(setId).length ? ` (${sheetsOf(setId).length})` : ''}</button>
+              {editMode && <button type="button" className="btn" onClick={() => open(({ close }) => <EditContent set={set} question={question} what="stem" close={close} />)}>Edit question</button>}
+              {editMode && <button type="button" className="btn" onClick={() => open(({ close }) => <EditContent set={set} question={question} what="solution" close={close} />)}>Edit solution</button>}
+              {editMode && <button type="button" className="btn" aria-pressed={panel === 'key'} onClick={() => setPanel(panel === 'key' ? null : 'key')}>Edit answer key{edited ? ' ·' : ''}</button>}
             </div>
+            <label className="stack" style={{ gap: 4 }}>
+              <b>Notes</b>
+              <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(setId, uid, e.target.value)} />
+            </label>
             {panel === 'solution' && <Solution set={set} question={question} />}
-            {panel === 'key' && (
+            {editMode && panel === 'key' && (
               <AnswerKeyEditor key={uid} question={question} edited={edited}
                 onSave={(edit) => { saveEdit(setId, uid, edit); setResult(null); }}
                 onRevert={() => { clearEdit(setId, uid); setResult(null); }} />
             )}
-            {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
+            {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
           </div>
         </aside>
       </div>
+      {formulaOpen && <FormulaSidebar setId={setId} onClose={toggleFormula} />}
     </Shell>
   );
 }

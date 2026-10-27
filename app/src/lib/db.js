@@ -6,11 +6,13 @@
 //   libEdits          answer keys and corrections the user made to imported questions (backed up)
 //   libRuns           practice sessions over imported sets (backed up)
 //   libMine           the user's own questions made in the app, with their images (backed up)
+//   libFormulas       the formula sheets added to a set (the files are in libFiles under "<set id>/formulas/"; not backed up)
+//   libHandles        the file handle of a PDF the user linked to a set, so edits can be written back (not backed up)
 //   libSets, libFiles question sets imported from a folder and their PDFs and images (copies
 //                     of files the user still has, so they are not backed up)
 const NAME = 'code-practice';
-const VERSION = 3;
-const STORES = [['runs', 'id'], ['stats', 'setId'], ['libSets', 'id'], ['libFiles', 'key'], ['libProgress', 'key'], ['libEdits', 'key'], ['libRuns', 'id'], ['libMine', 'id']];
+const VERSION = 4;
+const STORES = [['runs', 'id'], ['stats', 'setId'], ['libSets', 'id'], ['libFiles', 'key'], ['libProgress', 'key'], ['libEdits', 'key'], ['libRuns', 'id'], ['libMine', 'id'], ['libFormulas', 'setId'], ['libHandles', 'setId']];
 let dbPromise = null;
 export let persistent = true;
 export let blocked = false;

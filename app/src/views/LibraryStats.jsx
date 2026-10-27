@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useStore } from '../lib/store.js';
-import { libraryStats } from '../../shared/libstats.js';
+import { libraryStats, questionRows, keepRow, rankRows, ROW_FILTERS } from '../../shared/libstats.js';
 import { effectiveQuestions, getProgress, resetLibStats } from '../lib/practice.js';
 import { timeAgo, plural } from '../lib/format.js';
 import { backupNote } from '../lib/backup.js';
@@ -8,6 +9,30 @@ import Icon from '../components/Icon.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 
 const percent = (rate) => (rate === null ? '–' : `${Math.round(rate * 100)}%`);
+
+const VIEWS = [['section', 'By section'], ['ranked', 'Ranked']];
+
+// Rows of the per-question table. `section` adds the section's name, for the ranked list where rows are not grouped.
+function QuestionTable({ rows, link, section }) {
+  return (
+    <table className="stats">
+      <thead><tr><th className="l">Question</th>{section && <th className="l">Section</th>}<th>Right</th><th>Not right</th><th>Right rate</th><th>Difficult</th><th>Last check</th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.uid} className={r.attempts === 0 ? 'zero' : ''}>
+            <td className="title l"><a href={link(r.uid)}>{r.title}</a></td>
+            {section && <td className="l muted">{r.section}</td>}
+            <td>{r.right}</td>
+            <td>{r.wrong}</td>
+            <td>{r.rate === null ? '–' : <><span className="rate"><i style={{ width: `${r.rate * 100}%` }} /></span>{percent(r.rate)}</>}</td>
+            <td>{r.difficult ? 'yes' : ''}</td>
+            <td>{timeAgo(r.lastAt)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 function Tile({ n, label, tone }) {
   return <div className={`card tile ${tone || ''}`}><div className="n">{n}</div><div className="l">{label}</div></div>;
@@ -18,6 +43,9 @@ export default function LibraryStats({ setId, theme }) {
   const st = useStore();
   const { confirm } = useDialogs();
   const record = st.library.sets[setId];
+  const [filter, setFilter] = useState('all');
+  const [view, setView] = useState('section');
+  const [collapsed, setCollapsed] = useState({});
 
   if (!record) {
     return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">There is no imported set called "{setId}". <a href="#/">Back to the dashboard</a></div></Shell>;
@@ -25,6 +53,7 @@ export default function LibraryStats({ setId, theme }) {
 
   const questions = effectiveQuestions(record);
   const { total, sections, worth } = libraryStats(questions, (uid) => getProgress(setId, uid));
+  const rows = questionRows(questions, (uid) => getProgress(setId, uid)).filter((r) => keepRow(filter, r));
   const link = (uid) => `#/q/${encodeURIComponent(setId)}/${encodeURIComponent(uid)}`;
 
   const reset = async () => {
@@ -108,6 +137,41 @@ export default function LibraryStats({ setId, theme }) {
             </table>
           </div>
         </div>
+      </section>
+
+      <section>
+        <div className="section-title">
+          <h2>Questions</h2><span className="muted">{rows.length} of {questions.length}</span>
+        </div>
+        <div className="row" style={{ marginBottom: 12 }}>
+          <div className="filters" role="group" aria-label="Filter questions">
+            {ROW_FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}
+          </div>
+          <div className="filters" role="group" aria-label="How to list the questions">
+            {VIEWS.map(([id, label]) => <button key={id} type="button" aria-pressed={view === id} onClick={() => setView(id)}>{label}</button>)}
+          </div>
+        </div>
+        {rows.length === 0 ? <div className="empty">No questions match this filter.</div> : view === 'ranked' ? (
+          <div className="card stat-cat"><div className="body"><QuestionTable rows={rankRows(rows)} link={link} section /></div></div>
+        ) : (
+          <div style={{ display: 'grid', gap: 14 }}>
+            {sections.map((s) => {
+              const mine = rows.filter((r) => r.section === s.name);
+              if (!mine.length) return null;
+              const open = !collapsed[s.name];
+              return (
+                <div key={s.name} className="card stat-cat">
+                  <button type="button" className="cat-head" aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [s.name]: open })}>
+                    <span className="chev"><Icon name="chevron" /></span>
+                    <span style={{ flex: 1 }}>{s.name}</span>
+                    <span className="chip">{s.solved} / {s.questions} solved</span>
+                  </button>
+                  {open && <div className="body"><QuestionTable rows={mine} link={link} /></div>}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
     </Shell>
   );

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 33  (5 marks)  -  Recursion: PrintPermutations()
 // Topic: Recursion
+// Restrict: recursive
 //
 // Requirements for Recursion: PrintPermutations()
 //

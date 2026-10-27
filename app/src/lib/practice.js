@@ -25,7 +25,7 @@ export async function loadPractice() {
 // ---- questions with the user's edits ----
 
 export const effectiveQuestion = (setId, q) => applyEdit(q, state.libEdits[keyOf(setId, q.uid)]);
-export const effectiveQuestions = (set) => set.manifest.questions.map((q) => effectiveQuestion(set.id, q));
+export const effectiveQuestions = (set) => set.manifest.questions.map((q) => effectiveQuestion(set.id, q)).filter((q) => !q.hidden);
 
 // ---- saving ----
 const timers = new Map();
@@ -39,6 +39,7 @@ export function flushPracticeSaves() {
   for (const t of timers.values()) clearTimeout(t);
   timers.clear();
   for (const r of Object.values(state.libProgress)) db.put('libProgress', r);
+  for (const r of Object.values(state.libEdits)) db.put('libEdits', r);
 }
 
 // Drops queued saves, so one cannot land after a restore and overwrite restored data.
@@ -133,12 +134,35 @@ export function saveEdit(setId, uid, edit) {
   notify();
 }
 
+// Puts the imported version back. The user's notes are theirs rather than a correction, so they stay.
 export function clearEdit(setId, uid) {
   const key = keyOf(setId, uid);
-  delete state.libEdits[key];
-  db.remove('libEdits', key);
+  const old = state.libEdits[key];
+  if (old && old.notes) {
+    const record = { key, setId, uid, notes: old.notes, updatedAt: now() };
+    state.libEdits[key] = record;
+    db.put('libEdits', record);
+  } else {
+    delete state.libEdits[key];
+    db.remove('libEdits', key);
+  }
   notify();
 }
+
+// Notes on a question (what went wrong last time, a reminder). Saved as the user types.
+export function saveNotes(setId, uid, notes) {
+  const key = keyOf(setId, uid);
+  const record = { ...(state.libEdits[key] || {}), key, setId, uid, notes, updatedAt: now() };
+  state.libEdits[key] = record;
+  persist('libEdits', record, 400);
+  notify();
+}
+
+// True when the user has changed anything but notes, so "edited" and "Revert" mean corrections only.
+export const hasCorrections = (setId, uid) => {
+  const e = state.libEdits[keyOf(setId, uid)];
+  return !!e && Object.keys(e).some((k) => !['key', 'setId', 'uid', 'updatedAt', 'notes'].includes(k));
+};
 
 // ---- practice sessions over an imported set ----
 

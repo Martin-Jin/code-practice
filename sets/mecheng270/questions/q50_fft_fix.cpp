@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 50  (4 marks)  -  Fix the bugs: ditfft2()
 // Topic: Fast Fourier transform
+// Restrict: recursive
 //
 // Requirements for Fix the bugs: ditfft2()
 //

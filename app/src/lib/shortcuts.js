@@ -16,6 +16,7 @@ export const ACTIONS = [
 // Shortcuts that cannot be changed (shown in the help dialog for completeness).
 export const FIXED = [
   { group: 'Anywhere', label: 'Search question sets and questions (dashboard)', combo: '/' },
+  { group: 'Anywhere', label: 'Show or hide the formula sheets (practice questions)', combo: 'Alt+T' },
 ];
 
 export const comboFor = (id, overrides = {}) => overrides[id] || ACTIONS.find((a) => a.id === id).def;

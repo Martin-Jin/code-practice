@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildProgram, analyse, parseDiagnostics } from '../shared/program.js';
+import { buildProgram, analyse, parseDiagnostics, isUntouched } from '../shared/program.js';
 
 // A tiny stand-in for a catalog question: 3 header lines, the framework include on line 2,
 // the answer starting on line 5.
@@ -110,4 +110,28 @@ test('analyse: compile errors skip the run', () => {
   assert.equal(r.compile.errorCount, 1);
   assert.equal(r.compile.diagnostics[0].answerLine, 2);
   assert.ok(!r.compile.output.includes('\r'));
+});
+
+test('isUntouched is true for the starter code, whatever its spacing, and false once anything is typed', () => {
+  const starter = { starter: 'int F() {\n  return 0;\n}' };
+  assert.equal(isUntouched(starter, 'int F() {\r\n  return 0;\r\n}\r\n'), true);
+  assert.equal(isUntouched(starter, 'int F() { return 0; }'), true);
+  assert.equal(isUntouched(starter, ''), false);
+  assert.equal(isUntouched(starter, 'int F() {\n  return 1;\n}'), false);
+});
+
+test('analyse fails a passing run that breaks a question rule, and lists the rule first', () => {
+  const rq = { ...q, restrict: ['no-loops'] };
+  const stderr = ev({ e: 'test_start', name: 't1', hidden: false }) + ev({ e: 'test_end', passed: true, failures: [] })
+    + ev({ e: 'test_start', name: 't2', hidden: true }) + ev({ e: 'test_end', passed: true, failures: [] });
+  const raw = { compile: { ok: true, output: '', ms: 1 }, run: { exitCode: 0, stdout: '', stderr, timedOut: false } };
+  const clean = analyse(rq, 'int F(int n) { return n; }', raw);
+  assert.equal(clean.status, 'passed');
+  assert.equal(clean.summary.total, 2);
+  const broken = analyse(rq, 'int F(int n) {\n  for (;;) {}\n}', raw);
+  assert.equal(broken.status, 'failed');
+  assert.equal(broken.tests[0].rule, 'no-loops');
+  assert.equal(broken.tests[0].status, 'fail');
+  assert.match(broken.tests[0].failures[0].message, /line 2/);
+  assert.deepEqual(broken.summary, { passed: 2, total: 3 });
 });

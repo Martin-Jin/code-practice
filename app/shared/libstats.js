@@ -50,3 +50,30 @@ export function libraryStats(questions, progressOf, limit = 10) {
     worth,
   };
 }
+
+// One row per question, for the per-question table on the Stats page. `questions` as for libraryStats.
+export function questionRows(questions, progressOf) {
+  return questions.map((q) => {
+    const p = progressOf(q.uid) || {};
+    const right = p.right || 0;
+    const wrong = p.wrong || 0;
+    return {
+      uid: q.uid, title: q.title, section: q.section, right, wrong, attempts: right + wrong, difficult: !!p.difficult,
+      lastAt: p.lastAt || null, rate: rateOf(right, wrong), trouble: libraryTrouble(p),
+    };
+  });
+}
+
+// The stats filters (the same ideas as the C++ set's: all, attempted, struggling, not tried) plus difficult.
+export const ROW_FILTERS = [['all', 'All'], ['attempted', 'Attempted'], ['struggling', 'Struggling'], ['new', 'Not tried'], ['difficult', 'Difficult']];
+
+export function keepRow(filter, row) {
+  if (filter === 'attempted') return row.attempts > 0;
+  if (filter === 'struggling') return row.wrong > row.right;
+  if (filter === 'new') return row.attempts === 0;
+  if (filter === 'difficult') return row.difficult;
+  return true;
+}
+
+// Every row in one list, the ones giving the most trouble first; ties keep the set's order.
+export const rankRows = (rows) => rows.map((r, i) => ({ r, i })).sort((a, b) => b.r.trouble - a.r.trouble || b.r.wrong - a.r.wrong || a.i - b.i).map((x) => x.r);

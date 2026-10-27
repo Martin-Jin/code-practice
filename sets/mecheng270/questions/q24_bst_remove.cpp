@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 24  (8 marks)  -  Binary search tree: Remove()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: Remove()
 //

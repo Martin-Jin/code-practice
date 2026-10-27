@@ -3,6 +3,8 @@
 // Pure JavaScript (no DOM, no Node APIs) so the browser, the local server and the
 // verify tool all use the same code.
 
+import { checkRestrictions } from './restrictions.js';
+
 const FRAMEWORK_INCLUDE = /^#include\s+"[^"]*test_framework\.h"\s*$/;
 const EVENT = /\x1e([^\x1f]*)\x1f/g;  // one test event written by the framework on stderr
 
@@ -21,6 +23,11 @@ const SIGNAL_NAMES = {
 
 const normaliseNewlines = (s) => String(s).replace(/\r\n/g, '\n');
 export const answerLines = (code) => normaliseNewlines(code).replace(/\n+$/, '').split('\n');
+
+// True when the editor still holds the starter code (spacing aside): nothing has been typed, so a run of it
+// is not an attempt at the question.
+const squash = (s) => normaliseNewlines(s).replace(/\s+/g, '');
+export const isUntouched = (q, code) => squash(code) === squash(q.starter);
 
 // The question file with `code` pasted over the stub, the test framework inlined, and a
 // main(). `#line` directives keep compiler messages pointing at the original file names
@@ -127,13 +134,20 @@ export function analyse(q, code, raw) {
   const crashName = crashed
     ? (CRASH_NAMES[exitCode >>> 0] || SIGNAL_NAMES[run.signal] || SIGNAL_NAMES[POSIX[exitCode]] || run.signal || 'abnormal termination')
     : null;
+  // A question can forbid loops or demand recursion (see restrictions.js). Breaking a rule fails the question however
+  // the tests went, and each broken rule is listed first as a failed check, so it is the first thing seen.
+  const broken = checkRestrictions(q.restrict, code);
+  if (broken.length && status === 'passed') status = 'failed';
   return {
     status,
     compile,
     run: { ...run, stderr: rest, crashName },
-    tests,
+    tests: [
+      ...broken.map((v) => ({ name: 'Question rule', hidden: false, status: 'fail', rule: v.rule, failures: [{ message: v.message, kind: 'plain' }] })),
+      ...tests,
+    ],
     interruptedTest: interrupted ? interrupted.name : null,
     notRun: Math.max(0, total - tests.length),
-    summary: { passed, total },
+    summary: { passed, total: total + broken.length },
   };
 }

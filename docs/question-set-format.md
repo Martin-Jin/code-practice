@@ -79,6 +79,7 @@ Only files the manifest names are copied. Everything else in the folder (slides,
 | `stem` | Required. At least one of `text` (Markdown, maths between `$...$`), `image` (a file) or `pdf` (a crop). |
 | `parts` | Required, at least one, with distinct `label`s (use `""` for a single part). |
 | `solution` | Optional: `images` (files), `pdf` (a list of crops) and `text`. `null` when there is none. |
+| `notes` | Optional text (Markdown) shown in the question's **Notes** box: what went wrong last time, a reminder. You can also type notes in the app; those are kept apart from the set and are part of a backup. |
 | `flags` | Optional notes for you: `needs-crop`, `check-text`, `no-answer`. |
 
 A **crop** is `{ "page": 12, "box": [x0, y0, x1, y1] }`: a page number from 1 and a rectangle in PDF points measured from the top-left of the page as drawn. Crops need the set's `pdf`.
@@ -100,6 +101,7 @@ A practice PDF has to follow a fixed layout (the exact positions and an agent pr
 - Each question's `stem.pdf` crop runs from just under the title to the dashed rule, and each solution page's crop runs from under the header to above the footer. The viewer trims the blank space at the bottom of a solution page.
 - A question's `uid` is `q-` plus the first 8 hex digits of SHA-1 over `course|source|title` in lower case. Indexing the same PDF again gives the same uids, so progress stays attached even if the manifest is lost.
 - Every question starts with one `self` part (you read the solution and mark yourself). Add numeric or choice answers when you have them; the manifest's `parts` are kept when the PDF is indexed again.
+- **Updating the PDF.** Add the folder again (or run the tool again) and press **Index again**. The set keeps its id, and each question keeps its `uid`, so stats, answers, difficult marks, answer keys and notes stay. A new question is matched to a saved one by `uid`, then by source and title, then by source alone, then by title alone; the last two only when exactly one question on each side has it. So **rewording a title is safe while its `Source:` label stays the same** (and the reverse), but changing both makes the question look new, and its old progress is left behind. The import screen says how many questions kept their progress, how many are new and which ones are no longer in the PDF (their progress stays saved in case they come back). Renaming the PDF file makes a different set id, so it counts as a new set: keep the name.
 - A question whose solution pages are missing is flagged `no-solution`; one whose dashed rule is not found is flagged `needs-crop`.
 
 If the prompt's layout changes (header height, fonts, margins), `app/shared/pdfindex.js` needs the same change.
@@ -112,12 +114,28 @@ A file named by the set but missing from the folder does not stop the import eit
 
 ## Questions made in the app
 
-**Add a question…** in the app saves questions in a set with the id `mine` ("My questions"), stored in the browser instead of copied from a folder, with the same question format and the images as data URLs. No folder may use the id `mine`: the import screen refuses a manifest that does.
+**Add a question…** asks which set the question is for, then the question itself. A name that matches an existing set fills in that set's usual section, source and tags; a new name makes a new set. Sets made this way are stored in the browser (store `libMine`, one record per set), with the same question format and the images as data URLs, and are part of a backup. No folder may use the id of one of them: the import screen refuses a manifest that does. "My questions" is the first such set.
+
+A question added to a set **imported from a folder** is marked `own` and kept with the stored copy of that set. Importing the folder again carries it over. It is not in a backup (the stored sets are copies), so keep the question in the folder's manifest too if you want it to survive clearing site data.
 
 ## Your changes
 
 The user can add or correct parts, marks, tags and a PDF question's crop box in the app (**Answer key**). Those are saved apart from the set, as an overlay on the question with the same `uid`, so importing the folder again never overwrites them and they are part of a backup. The same goes for answers typed, results and the difficult flag. This is another reason a `uid` must not change.
 
+## Formula sheets
+
+Each set can have formula sheets (PDFs or images). In a question of an imported set, **Formulas** (or Alt+T) opens a side panel with one tab per sheet; if the set has none, the panel offers an upload. They are copies kept in the browser like the PDFs, so they are not part of a backup.
+
+## Keeping the PDF and the set in step
+
+For a set the app indexed from a PDF (Chromium browsers, such as Edge or Chrome), **Link the PDF file** keeps a handle to the file. Then:
+
+- When the file changes (checked when the page opens and when the window is focused, or with **Check for changes**), the set is indexed again and keeps its progress, as described above. A file that no longer reads as a practice PDF is refused and the old copy stays.
+- **Add a question** can also append it to the PDF as a new question page and solution page in the PDF layout. **Edit mode** can draw a replacement image or wording over a question's or solution's part of the page. **Delete** can remove a question's pages. These write into the linked file. The PDF's cover is not updated, so the indexer may warn that the cover lists fewer questions than were found.
+- Without a link, or in a browser that cannot link files (Firefox), the same changes download an updated PDF, which you replace your original with. The app's stored copy is updated either way.
+- A question's title can be changed in the app but not in the PDF. Marks, tags, answers and notes are not in the PDF at all.
+- Deleting a question without the PDF option hides it in the app only; indexing again does not bring it back.
+
 ## Where the copies live
 
-Imported sets are kept in the browser's IndexedDB (`libSets` for the manifests, `libFiles` for the PDFs and images). They are copies, so they are not part of a backup: add the folder again to restore them. Your progress on them is stored separately and is part of a backup. Clearing "cookies and site data" removes the copies, so keep the folder.
+Imported sets are kept in the browser's IndexedDB (`libSets` for the manifests, `libFiles` for the PDFs and images; `libFormulas` lists the formula sheets and `libHandles` holds the linked PDF files). They are copies, so they are not part of a backup: add the folder again to restore them. Your progress on them is stored separately and is part of a backup. Clearing "cookies and site data" removes the copies, so keep the folder.

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 35  (4 marks)  -  Recursion: fix IsPalindrome()
 // Topic: Recursion
+// Restrict: recursive
 //
 // Requirements for Recursion: fix IsPalindrome()
 //

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 21  (5 marks)  -  Binary search tree: FindMin() and FindMax()
 // Topic: Trees & binary search trees
+// Restrict: no-recursion
 //
 // Requirements for Binary search tree: FindMin() and FindMax()
 //

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 64  (4 marks)  -  Recursive merge sort
 // Topic: Sorting algorithms
+// Restrict: recursive
 //
 // Requirements for Merge sort
 //

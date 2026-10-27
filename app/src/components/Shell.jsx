@@ -173,12 +173,19 @@ export function SettingsButton() {
   );
 }
 
+// The app's pages: the dashboard (what you are in the middle of) and the question sets (everything you can start).
+const TABS = [['dashboard', 'Dashboard', '#/'], ['sets', 'Question sets', '#/sets']];
+const tabOfHash = () => (/^#\/(sets|set|lib|q)(\/|$)/.test(window.location.hash) ? 'sets' : /^#\/?$/.test(window.location.hash) ? 'dashboard' : null);
+
 // Top bar for the dashboard, set and stats pages. `hero` is a banner between the bar and the page (the landing page's).
 export default function Shell({ crumbs = [], theme, hero = null, children }) {
   return (
     <>
       <nav className="shell-nav">
         <a className="brand" href="#/"><span className="logo"><Logo /></span>Practice Questions</a>
+        <div className="top-tabs" role="navigation" aria-label="Pages">
+          {TABS.map(([id, label, href]) => <a key={id} href={href} aria-current={tabOfHash() === id ? 'page' : undefined}>{label}</a>)}
+        </div>
         <div className="crumbs">
           {crumbs.map((c, i) => (
             <span key={i} style={{ display: 'contents' }}>

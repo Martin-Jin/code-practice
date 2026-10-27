@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { getSet, getQuestion } from '../lib/catalog.js';
 import { resetStats, statsFor } from '../lib/service.js';
+import { codingTrouble } from '../../shared/weights.js';
 import { timeAgo, plural } from '../lib/format.js';
 import { backupNote } from '../lib/backup.js';
 import Shell from '../components/Shell.jsx';
@@ -11,7 +12,6 @@ import { useDialogs } from '../components/Dialogs.jsx';
 const FILTERS = [
   ['all', 'All'],
   ['attempted', 'Attempted'],
-  ['unsolved', 'Never solved'],
   ['struggling', 'Struggling'],
   ['new', 'Not tried'],
 ];
@@ -20,10 +20,43 @@ const empty = { attempts: 0, correct: 0, wrong: 0, compileErrors: 0, crashes: 0,
 
 function keep(filter, s) {
   if (filter === 'attempted') return s.attempts > 0;
-  if (filter === 'unsolved') return s.attempts > 0 && s.correct === 0;
   if (filter === 'struggling') return s.wrong + s.compileErrors > s.correct;
   if (filter === 'new') return s.attempts === 0;
   return true;
+}
+
+const VIEWS = [['section', 'By section'], ['ranked', 'Ranked']];
+
+// One row per question. `section` adds the section's name, for the ranked list where rows are not grouped.
+function QuestionTable({ setId, rows, per, section }) {
+  return (
+    <table className="stats">
+      <thead>
+        <tr><th>#</th><th className="l">Question</th>{section && <th className="l">Section</th>}<th>Attempts</th><th>Correct</th><th>Wrong</th><th>Compile errors</th><th>Crashes</th><th>Pass rate</th><th>Last attempt</th></tr>
+      </thead>
+      <tbody>
+        {rows.map((n) => {
+          const s = per(n);
+          const ran = s.correct + s.wrong;
+          const pct = ran ? Math.round((s.correct / ran) * 100) : null;
+          return (
+            <tr key={n} className={s.attempts === 0 ? 'zero' : ''}>
+              <td>Q{n}</td>
+              <td className="title l">{getQuestion(setId, n).title}</td>
+              {section && <td className="l muted">{section(n)}</td>}
+              <td>{s.attempts}</td>
+              <td>{s.correct}</td>
+              <td>{s.wrong}</td>
+              <td>{s.compileErrors}</td>
+              <td>{s.crashes}</td>
+              <td>{pct === null ? '–' : <><span className="rate"><i style={{ width: `${pct}%` }} /></span>{pct}%</>}</td>
+              <td>{timeAgo(s.lastAt)}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
 }
 
 function Tile({ n, label, tone }) {
@@ -35,6 +68,7 @@ export default function Stats({ setId, theme }) {
   const { confirm } = useDialogs();
   const set = getSet(setId);
   const [filter, setFilter] = useState('all');
+  const [view, setView] = useState('section');
   const [collapsed, setCollapsed] = useState({});
 
   if (!set) return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">Unknown question set. <a href="#/">Dashboard</a></div></Shell>;
@@ -47,6 +81,13 @@ export default function Stats({ setId, theme }) {
   const solved = all.filter((q) => q.correct > 0).length;
   const correct = sumOf('correct'), wrong = sumOf('wrong');
   const rate = correct + wrong ? Math.round((correct / (correct + wrong)) * 100) : null;
+
+  // Every question in one list, the ones giving the most trouble first (the same measure "draw the questions I
+  // struggle with" uses); questions never tried keep the set's order at the end.
+  const sectionOf = Object.fromEntries(set.categories.flatMap((c) => c.questions.map((n) => [n, c.name])));
+  const order = set.categories.flatMap((c) => c.questions);
+  const ranked = order.filter((n) => keep(filter, per(n)))
+    .sort((a, b) => codingTrouble(per(b)) - codingTrouble(per(a)) || per(b).attempts - per(a).attempts || order.indexOf(a) - order.indexOf(b));
 
   const reset = async () => {
     const ok = await confirm({
@@ -75,58 +116,43 @@ export default function Stats({ setId, theme }) {
       </div>
 
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <div className="filters" role="group" aria-label="Filter questions">
-          {FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}
+        <div className="row">
+          <div className="filters" role="group" aria-label="Filter questions">
+            {FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}
+          </div>
+          <div className="filters" role="group" aria-label="How to list the questions">
+            {VIEWS.map(([id, label]) => <button key={id} type="button" aria-pressed={view === id} onClick={() => setView(id)}>{label}</button>)}
+          </div>
         </div>
         <button type="button" className="btn danger" onClick={reset}><Icon name="trash" /> Reset stats</button>
       </div>
 
-      <div style={{ display: 'grid', gap: 14 }}>
-        {set.categories.map((c) => {
-          const rows = c.questions.filter((n) => keep(filter, per(n)));
-          if (!rows.length) return null;
-          const open = !collapsed[c.id];
-          const solvedHere = c.questions.filter((n) => per(n).correct > 0).length;
-          return (
-            <div key={c.id} className="card stat-cat">
-              <button type="button" className="cat-head" aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [c.id]: open })}>
-                <span className="chev"><Icon name="chevron" /></span>
-                <span style={{ flex: 1 }}>{c.name}</span>
-                <span className="chip">{solvedHere} / {c.questions.length} solved</span>
-              </button>
-              {open && (
-                <div className="body">
-                  <table className="stats">
-                    <thead>
-                      <tr><th>#</th><th className="l">Question</th><th>Attempts</th><th>Correct</th><th>Wrong</th><th>Compile errors</th><th>Crashes</th><th>Pass rate</th><th>Last attempt</th></tr>
-                    </thead>
-                    <tbody>
-                      {rows.map((n) => {
-                        const s = per(n);
-                        const ran = s.correct + s.wrong;
-                        const pct = ran ? Math.round((s.correct / ran) * 100) : null;
-                        return (
-                          <tr key={n} className={s.attempts === 0 ? 'zero' : ''}>
-                            <td>Q{n}</td>
-                            <td className="title l">{getQuestion(setId, n).title}</td>
-                            <td>{s.attempts}</td>
-                            <td>{s.correct}</td>
-                            <td>{s.wrong}</td>
-                            <td>{s.compileErrors}</td>
-                            <td>{s.crashes}</td>
-                            <td>{pct === null ? '–' : <><span className="rate"><i style={{ width: `${pct}%` }} /></span>{pct}%</>}</td>
-                            <td>{timeAgo(s.lastAt)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {view === 'ranked' ? (
+        <div className="card stat-cat">
+          <div className="body">
+            <QuestionTable setId={setId} per={per} rows={ranked} section={(n) => sectionOf[n]} />
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: 14 }}>
+          {set.categories.map((c) => {
+            const rows = c.questions.filter((n) => keep(filter, per(n)));
+            if (!rows.length) return null;
+            const open = !collapsed[c.id];
+            const solvedHere = c.questions.filter((n) => per(n).correct > 0).length;
+            return (
+              <div key={c.id} className="card stat-cat">
+                <button type="button" className="cat-head" aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [c.id]: open })}>
+                  <span className="chev"><Icon name="chevron" /></span>
+                  <span style={{ flex: 1 }}>{c.name}</span>
+                  <span className="chip">{solvedHere} / {c.questions.length} solved</span>
+                </button>
+                {open && <div className="body"><QuestionTable setId={setId} per={per} rows={rows} /></div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </Shell>
   );
 }

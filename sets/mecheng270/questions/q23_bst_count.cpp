@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 23  (6 marks)  -  Binary search tree: CountNodes() and CountLeaves()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: CountNodes() and CountLeaves()
 //

@@ -12,7 +12,7 @@ const FORMAT_DOC = `${DOCS}/question-set-format.md`;
 const STATUS = { new: ['New', 'accent'], update: ['Changed', 'warn'], current: ['Up to date', 'ok'] };
 
 function SetChoice({ item, picked, onToggle }) {
-  const { set, errors, skipped, missing, status, warnings = [] } = item;
+  const { set, errors, skipped, missing, status, warnings = [], merge } = item;
   const usable = !!set;
   return (
     <div className="card pad" style={{ display: 'grid', gap: 6, opacity: usable ? 1 : 0.85 }}>
@@ -34,6 +34,13 @@ function SetChoice({ item, picked, onToggle }) {
         </div>
       )}
       {errors.length > 0 && <div className="notice" role="alert">{errors.join(' ')}</div>}
+      {merge && (
+        <div className="notice">
+          This updates the copy already in this browser: {plural(merge.kept, 'question')} keep their stats and answers
+          {merge.renamed > 0 ? ` (${merge.renamed} matched although the title or source changed)` : ''}, {merge.added} {merge.added === 1 ? 'is' : 'are'} new.
+          {merge.droppedTitles.length > 0 && <> {plural(merge.droppedTitles.length, 'question')} {merge.droppedTitles.length === 1 ? 'is' : 'are'} no longer in the PDF and will disappear from the set (their stats stay saved, in case they come back): {merge.droppedTitles.slice(0, 3).join('; ')}{merge.droppedTitles.length > 3 ? '; …' : ''}.</>}
+        </div>
+      )}
       {warnings.length > 0 && <div className="notice">{warnings.join(' ')}</div>}
       {missing.length > 0 && (
         <div className="notice">

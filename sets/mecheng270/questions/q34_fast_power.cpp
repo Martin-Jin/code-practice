@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 34  (4 marks)  -  Recursion: Power() by fast exponentiation
 // Topic: Recursion
+// Restrict: no-loops, recursive
 //
 // Requirements for Recursion: Power()
 //

@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 22  (5 marks)  -  Binary search tree: Height()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: Height()
 //

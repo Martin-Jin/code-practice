@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
-import { addMineQuestion } from '../lib/mine.js';
+import { addMineQuestion, idFromTitle } from '../lib/mine.js';
+import { addToImportedSet } from '../lib/library.js';
+import { canSync, addQuestionToPdf } from '../lib/pdfsync.js';
 import { Modal } from './Dialogs.jsx';
 import { PartsEditor, blankDrafts, partsOf } from './Parts.jsx';
 import { toast } from './Toasts.jsx';
@@ -16,7 +18,7 @@ const extensionOf = (dataUrl) => (dataUrl.startsWith('data:image/webp') ? 'webp'
 
 // Takes an image (pasted, dropped or chosen), lets the user drag a box over the part to keep, and
 // hands back the result as a data URL. `file` is an image the parent received from a paste.
-function ImagePicker({ label, hint, value, onChange, file }) {
+export function ImagePicker({ label, hint, value, onChange, file }) {
   const [img, setImg] = useState(null);       // the picture being cropped
   const [box, setBox] = useState(null);       // the selection, in picture pixels: { x, y, w, h }
   const canvas = useRef(null);
@@ -111,10 +113,16 @@ function ImagePicker({ label, hint, value, onChange, file }) {
   );
 }
 
-// Make a question of your own: a pasted screenshot or typed wording, the parts to answer, and
-// optionally a solution. It is saved in "My questions".
-export default function AddQuestionDialog({ close }) {
+const sameName = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+const lastOf = (set) => set.manifest.questions[set.manifest.questions.length - 1];
+
+// Make a question of your own: say which set it belongs to, then a pasted screenshot or typed wording, the parts
+// to answer, and optionally a solution. Naming a set that exists fills in its usual section, source and tags; a
+// new name makes a new set. `setId` starts the dialog on that set.
+export default function AddQuestionDialog({ close, setId }) {
   const st = useStore();
+  const all = Object.values(st.library.sets).sort((a, b) => a.title.localeCompare(b.title));
+  const [setName, setSetName] = useState(() => (setId && st.library.sets[setId] ? st.library.sets[setId].title : ''));
   const [title, setTitle] = useState('');
   const [section, setSection] = useState('');
   const [source, setSource] = useState('');
@@ -128,7 +136,30 @@ export default function AddQuestionDialog({ close }) {
   const [pasted, setPasted] = useState({ stem: null, sol: null });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const sections = [...new Set(Object.values(st.library.sets).flatMap((s) => s.manifest.questions.map((q) => q.section)))];
+  const [toPdf, setToPdf] = useState(true);
+  const touched = useRef(new Set());   // fields the user has typed in, which autofill leaves alone
+
+  const target = all.find((x) => sameName(x.title, setName)) || null;
+  const named = setName.trim() !== '';
+  const known = target ? target.manifest.questions : all.flatMap((x) => x.manifest.questions);
+  const sections = [...new Set(known.map((q) => q.section))];
+  const knownTags = [...new Set(known.flatMap((q) => q.tags))].slice(0, 16);
+
+  // Naming an existing set fills what its latest question had, unless the field has been typed in already.
+  useEffect(() => {
+    if (!target || !target.manifest.questions.length) return;
+    const last = lastOf(target);
+    const fill = (field, value, set) => { if (value && !touched.current.has(field)) set(value); };
+    fill('section', last.section, setSection);
+    fill('source', last.source, setSource);
+    fill('tags', last.tags.join(', '), setTags);
+  }, [target && target.id]);
+
+  const typed = (field, set) => (value) => { touched.current.add(field); set(value); };
+  const addTag = (tag) => {
+    const have = tags.split(',').map((t) => t.trim()).filter(Boolean);
+    if (!have.includes(tag)) typed('tags', setTags)([...have, tag].join(', '));
+  };
 
   // Ctrl+V anywhere in the dialog fills the question's image first, then the solution's.
   useEffect(() => {
@@ -145,6 +176,7 @@ export default function AddQuestionDialog({ close }) {
 
   const save = async () => {
     setError('');
+    if (!named) return setError('Say which set the question belongs to. A name that is not in the list makes a new set.');
     if (!title.trim()) return setError('Give the question a title, like "Rigid body kinetics - mass of a slender-rod assembly".');
     if (!section.trim()) return setError('Choose or type a section.');
     if (!wording.trim() && !stemImage) return setError('Add the question as an image or as typed wording.');
@@ -166,10 +198,30 @@ export default function AddQuestionDialog({ close }) {
     };
     setBusy(true);
     try {
-      const uid = await addMineQuestion(question, images);
+      let into = target;
+      let uid;
+      if (target && !target.userOwned) {
+        uid = await addToImportedSet(target.id, question, images);
+        if (toPdf && canSync(target)) {
+          // the paths still say {uid}; the PDF only needs the pictures
+          const named = { ...question, stem: { ...question.stem }, solution: question.solution && { ...question.solution } };
+          try {
+            const { written } = await addQuestionToPdf(target.id, named, images);
+            toast(written ? 'Also added to the end of the PDF.' : 'Also added to the PDF: the updated copy was downloaded, replace your original with it.');
+          } catch (e) { toast(`Saved in the app, but not added to the PDF: ${e.message}`, 'bad'); }
+        }
+      }
+      else {
+        if (!into) {
+          let id = idFromTitle(setName);
+          for (let n = 2; st.library.sets[id] || st.libMine[id]; n++) id = `${idFromTitle(setName)}-${n}`;
+          into = { id, title: setName.trim() };
+        }
+        uid = await addMineQuestion(question, images, { id: into.id, title: into.title });
+      }
       close(true);
-      toast('Question saved in My questions.');
-      window.location.hash = `#/q/mine/${encodeURIComponent(uid)}`;
+      toast(`Question saved in ${into.title}.`);
+      window.location.hash = `#/q/${encodeURIComponent(into.id)}/${encodeURIComponent(uid)}`;
     } catch (e) {
       setError(`Not saved. ${e.message}`);
       setBusy(false);
@@ -182,34 +234,53 @@ export default function AddQuestionDialog({ close }) {
       footer={(
         <>
           <button type="button" className="btn" disabled={busy} onClick={() => close(false)}>Cancel</button>
-          <button type="button" className="btn primary" disabled={busy} onClick={save}>{busy ? 'Saving…' : 'Save question'}</button>
+          <button type="button" className="btn primary" disabled={busy || !named} onClick={save}>{busy ? 'Saving…' : 'Save question'}</button>
         </>
       )}
     >
-      <p className="muted">Paste a screenshot with Ctrl+V (or drop or choose an image), drag a box over the question, and say what is to be answered. It is saved in this browser under My questions, and is part of a backup.</p>
-      <ImagePicker label="The question (image)" hint="Click here and press Ctrl+V to paste a screenshot, or drop an image." value={stemImage} onChange={setStemImage} file={pasted.stem} />
-      <label className="stack">Typed wording (optional; maths between $ signs)
-        <textarea rows={3} value={wording} onChange={(e) => setWording(e.target.value)} />
+      <label className="stack">Which set is it for?
+        <input type="text" list="set-choices" value={setName} autoFocus placeholder="Pick a set, or type a new name" onChange={(e) => setSetName(e.target.value)} />
+        <datalist id="set-choices">{all.map((x) => <option key={x.id} value={x.title} />)}</datalist>
       </label>
-      <label className="stack">Title (this is what search finds)
-        <input type="text" value={title} placeholder="Topic - what is asked" onChange={(e) => setTitle(e.target.value)} />
-      </label>
-      <div className="row">
-        <label className="grow">Section <input type="text" list="section-choices" value={section} style={{ width: '100%' }} onChange={(e) => setSection(e.target.value)} /></label>
-        <datalist id="section-choices">{sections.map((s) => <option key={s} value={s} />)}</datalist>
-        <label className="grow">Source <input type="text" value={source} placeholder="MECHENG222 Quiz 1, Q3" style={{ width: '100%' }} onChange={(e) => setSource(e.target.value)} /></label>
-        <label>Marks <input type="number" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => setMarks(e.target.value)} /></label>
-      </div>
-      <label className="stack">Tags (comma separated search words)
-        <input type="text" value={tags} onChange={(e) => setTags(e.target.value)} />
-      </label>
-      <h3>Answers</h3>
-      <PartsEditor drafts={parts} onChange={setParts} />
-      <h3>Solution (optional)</h3>
-      <ImagePicker label="Solution image" hint="Paste or drop a screenshot of the worked solution." value={solImage} onChange={setSolImage} file={pasted.sol} />
-      <label className="stack">Solution text
-        <textarea rows={2} value={solText} onChange={(e) => setSolText(e.target.value)} />
-      </label>
+      {target && !target.userOwned && canSync(target) && (
+        <label className="check"><input type="checkbox" checked={toPdf} onChange={(e) => setToPdf(e.target.checked)} /> Also add it to the end of the PDF</label>
+      )}
+      {named && <p className="muted">{target ? `Adding to ${target.title}, which has ${target.manifest.questions.length} questions. Its usual section, source and tags are filled in below.` : 'This makes a new set.'}</p>}
+      {named && (
+        <>
+          <p className="muted">Paste a screenshot with Ctrl+V (or drop or choose an image), then drag a box over the question.</p>
+          <ImagePicker label="The question (image)" hint="Click here and press Ctrl+V to paste a screenshot, or drop an image." value={stemImage} onChange={setStemImage} file={pasted.stem} />
+          <label className="stack">Typed wording (optional; maths between $ signs)
+            <textarea rows={3} value={wording} onChange={(e) => setWording(e.target.value)} />
+          </label>
+          <label className="stack">Title (this is what search finds)
+            <input type="text" value={title} placeholder="Topic - what is asked" onChange={(e) => setTitle(e.target.value)} />
+          </label>
+          <label className="stack">Section
+            <input type="text" list="section-choices" value={section} onChange={(e) => typed('section', setSection)(e.target.value)} />
+            <datalist id="section-choices">{sections.map((x) => <option key={x} value={x} />)}</datalist>
+          </label>
+          <h3>Answers</h3>
+          <PartsEditor drafts={parts} onChange={setParts} />
+          <details>
+            <summary>More: source, marks, tags, solution</summary>
+            <div className="stack" style={{ marginTop: 10 }}>
+              <div className="row">
+                <label className="grow">Source <input type="text" value={source} placeholder="MECHENG222 Quiz 1, Q3" style={{ width: '100%' }} onChange={(e) => typed('source', setSource)(e.target.value)} /></label>
+                <label>Marks <input type="number" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => setMarks(e.target.value)} /></label>
+              </div>
+              <label className="stack">Tags (comma separated search words)
+                <input type="text" value={tags} onChange={(e) => typed('tags', setTags)(e.target.value)} />
+              </label>
+              {knownTags.length > 0 && <div className="filters" aria-label="Tags used in this set">{knownTags.map((t) => <button key={t} type="button" onClick={() => addTag(t)}>+ {t}</button>)}</div>}
+              <ImagePicker label="Solution image" hint="Paste or drop a screenshot of the worked solution." value={solImage} onChange={setSolImage} file={pasted.sol} />
+              <label className="stack">Solution text
+                <textarea rows={2} value={solText} onChange={(e) => setSolText(e.target.value)} />
+              </label>
+            </div>
+          </details>
+        </>
+      )}
       {error && <div className="notice" role="alert">{error}</div>}
     </Modal>
   );

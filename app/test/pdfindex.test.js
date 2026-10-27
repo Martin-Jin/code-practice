@@ -163,3 +163,27 @@ test('mergeIndex keeps answers, drops vanished PDF questions and keeps screensho
   assert.deepEqual(q1.flags, ['check-text'], 'structural flags come from the PDF again, the user\'s own stay');
   assert.equal(q1.solution.pdf.length, 2);
 });
+
+const mq = (uid, title, source) => ({ uid, title, source, section: 'S', marks: null, tags: [], flags: [], parts: [{ label: '', type: 'self' }], stem: { pdf: { page: 2, box: [30, 60, 560, 300] } }, solution: null });
+
+test('mergeIndex keeps progress when a title is reworded but the source stays, and reports what changed', () => {
+  const saved = { id: 'set', title: 'Set', course: 'C', questions: [
+    { ...mq('q-1', 'Old wording', 'Tutorial 1, Q1'), tags: ['kept'] }, mq('q-2', 'Same', 'Tutorial 1, Q2'), mq('q-3', 'Gone', 'Tutorial 2, Q1'),
+  ] };
+  const fresh = { id: 'new', title: 'New', course: 'C', questions: [mq('q-9', 'New wording', 'Tutorial 1, Q1'), mq('q-2', 'Same', 'Tutorial 1, Q2'), mq('q-8', 'Brand new', 'Tutorial 3, Q1')] };
+  const { manifest, dropped, report } = mergeIndex(saved, fresh);
+  assert.deepEqual(manifest.questions.map((x) => x.uid), ['q-1', 'q-2', 'q-8']);
+  assert.deepEqual(manifest.questions[0].tags, ['kept']);
+  assert.equal(manifest.questions[0].title, 'New wording');
+  assert.equal(dropped, 1);
+  assert.deepEqual(report, { kept: 2, added: 1, renamed: 1, droppedTitles: ['Gone'] });
+});
+
+test('mergeIndex does not guess between two questions that share a source', () => {
+  const saved = { id: 's', title: 'S', course: '', questions: [mq('q-1', 'A', 'Same'), mq('q-2', 'B', 'Same')] };
+  const fresh = { id: 's', title: 'S', course: '', questions: [mq('q-7', 'A2', 'Same'), mq('q-8', 'B2', 'Same')] };
+  const { manifest, report } = mergeIndex(saved, fresh);
+  assert.deepEqual(manifest.questions.map((x) => x.uid), ['q-7', 'q-8']);
+  assert.equal(report.kept, 0);
+  assert.equal(report.droppedTitles.length, 2);
+});

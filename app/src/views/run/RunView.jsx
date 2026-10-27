@@ -190,7 +190,8 @@ export default function RunView({ runId, param, theme }) {
     setRunning(num);
     setRunnerError(null);
     try {
-      const { result, justCompleted } = await runQuestion(run.id, num, code);
+      const { result, justCompleted, counted } = await runQuestion(run.id, num, code);
+      if (!counted) toast('Nothing typed yet, so this run was not counted as an attempt.');
       setOutTabs((t) => ({ ...t, [num]: result.status === 'compile_error' ? 'compiler' : 'results' }));
       if (currentN.current === num && editor.current) editor.current.setMarkers(result.compile.diagnostics);
       if (justCompleted) { setCelebrate(true); setFinishOpen(true); }

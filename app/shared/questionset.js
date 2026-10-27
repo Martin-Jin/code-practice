@@ -76,6 +76,7 @@ export function questionProblems(q) {
   if (q.source !== undefined && typeof q.source !== 'string') problems.push('source must be text');
   if (q.marks !== undefined && q.marks !== null && !(isNumber(q.marks) && q.marks >= 0)) problems.push('marks must be a number from 0');
   if (q.tags !== undefined && !(Array.isArray(q.tags) && q.tags.every((t) => typeof t === 'string'))) problems.push('tags must be a list of text');
+  if (q.notes !== undefined && typeof q.notes !== 'string') problems.push('notes must be text');
   if (q.flags !== undefined && !(Array.isArray(q.flags) && q.flags.every((t) => typeof t === 'string'))) problems.push('flags must be a list of text');
 
   if (!isObject(q.stem)) problems.push('stem is missing');
@@ -113,7 +114,7 @@ export function questionProblems(q) {
 }
 
 const normaliseQuestion = (q) => ({
-  ...q, source: q.source || '', marks: q.marks ?? null, tags: q.tags || [], flags: q.flags || [], solution: q.solution || null,
+  ...q, notes: q.notes || '', source: q.source || '', marks: q.marks ?? null, tags: q.tags || [], flags: q.flags || [], solution: q.solution || null,
   parts: q.parts.map((p) => (p.type === 'mcq' ? { multi: false, ...p } : p)),
 });
 
@@ -160,13 +161,24 @@ export function parseQuestionSet(text) {
 // ---- the user's corrections ----
 
 // A question with the user's edits laid over it. An edit holds only what the user changed:
-// parts (the answer key), marks, tags, and stemBox (a new crop rectangle for a PDF question).
+// parts (the answer key), marks, tags, notes, hidden, title, stemText/stemImage and solutionText/solutionImage (a replacement
+// as text or a data URL), and stemBox (a new crop rectangle for a PDF question).
 export function applyEdit(question, edit) {
   if (!edit) return question;
   const out = { ...question };
   if (edit.parts) out.parts = edit.parts;
   if (edit.marks !== undefined) out.marks = edit.marks;
   if (edit.tags) out.tags = edit.tags;
+  if (edit.notes !== undefined) out.notes = edit.notes;
+  if (edit.hidden) out.hidden = true;
+  if (edit.title) out.title = edit.title;
+  if (edit.stemText !== undefined || edit.stemImage) {
+    out.stem = { text: edit.stemText !== undefined ? edit.stemText : question.stem.text, ...(edit.stemImage ? { imageData: edit.stemImage } : { image: question.stem.image, pdf: question.stem.pdf }) };
+  }
+  if (edit.solutionText !== undefined || edit.solutionImage) {
+    const base = question.solution || {};
+    out.solution = { text: edit.solutionText !== undefined ? edit.solutionText : base.text, ...(edit.solutionImage ? { imageData: edit.solutionImage } : { images: base.images, pdf: base.pdf }) };
+  }
   if (edit.stemBox && question.stem.pdf) out.stem = { ...question.stem, pdf: { ...question.stem.pdf, box: edit.stemBox } };
   return out;
 }

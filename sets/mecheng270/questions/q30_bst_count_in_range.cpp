@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 30  (5 marks)  -  Binary search tree: CountInRange()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: CountInRange()
 //

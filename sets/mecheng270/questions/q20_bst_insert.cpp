@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 20  (6 marks)  -  Binary search tree: Insert()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: Insert()
 //

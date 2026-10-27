@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 32  (5 marks)  -  Recursion: CountSubsets()
 // Topic: Recursion
+// Restrict: no-loops, recursive
 //
 // Requirements for Recursion: CountSubsets()
 //

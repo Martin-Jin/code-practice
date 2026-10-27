@@ -3,6 +3,7 @@ import { plural } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
 import { useStore } from '../../lib/store.js';
 import { comboFor } from '../../lib/shortcuts.js';
+import { RESTRICTION_LABELS, RESTRICTIONS } from '../../../shared/restrictions.js';
 
 // `code` spans in the task text.
 function Inline({ text }) {
@@ -108,7 +109,8 @@ function Statement({ text }) {
   });
 }
 
-function ProvidedCode({ code }) {
+// C++ source with the editor's highlighting (plain text until the editor has loaded).
+function CodeBlock({ code }) {
   const [html, setHtml] = useState(null);
   useEffect(() => {
     let live = true;
@@ -122,11 +124,13 @@ function ProvidedCode({ code }) {
     : <pre className="code mono">{code}</pre>;
 }
 
+const TABS = ['task', 'provided', 'tests'];
+
 export default function TaskPane({ q, onHide }) {
   const st = useStore();
   // The pane unmounts when hidden, so the last tab is kept in this browser (not reset per question).
   const [tab, setTabState] = useState(() => {
-    try { return localStorage.getItem('taskTab') === 'provided' ? 'provided' : 'task'; } catch { return 'task'; }
+    try { const saved = localStorage.getItem('taskTab'); return TABS.includes(saved) ? saved : 'task'; } catch { return 'task'; }
   });
   const setTab = (next) => {
     setTabState(next);
@@ -137,6 +141,7 @@ export default function TaskPane({ q, onHide }) {
       <div className="tabs" role="tablist">
         <button type="button" role="tab" className="tab" aria-selected={tab === 'task'} onClick={() => setTab('task')}>Task</button>
         <button type="button" role="tab" className="tab" aria-selected={tab === 'provided'} onClick={() => setTab('provided')}>Provided code</button>
+        <button type="button" role="tab" className="tab" aria-selected={tab === 'tests'} onClick={() => setTab('tests')}>Visible tests</button>
         <span className="spacer" />
         {onHide && (
           <button type="button" className="btn ghost sm icon-only" onClick={onHide} title={`Hide the task (${comboFor('task', st.shortcuts)})`} aria-label="Hide task">
@@ -152,13 +157,22 @@ export default function TaskPane({ q, onHide }) {
               <span className="chip accent">{plural(q.marks, 'mark')}</span>
               <span className="chip">{q.topic}</span>
               <span className="chip">{q.visibleTests} visible / {q.hiddenTests} hidden tests</span>
+              {(q.restrict || []).map((r) => <span key={r} className="chip warn" title={`${RESTRICTIONS[r]} The app checks this when you press Run.`}>{RESTRICTION_LABELS[r]}</span>)}
             </div>
             <Statement text={q.statement} />
           </>
-        ) : (
+        ) : tab === 'provided' ? (
           <>
             <p className="para muted">This code is already part of the program your answer is added to. Do not paste it into the editor.</p>
-            <ProvidedCode code={q.provided} />
+            <CodeBlock code={q.provided} />
+          </>
+        ) : (
+          <>
+            <p className="para muted">
+              These {plural(q.visibleTests, 'test')} run, and show their results, whenever you press Run.
+              {q.hiddenTests > 0 && ` ${plural(q.hiddenTests, 'hidden test')} also run, but their code is not shown.`}
+            </p>
+            {q.visibleCode ? <CodeBlock code={q.visibleCode} /> : <p className="para muted">The code of these tests is not available.</p>}
           </>
         )}
       </div>

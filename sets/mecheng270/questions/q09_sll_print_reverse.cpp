@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 9  (4 marks)  -  Singly linked-list: PrintReverse()
 // Topic: Linked lists & List ADT, recursion
+// Restrict: recursive
 //
 // Requirements for Singly linked-list: PrintReverse()
 //

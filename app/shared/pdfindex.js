@@ -223,28 +223,52 @@ export async function buildIndex(pages, fileName) {
 const STRUCTURAL_FLAGS = ['needs-crop', 'no-solution'];
 const sameQuestion = (q) => `${(q.source || '').toLowerCase()}|${q.title.toLowerCase()}`;
 
-// Indexing a PDF again: `existing` is the manifest already saved, `fresh` the new index. Questions
-// are matched by uid (or by source and title), and keep what the user has added: answers (parts),
-// marks, tags and their own flags. Crops, titles, sections and solutions come from the PDF again.
-// Questions that are not from the PDF (added from screenshots) are kept at the end, and
-// PDF questions that are no longer in the PDF are dropped and counted.
+// Indexing a PDF again: `existing` is the manifest already saved, `fresh` the new index. Questions keep what
+// the user has added (answers, marks, tags, their own flags) and, above all, their uid, which is what saved
+// progress (stats, answers, difficult marks, answer keys) is filed under. Crops, titles, sections and
+// solutions come from the PDF again. A fresh question is matched to a saved one by, in turn: uid, source and
+// title, source alone, title alone. The last two only count when exactly one question on each side has that source
+// or title, so a reworded title keeps its progress as long as its source label is unchanged (and the reverse).
+// Questions that are not from the PDF (added from screenshots) are kept at the end. Saved PDF questions the new PDF
+// no longer has are dropped; their progress stays in the browser but has nothing to show, and they are listed.
+// Returns { manifest, dropped (a count), report: { kept, added, renamed, droppedTitles } }.
 export function mergeIndex(existing, fresh) {
-  const byUid = new Map(existing.questions.map((q) => [q.uid, q]));
-  const byText = new Map(existing.questions.map((q) => [sameQuestion(q), q]));
-  const matched = new Set();
-  const questions = fresh.questions.map((q) => {
-    const old = byUid.get(q.uid) || byText.get(sameQuestion(q));
-    if (!old || matched.has(old.uid)) return q;
-    matched.add(old.uid);
+  const pairs = new Map();   // index in fresh.questions -> saved question
+  const taken = new Set();   // uids of saved questions already paired
+  const pass = (keyOf) => {
+    const saved = new Map();
+    for (const o of existing.questions) {
+      const k = !taken.has(o.uid) && keyOf(o);
+      if (k) saved.set(k, saved.has(k) ? null : o);
+    }
+    const seen = new Map();
+    fresh.questions.forEach((q, i) => { const k = !pairs.has(i) && keyOf(q); if (k) seen.set(k, (seen.get(k) || 0) + 1); });
+    fresh.questions.forEach((q, i) => {
+      const k = !pairs.has(i) && keyOf(q);
+      const old = k && seen.get(k) === 1 && saved.get(k);
+      if (old) { pairs.set(i, old); taken.add(old.uid); }
+    });
+  };
+  pass((q) => q.uid);
+  pass(sameQuestion);
+  pass((q) => (q.source ? `source:${q.source.toLowerCase()}` : ''));
+  pass((q) => `title:${q.title.toLowerCase()}`);
+
+  let renamed = 0;
+  const questions = fresh.questions.map((q, i) => {
+    const old = pairs.get(i);
+    if (!old) return q;
+    if (sameQuestion(old) !== sameQuestion(q)) renamed++;
     return {
       ...q, uid: old.uid, parts: old.parts, marks: old.marks, tags: old.tags,
       flags: [...new Set([...q.flags, ...old.flags.filter((f) => !STRUCTURAL_FLAGS.includes(f))])],
     };
   });
-  const own = existing.questions.filter((q) => !matched.has(q.uid) && !q.stem.pdf);
-  const dropped = existing.questions.filter((q) => !matched.has(q.uid) && q.stem.pdf).length;
+  const own = existing.questions.filter((q) => !taken.has(q.uid) && !q.stem.pdf);
+  const gone = existing.questions.filter((q) => !taken.has(q.uid) && q.stem.pdf);
   return {
     manifest: { ...fresh, id: existing.id, title: existing.title, course: existing.course, questions: [...questions, ...own] },
-    dropped,
+    dropped: gone.length,
+    report: { kept: pairs.size, added: fresh.questions.length - pairs.size, renamed, droppedTitles: gone.map((q) => q.title) },
   };
 }

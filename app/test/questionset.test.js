@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  resolveRef, dirOf, joinPath, fileKind, isManifestPath, questionProblems, validateQuestionSet, parseQuestionSet, neededFiles, importStatus,
+  resolveRef, dirOf, joinPath, fileKind, isManifestPath, questionProblems, validateQuestionSet, parseQuestionSet, neededFiles, importStatus, applyEdit,
 } from '../shared/questionset.js';
 
 const question = (uid, extra = {}) => ({
@@ -121,4 +121,16 @@ test('importStatus tells new, update and current apart', () => {
   assert.equal(importStatus(existing, { ...set, title: 'Renamed' }, found), 'update');
   assert.equal(importStatus({ manifest: set, files: {} }, set, found), 'update');
   assert.equal(importStatus({ manifest: set, files: {} }, set, {}), 'current', 'a file missing from the folder does not keep a set "updating"');
+});
+
+test('applyEdit lays notes, hiding and replaced content over a question without touching the original', () => {
+  const q = { uid: 'a', title: 'Old', stem: { text: 'Old text', pdf: { page: 2, box: [0, 0, 1, 1] } }, solution: { pdf: [{ page: 3, box: [0, 0, 1, 1] }] }, notes: '' };
+  const out = applyEdit(q, { notes: 'mind the units', title: 'New', stemImage: 'data:image/png;base64,AA', solutionText: 'Because.' });
+  assert.equal(out.notes, 'mind the units');
+  assert.equal(out.title, 'New');
+  assert.deepEqual(out.stem, { text: 'Old text', imageData: 'data:image/png;base64,AA' });
+  assert.deepEqual(out.solution, { text: 'Because.', images: undefined, pdf: [{ page: 3, box: [0, 0, 1, 1] }] });
+  assert.equal(applyEdit(q, { hidden: true }).hidden, true);
+  assert.equal(q.title, 'Old');
+  assert.equal(applyEdit(q, { notes: '' }).notes, '');
 });

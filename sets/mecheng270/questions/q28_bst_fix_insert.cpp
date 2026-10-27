@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 28  (4 marks)  -  Binary search tree: fix Insert()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: fix Insert()
 //

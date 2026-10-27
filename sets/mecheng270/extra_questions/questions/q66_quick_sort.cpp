@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 66  (4 marks)  -  Recursive quicksort
 // Topic: Sorting algorithms
+// Restrict: recursive
 //
 // Requirements for Quicksort
 //

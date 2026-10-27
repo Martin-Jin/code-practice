@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 37  (4 marks)  -  Recursion: Gcd()
 // Topic: Recursion & algorithms
+// Restrict: no-loops, recursive
 //
 // Requirements for Recursion: Gcd()
 //

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { libraryStats } from '../shared/libstats.js';
+import { libraryStats, questionRows, keepRow, rankRows } from '../shared/libstats.js';
 
 const qs = [
   { uid: 'a', title: 'Alpha', section: 'One' },
@@ -50,4 +50,17 @@ test('an untouched set is all zeros with no rate', () => {
   assert.equal(none.total.untried, 4);
   assert.equal(none.total.rate, null);
   assert.deepEqual(none.worth, []);
+});
+
+test('question rows can be filtered and ranked by trouble', () => {
+  const rows = questionRows(qs, (uid) => progress[uid] || null);
+  const ids = (filter) => rows.filter((r) => keepRow(filter, r)).map((r) => r.uid);
+  assert.deepEqual(ids('all'), ['a', 'b', 'c', 'd']);
+  assert.deepEqual(ids('attempted'), ['a', 'b']);
+  assert.deepEqual(ids('struggling'), ['b']);
+  assert.deepEqual(ids('new'), ['c', 'd']);
+  assert.deepEqual(ids('difficult'), ['b', 'c']);
+  assert.deepEqual(rankRows(rows).map((r) => r.uid), ['b', 'c', 'a', 'd']);
+  assert.equal(rows[0].rate, 0.75);
+  assert.equal(rows[3].rate, null);
 });

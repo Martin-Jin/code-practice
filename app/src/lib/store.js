@@ -14,6 +14,8 @@ export const state = {
   libProgress: {},     // "<set id>/<uid>" -> progress on one imported question (see practice.js)
   libEdits: {},        // "<set id>/<uid>" -> the user's changes to one imported question
   libRuns: {},         // id -> practice session over an imported set
+  libFormulas: {},     // set id -> { setId, sheets: [{ path, name, type }] } formula sheets; not backed up
+  libHandles: {},      // set id -> { setId, handle, name } the PDF file linked to an imported set (see pdfsync.js); not backed up
   libMine: {},         // id -> the user's own questions made in the app
   runner: 'online',    // 'local' | 'online'
   local: null,         // { compiler } when the local g++ server answered, else null

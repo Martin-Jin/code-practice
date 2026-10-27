@@ -108,3 +108,7 @@ The workspace has many panels that must stay in step (question list, editor, out
 - The coding sets are C++ only (`language: "cpp"`). A second language would need its own framework, `buildProgram` and runner. The user's own question sets (PDFs, screenshots, typed questions) have no code and no runner.
 - The online runner depends on a free third-party service: it needs internet, may rate-limit, and receives your answer. The local runner has none of these limits.
 - Progress is per browser and is not synced. A backup file moves it by hand.
+
+## Practice PDFs: two-way sync
+
+`app/src/lib/pdfsync.js` links an indexed set to its PDF file (File System Access API), re-indexes when the file changes, and writes changes back through `app/shared/pdfwrite.js` (pdf-lib): append a question in the indexer's layout, paint a replacement over a crop, remove pages. Every write is re-indexed straight away, so the manifest always comes from the PDF and `mergeIndex` keeps the uids that progress is filed under.

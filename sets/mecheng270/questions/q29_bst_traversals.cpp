@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 29  (5 marks)  -  Binary search tree: InOrder() and PreOrder()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: InOrder() and PreOrder()
 //

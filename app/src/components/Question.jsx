@@ -91,11 +91,16 @@ export function PdfCrop(props) {
 }
 
 // What a question shows above its answer boxes: typed text, an image, or a PDF crop.
+function DataImage({ url, alt }) {
+  return <Enlargeable title={alt} render={(width) => <img className="lib-image" src={url} alt={alt} style={{ width, maxWidth: 'none' }} />}><img className="lib-image" src={url} alt={alt} /></Enlargeable>;
+}
+
 export function Stem({ set, question }) {
-  const { text, image, pdf } = question.stem;
+  const { text, image, pdf, imageData } = question.stem;
   return (
     <div className="stem">
       {text && <Markup text={text} />}
+      {imageData && <DataImage url={imageData} alt="Figure for the question" />}
       {image && <LibImage setId={set.id} path={image} alt="Figure for the question" />}
       {pdf && <PdfCrop setId={set.id} pdf={set.manifest.pdf} crop={pdf} label={`Question: ${question.title}`} />}
     </div>
@@ -108,6 +113,7 @@ export function Solution({ set, question }) {
   if (!s) return <p className="muted">This set has no worked solution for this question.</p>;
   return (
     <div className="stem">
+      {s.imageData && <DataImage url={s.imageData} alt="Worked solution" />}
       {(s.pdf || []).map((crop) => <PdfCrop key={crop.page} setId={set.id} pdf={set.manifest.pdf} crop={crop} trim label={`Worked solution, page ${crop.page}`} />)}
       {(s.images || []).map((path) => <LibImage key={path} setId={set.id} path={path} alt="Worked solution" />)}
       {s.text && <Markup text={s.text} />}

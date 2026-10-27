@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 31  (5 marks)  -  Recursion: Tower of Hanoi
 // Topic: Recursion
+// Restrict: recursive
 //
 // Requirements for Recursion: Tower of Hanoi
 //

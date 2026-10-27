@@ -1,6 +1,7 @@
 // ============================================================================
 // Question 26  (4 marks)  -  Binary search tree: PrintReverse()
 // Topic: Trees & binary search trees
+// Restrict: recursive
 //
 // Requirements for Binary search tree: PrintReverse()
 //

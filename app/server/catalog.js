@@ -6,6 +6,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { editorOptions } from './editor-settings.js';
+import { parseRestrictions } from '../shared/restrictions.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 // SETS_DIR lets tools check another folder of sets (CI checks templates/ this way).
@@ -57,6 +58,51 @@ function trimBlank(lines) {
   return lines.slice(a, b);
 }
 
+// The text of each tf::Test( ... ); statement in `src`, in order, with the indentation of its first line
+// removed. Parentheses are counted, skipping strings, character literals and comments, so a test may
+// be laid out however clang-format likes.
+function visibleStatements(src) {
+  const out = [];
+  const open = /\btf::Test\(/g;
+  for (let m = open.exec(src); m; m = open.exec(src)) {
+    let depth = 1;
+    let i = open.lastIndex;
+    while (i < src.length && depth > 0) {
+      const c = src[i];
+      if (c === '"' || c === "'") {
+        for (i++; i < src.length && src[i] !== c; i++) if (src[i] === '\\') i++;
+      } else if (c === '/' && src[i + 1] === '/') {
+        while (i < src.length && src[i] !== '\n') i++;
+        continue;
+      } else if (c === '/' && src[i + 1] === '*') {
+        i = src.indexOf('*/', i + 2);
+        if (i < 0) break;
+        i++;
+      } else if (c === '(') depth++;
+      else if (c === ')') depth--;
+      i++;
+    }
+    if (depth > 0) break;
+    const end = src[i] === ';' ? i + 1 : i;
+    const lineStart = src.lastIndexOf('\n', m.index) + 1;
+    const indent = src.slice(lineStart, m.index).match(/^ */)[0].length;
+    out.push(src.slice(lineStart, end).split('\n').map((l) => l.replace(new RegExp(`^ {0,${indent}}`), '')).join('\n'));
+    open.lastIndex = end;
+  }
+  return out;
+}
+
+// What the student can see of the tests: helper functions the tests share (between the TESTS banner and
+// RunQnn), then the visible tests. The hidden tests are left out.
+function visibleTestCode(lines) {
+  const banner = lines.findIndex((l) => /^\/\/ -+ TESTS\b/.test(l));
+  const run = lines.findIndex((l, i) => i > banner && /^void RunQ\d+\(\)/.test(l));
+  if (banner < 0 || run < 0) return '';
+  const helpers = trimBlank(lines.slice(banner + 1, run)).join('\n');
+  const tests = visibleStatements(lines.slice(run).join('\n')).join('\n\n');
+  return [helpers, tests].filter(Boolean).join('\n\n');
+}
+
 export function parseQuestion(text, rel) {
   const lines = text.replace(/\r\n/g, '\n').split('\n');
   const head = /^\/\/ Question (\d+)\s+\((\d+) marks?\)\s+-\s+(.+?)\s*$/.exec(lines[1] || '');
@@ -70,7 +116,14 @@ export function parseQuestion(text, rel) {
   const topic = lines.slice(topicIdx, topicEnd + 1)
     .map((l, i) => stripComment(l).replace(i === 0 ? /^Topic:\s*/ : /^\s+/, '')).join(' ');
 
-  let statement = trimBlank(lines.slice(topicEnd + 1, ruleIdx).map(stripComment));
+  // An optional `// Restrict: no-loops, recursive` line after the topic; the app checks the answer for it.
+  const restrictIdx = lines.findIndex((l, i) => i > topicEnd && i < ruleIdx && /^\/\/ Restrict:/.test(l));
+  let restrict = [];
+  if (restrictIdx >= 0) {
+    try { restrict = parseRestrictions(lines[restrictIdx].replace(/^\/\/ Restrict:/, '')); } catch (e) { throw new Error(`${rel}: ${e.message}`); }
+  }
+
+  let statement = trimBlank(lines.slice(topicEnd + 1, ruleIdx).filter((l, i) => topicEnd + 1 + i !== restrictIdx).map(stripComment));
   if (/^Requirements for /.test(statement[0] || '')) statement = trimBlank(statement.slice(1));
 
   const provIdx = lines.findIndex((l) => /^\/\/ -+ PROVIDED CODE/.test(l));
@@ -87,10 +140,12 @@ export function parseQuestion(text, rel) {
     marks: Number(head[2]),
     title: head[3],
     topic,
+    restrict,
     statement: statement.join('\n'),
     provided: trimBlank([...systemIncludes, '', ...lines.slice(provIdx + 1, startIdx)]).join('\n'),
     starter: lines.slice(ifnIdx + 1, elseIdx).join('\n'),
     visibleTests: (text.match(/tf::Test\(/g) || []).length,
+    visibleCode: visibleTestCode(lines),
     hiddenTests: (text.match(/tf::HiddenTest\(/g) || []).length,
     file: path.posix.basename(rel),
     // The file with the answer cut out: before + <answer> + after.
