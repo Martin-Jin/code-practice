@@ -538,14 +538,32 @@ dialog.lightbox::backdrop { background: rgb(8 12 18 / 94%); }
 .formula-frame { width: 100%; height: 100%; border: 0; }
 .formula-body .empty { display: grid; gap: 6px; justify-items: center; margin-top: 24px; }
 
-/* ---------- folders of question sets ---------- */
-.folder-zone { border: 1px dashed var(--control-border); border-radius: 12px; padding: 14px; display: grid; gap: 12px; }
-.folder-zone.over { border-color: var(--accent); background: var(--surface-2); outline: 2px solid var(--accent); }
-.folder-zone .grid { min-height: 40px; }
-.folder-zone .zone-hint { margin: 0; color: var(--muted); }
-.set-tile { display: grid; gap: 6px; cursor: grab; }
-.set-tile:active { cursor: grabbing; }
-.set-tile .move { justify-self: start; max-width: 100%; }
+/* ---------- the library as a file explorer ---------- */
+.tile { display: grid; gap: 8px; align-content: start; padding: 16px 18px; color: var(--text); }
+a.tile:hover { text-decoration: none; border-color: var(--accent); }
+.tile h2 { font-size: 16px; }
+.tile .meta { display: flex; gap: 6px; flex-wrap: wrap; }
+.tile.folder h2 { display: flex; align-items: center; gap: 8px; }
+.tile.folder .icon { width: 20px; height: 20px; color: var(--accent); }
+.tile[draggable="true"] { cursor: grab; }
+.tile.over, .drop-out.over { border-color: var(--accent); background: var(--surface-2); outline: 2px solid var(--accent); }
+.drop-out { border: 1px dashed var(--control-border); border-radius: 10px; padding: 10px 14px; color: var(--muted); }
+.explorer-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
-/* Text boxes have no drag handle: they grow with what is typed (field-sizing where supported, else App.jsx does it). */
-textarea { resize: none; field-sizing: content; min-height: 4.5em; max-height: 60vh; overflow-y: auto; }
+/* ---------- floating add button ---------- */
+.fab { position: fixed; right: 24px; bottom: 24px; z-index: 30; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.fab-main { width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgb(0 0 0 / 28%); transition: transform .2s ease; }
+.fab-main .icon { width: 24px; height: 24px; stroke-width: 2; }
+.fab.open .fab-main { transform: rotate(135deg); }
+.fab-opt { display: flex; flex-direction: row-reverse; align-items: center; height: 48px; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 24px; background: var(--surface); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; box-shadow: 0 3px 12px rgb(0 0 0 / 22%);
+  opacity: 0; transform: translateY(14px) scale(.7); transform-origin: bottom right; pointer-events: none; transition: opacity .18s ease, transform .22s cubic-bezier(.2, 1.3, .4, 1); }
+.fab.open .fab-opt { opacity: 1; transform: none; pointer-events: auto; }
+.fab-opt .ico { width: 46px; height: 46px; flex: none; display: grid; place-items: center; color: var(--accent); }
+.fab-opt .ico .icon { width: 22px; height: 22px; }
+.fab-opt .label { max-width: 0; padding-left: 0; white-space: nowrap; overflow: hidden; transition: max-width .3s ease, padding .3s ease; }
+.fab-opt:hover .label, .fab-opt:focus-visible .label { max-width: 320px; padding-left: 18px; }
+@media (prefers-reduced-motion: reduce) { .fab-main, .fab-opt, .fab-opt .label { transition: none; } }
+
+/* ---------- command palette: the page behind it is dimmed and blurred a little ---------- */
+dialog.palette::backdrop { background: rgb(8 12 18 / 38%); backdrop-filter: blur(3px); }
+dialog.palette .chip { flex: none; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

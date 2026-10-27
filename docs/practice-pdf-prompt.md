@@ -31,7 +31,7 @@ From the `app` folder of the repo:
 node tools/index-pdf.js --dry-run "path\to\Practice Questions.pdf"
 ```
 
-It must report as many questions as the cover lists, and no unplaced pages. Without the repo, press **Find the questions** in the import dialog (see [using-the-app.md](using-the-app.md#your-own-question-sets)); it shows the same report. Then open a few questions and check that the crop shows the whole question and nothing from a neighbour.
+It must report as many questions as the cover lists, and no unplaced pages. Without the repo, choose its folder in the import dialog, which reads the PDF for you (see [using-the-app.md](using-the-app.md#your-own-question-sets)); it shows the same report. Then open a few questions and check that the crop shows the whole question and nothing from a neighbour.
 
 ## The prompt
 

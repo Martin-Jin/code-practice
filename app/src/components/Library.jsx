@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { scanFolder, indexPdf, importSet, removeSet, requestPersistence, storageStatus, mb } from '../lib/library.js';
+import { scanFolder, indexPdf, importSet, requestPersistence, storageStatus, mb } from '../lib/library.js';
 import Icon from './Icon.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
@@ -61,7 +61,7 @@ function SetChoice({ item, picked, onToggle }) {
 }
 
 // Scans the chosen folder, lets the user tick the sets to import, and copies them in.
-function ImportDialog({ files, close }) {
+export function ImportDialog({ files, close }) {
   const [phase, setPhase] = useState('scanning');   // scanning | review | importing | failed
   const [scan, setScan] = useState(null);
   const [picked, setPicked] = useState({});         // manifest path -> ticked
@@ -184,31 +184,37 @@ function ImportDialog({ files, close }) {
 }
 
 // A short guide to every way of getting questions in. The full version is docs/adding-questions.md.
-function HelpDialog({ close }) {
+export function HelpDialog({ close }) {
   return (
     <Modal wide title="How to add questions" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
       <h3>A practice PDF</h3>
       <ol className="steps">
-        <li>Press <b>Add or update a folder…</b> and choose the folder that holds the PDF.</li>
-        <li>Press <b>Find the questions</b> next to it. The app reads the PDF (about half a minute) and lists what it found, checked against the PDF's cover.</li>
-        <li>Tick it and press <b>Import</b>. Open it from <b>Your library</b> with <b>Browse</b>.</li>
+        <li>Press the round <b>+</b> button at the bottom right, then <b>Add or update a folder</b>, and choose the folder that holds the PDF.</li>
+        <li>The app reads the PDF by itself (about half a minute each) and lists what it found, checked against the PDF's cover.</li>
+        <li>Tick it and press <b>Import</b>. Click its tile in <b>Your library</b> to open it and <b>Browse</b>.</li>
       </ol>
       <p>The PDF has to be laid out a certain way (a cover that lists the questions, then each question page followed by its worked solution), because the app finds the questions from the layout. Build it with the <a href={`${DOCS}/practice-pdf-prompt.md`} target="_blank" rel="noreferrer">agent prompt</a> that does it for you, or format it by hand to the same rules.</p>
       <p className="muted">To keep the result beside the PDF, run <code>node tools/index-pdf.js "file.pdf"</code> in the repo's <code>app</code> folder, then import the folder. Nothing is uploaded; your folder is not changed.</p>
 
       <h3>A screenshot, or a question you write</h3>
       <ol className="steps">
-        <li>Press <b>Add a question…</b>, then Ctrl+V to paste a screenshot (or drop or choose an image).</li>
+        <li>Press the <b>+</b> button, then <b>Add a question</b> (or press Ctrl+K and choose <b>Add a question</b>). Say which set it is for, then press Ctrl+V to paste a screenshot (or drop or choose an image).</li>
         <li>Drag a box over the question, give it a title, a section and the parts to answer (a number with its unit, multiple choice, or self-marked).</li>
         <li>Press <b>Save question</b>. It goes in <b>My questions</b>, and is included in a backup.</li>
       </ol>
+
+      <h3>Folders and shortcuts</h3>
+      <ul>
+        <li><b>New folder</b> in <b>Your library</b> makes a folder. Drag a set's tile onto it, or use the <b>Folder</b> menu on the set's page.</li>
+        <li><b>Ctrl+K</b> opens the command palette: add a question, upload, move a set to a folder (type the set, then the folder, then Enter), go to a set, and more.</li>
+      </ul>
 
       <h3>Let an agent do it</h3>
       <p>An AI agent can build the practice PDF from your tutorial sheets (<a href={`${DOCS}/practice-pdf-prompt.md`} target="_blank" rel="noreferrer">prompt and layout</a>), or add one question to a <code>.questions.json</code> file from a screenshot, following <a href={FORMAT_DOC} target="_blank" rel="noreferrer">the question set format</a>.</p>
 
       <h3>After importing</h3>
       <ul>
-        <li>Open a question and use the <b>Answer key</b> tab to add the answer, so the app can check what you type.</li>
+        <li>Open a question, turn on <b>Edit mode</b> and use <b>Edit answer key</b> to add the answer, so the app can check what you type.</li>
         <li><b>Mark as difficult</b> (or press D) flags a question. Turn on <b>Settings &gt; Practice</b> to draw those more often.</li>
         <li>Practise a set from its page, and press <b>Back up now</b> in Settings now and then: your progress is only in this browser.</li>
       </ul>
@@ -234,62 +240,58 @@ function StorageNote() {
   );
 }
 
-// One imported set as a card (Browse, Stats, Remove or Add a question).
-export function LibrarySetCard({ set }) {
-  const { open, confirm } = useDialogs();
-  const remove = async () => {
-    const ok = await confirm({
-      title: `Remove ${set.title}?`,
-      body: 'This deletes the copy kept in this browser. Your folder is not touched, and you can add it again later.',
-      confirmText: 'Remove', danger: true,
-    });
-    if (!ok) return;
-    try { await removeSet(set.id); } catch (e) { toast(`Could not remove it: ${e.message}`, 'bad'); }
-  };
-  return (
-    <div className="card set-card">
-      <div>
-        <h2>{set.title}</h2>
-        {set.course && <p className="muted" style={{ marginTop: 4 }}>{set.course}</p>}
-      </div>
-      <div className="meta">
-        <span className="chip">{plural(set.manifest.questions.length, 'question')}</span>
-        <span className="chip">{plural(new Set(set.manifest.questions.map((q) => q.section)).size, 'section')}</span>
-        <span className="chip">{mb(set.bytes)}</span>
-        {set.missing.length > 0 && <span className="chip warn">{plural(set.missing.length, 'file')} missing</span>}
-      </div>
-      <div className="actions">
-        <a className="btn primary" href={`#/lib/${encodeURIComponent(set.id)}`}>Browse</a>
-        <a className="btn" href={`#/lib/${encodeURIComponent(set.id)}/stats`}>Stats</a>
-        {set.userOwned
-          ? <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} setId={set.id} />)}><Icon name="plus" /> Add a question</button>
-          : <button type="button" className="btn" onClick={remove}><Icon name="trash" /> Remove</button>}
-      </div>
-    </div>
-  );
-}
-
-// The buttons that bring sets in: choose a folder of sets, or make a question from a screenshot.
-export function LibraryTools() {
+// The floating add button: press it and two round buttons pop up; hovering one slides out what it does.
+// "Add or update a folder" chooses a folder of sets or PDFs; "Add a question" makes one from a screenshot.
+export function AddFab() {
   const { open } = useDialogs();
   const input = useRef(null);
+  const [expanded, setExpanded] = useState(false);
+  const box = useRef(null);
+
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const away = (e) => { if (box.current && !box.current.contains(e.target)) setExpanded(false); };
+    const esc = (e) => { if (e.key === 'Escape') setExpanded(false); };
+    document.addEventListener('pointerdown', away);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
+  }, [expanded]);
+
   const onChoose = (e) => {
     const files = [...e.target.files];
     e.target.value = '';   // so choosing the same folder again still fires
     if (files.length) open(({ close }) => <ImportDialog files={files} close={close} />);
   };
+  const options = [
+    ['Add a question from a screenshot', 'task', () => open(({ close }) => <AddQuestionDialog close={close} />)],
+    ['Add or update a folder of sets or PDFs', 'folder', () => input.current.click()],
+  ];
+  return (
+    <div className={`fab${expanded ? ' open' : ''}`} ref={box}>
+      {options.map(([label, icon, run], i) => (
+        <button key={label} type="button" className="fab-opt" style={{ transitionDelay: expanded ? `${(options.length - 1 - i) * 50}ms` : '0ms' }}
+          tabIndex={expanded ? 0 : -1} aria-label={label} onClick={() => { setExpanded(false); run(); }}>
+          <span className="ico"><Icon name={icon} /></span>
+          <span className="label">{label}</span>
+        </button>
+      ))}
+      <button type="button" className="fab-main" aria-expanded={expanded} aria-label={expanded ? 'Close the add menu' : 'Add to your library'} title="Add to your library" onClick={() => setExpanded(!expanded)}>
+        <Icon name="plus" />
+      </button>
+      <input ref={input} type="file" webkitdirectory="" multiple hidden onChange={onChoose} />
+    </div>
+  );
+}
+
+// Under the library: how storage is used, and a pointer to the guide for adding questions.
+export function LibraryNotes() {
+  const { open } = useDialogs();
   return (
     <section>
-      <div className="section-title with-action">
-        <h2>Add to your library</h2>
+      <p className="muted">
+        Use the <b>+</b> button at the bottom right to add a folder of sets or PDFs, or to make a question from a screenshot.{' '}
         <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
-      </div>
-      <div className="row">
-        <button type="button" className="btn" onClick={() => input.current.click()}><Icon name="plus" /> Add or update a folder…</button>
-        <input ref={input} type="file" webkitdirectory="" multiple hidden onChange={onChoose} />
-        <button type="button" className="btn" onClick={() => open(({ close }) => <AddQuestionDialog close={close} />)}><Icon name="plus" /> Add a question…</button>
-        <span className="muted">Choose the folder that holds your <code>.questions.json</code> files (choose it again after changing them), or make a question from a screenshot.</span>
-      </div>
+      </p>
       <StorageNote />
     </section>
   );

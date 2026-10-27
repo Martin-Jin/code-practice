@@ -6,12 +6,12 @@ The code that checks this format is `app/shared/questionset.js`. It is the forma
 
 ## How a set is found
 
-1. On the dashboard, **Add or update a folder…** opens the browser's folder chooser. Pick any folder; it can be a parent of several sets.
+1. On **Question sets**, the **+** button and then **Add or update a folder of sets or PDFs** opens the browser's folder chooser. Pick any folder; it can be a parent of several sets.
 2. The app looks through it for files ending in `.questions.json`. Each one is a set. Where the file sits does not matter.
 3. A set's files (its PDF and images) are named in the manifest by paths **relative to the manifest's own folder**, and must be inside it. A path that starts with `/`, has a drive letter or contains `..` is refused.
 4. Sets you tick are copied into the browser. Choosing the folder again shows each set as **New**, **Changed** or **Up to date**, and copies only what changed.
 5. A manifest that is not valid JSON, or has the wrong header, is listed with the reason and cannot be ticked.
-6. A PDF with no manifest beside it is listed with **Find the questions**, which reads the PDF in the browser and adds its questions to the list (see [Practice-question PDFs](#practice-question-pdfs)).
+6. A PDF with no manifest beside it is read automatically in the browser, one at a time, and its questions are added to the list (see [Practice-question PDFs](#practice-question-pdfs)).
 
 ```
 any-folder-you-choose/
@@ -96,12 +96,12 @@ How an answer is checked (`app/shared/answers.js`): a number is right when it is
 
 A practice PDF has to follow a fixed layout (the exact positions and an agent prompt that builds it are in [practice-pdf-prompt.md](practice-pdf-prompt.md)): a cover with a table of contents, then for each question a question page (header with the section and `Question N`, a title `QN. Topic - what is asked`, the question, a dashed rule, blank working space, and a footer `Source: ...`) followed by its worked solution pages (header `Section | QN: title` and `Worked solution (i/n)`). The app finds the questions from that layout with no AI:
 
-- **Find the questions** (in the import dialog) reads the PDF in the browser, with about half a minute of work for a 250-page file, and imports the result as a set. It shows how many questions it found, warns if the cover lists a different number, and lists pages it could not place.
+- The import dialog reads each PDF that has no manifest in the browser, automatically, with about half a minute of work for a 250-page file, and imports the result as a set. It shows how many questions it found, warns if the cover lists a different number, and lists pages it could not place.
 - `node tools/index-pdf.js "<file.pdf>"` (from the `app` folder of the repo) does the same and writes `<pdf name>.questions.json` beside the PDF. Run it again after the PDF changes: questions are matched by `uid`, so answers, marks and tags already in the manifest are kept. Add `--dry-run` to see the report only.
 - Each question's `stem.pdf` crop runs from just under the title to the dashed rule, and each solution page's crop runs from under the header to above the footer. The viewer trims the blank space at the bottom of a solution page.
 - A question's `uid` is `q-` plus the first 8 hex digits of SHA-1 over `course|source|title` in lower case. Indexing the same PDF again gives the same uids, so progress stays attached even if the manifest is lost.
 - Every question starts with one `self` part (you read the solution and mark yourself). Add numeric or choice answers when you have them; the manifest's `parts` are kept when the PDF is indexed again.
-- **Updating the PDF.** Add the folder again (or run the tool again) and press **Index again**. The set keeps its id, and each question keeps its `uid`, so stats, answers, difficult marks, answer keys and notes stay. A new question is matched to a saved one by `uid`, then by source and title, then by source alone, then by title alone; the last two only when exactly one question on each side has it. So **rewording a title is safe while its `Source:` label stays the same** (and the reverse), but changing both makes the question look new, and its old progress is left behind. The import screen says how many questions kept their progress, how many are new and which ones are no longer in the PDF (their progress stays saved in case they come back). Renaming the PDF file makes a different set id, so it counts as a new set: keep the name.
+- **Updating the PDF.** Add the folder again (or run the tool again) and the import dialog reads the changed PDF again by itself. The set keeps its id, and each question keeps its `uid`, so stats, answers, difficult marks, answer keys and notes stay. A new question is matched to a saved one by `uid`, then by source and title, then by source alone, then by title alone; the last two only when exactly one question on each side has it. So **rewording a title is safe while its `Source:` label stays the same** (and the reverse), but changing both makes the question look new, and its old progress is left behind. The import screen says how many questions kept their progress, how many are new and which ones are no longer in the PDF (their progress stays saved in case they come back). Renaming the PDF file makes a different set id, so it counts as a new set: keep the name.
 - A question whose solution pages are missing is flagged `no-solution`; one whose dashed rule is not found is flagged `needs-crop`.
 
 If the prompt's layout changes (header height, fonts, margins), `app/shared/pdfindex.js` needs the same change.
@@ -114,7 +114,7 @@ A file named by the set but missing from the folder does not stop the import eit
 
 ## Questions made in the app
 
-**Add a question…** asks which set the question is for, then the question itself. A name that matches an existing set fills in that set's usual section, source and tags; a new name makes a new set. Sets made this way are stored in the browser (store `libMine`, one record per set), with the same question format and the images as data URLs, and are part of a backup. No folder may use the id of one of them: the import screen refuses a manifest that does. "My questions" is the first such set.
+**Add a question** (the **+** button, a set's page or Ctrl+K) asks which set the question is for, then the question itself. A name that matches an existing set fills in that set's usual section, source and tags; a new name makes a new set. Sets made this way are stored in the browser (store `libMine`, one record per set), with the same question format and the images as data URLs, and are part of a backup. No folder may use the id of one of them: the import screen refuses a manifest that does. "My questions" is the first such set.
 
 A question added to a set **imported from a folder** is marked `own` and kept with the stored copy of that set. Importing the folder again carries it over. It is not in a backup (the stored sets are copies), so keep the question in the folder's manifest too if you want it to survive clearing site data.
 

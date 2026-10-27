@@ -12,6 +12,7 @@ import { toast } from '../components/Toasts.jsx';
 import { Modal } from '../components/Dialogs.jsx';
 import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf } from '../lib/pdfsync.js';
 import { saveEdit } from '../lib/practice.js';
+import { foldersSorted, folderOf, moveSet } from '../lib/folders.js';
 
 const reportText = (r) => (r ? `${r.kept} questions kept their progress, ${r.added} new${r.droppedTitles.length ? `, ${r.droppedTitles.length} no longer in the PDF` : ''}.` : 'The PDF has not changed.');
 
@@ -129,6 +130,12 @@ export default function LibrarySet({ setId, theme }) {
         </p>
         <div className="row">
           <a className="btn" href={`#/lib/${encodeURIComponent(setId)}/stats`}>Stats</a>
+          {foldersSorted().length > 0 && (
+            <select aria-label="Folder" value={(folderOf(setId) || { id: '' }).id} onChange={(e) => moveSet(setId, e.target.value || null)}>
+              <option value="">Not in a folder</option>
+              {foldersSorted().map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+            </select>
+          )}
           <button type="button" className="btn primary" onClick={() => open(({ close }) => <AddQuestionDialog close={close} setId={setId} />)}>Add a question</button>
           <button type="button" className="btn danger" onClick={remove}>{record.userOwned ? 'Delete all my questions' : 'Remove from this browser'}</button>
         </div>

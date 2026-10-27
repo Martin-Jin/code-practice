@@ -4,113 +4,113 @@ import { plural } from '../lib/format.js';
 import { foldersSorted, folderOf, createFolder, renameFolder, deleteFolder, moveSet, startDrag, hasDrag, readDrag } from '../lib/folders.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
-import { LibrarySetCard, LibraryTools } from '../components/Library.jsx';
+import { AddFab, LibraryNotes } from '../components/Library.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 import { toast } from '../components/Toasts.jsx';
 
 const questionCount = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 
-function CodingSetCard({ set, ongoing, stats }) {
-  const solved = stats ? Object.values(stats.questions).filter((q) => q.correct > 0).length : 0;
-  const active = ongoing.filter((r) => r.setId === set.id).length;
+// A set is just a tile: click it to open it, where Browse, Stats and the rest are. `drag` makes a library set movable.
+function Tile({ href, title, sub, chips, drag, onDragStart }) {
   return (
-    <div className="card set-card">
-      <div>
-        <h2>{set.name}</h2>
-        <p className="muted" style={{ marginTop: 4 }}>{set.description}</p>
-      </div>
-      <div className="meta">
-        <span className="chip">{plural(questionCount(set), 'question')}</span>
-        <span className="chip">{plural(set.categories.length, 'topic')}</span>
-        <span className={`chip${solved ? ' ok' : ''}`}>{solved} solved</span>
-        {active > 0 && <span className="chip accent">{plural(active, 'run')} in progress</span>}
-      </div>
-      <div className="actions">
-        <a className="btn primary" href={`#/set/${set.id}`}>Start a run</a>
-        <a className="btn" href={`#/set/${set.id}/stats`}>Stats</a>
-      </div>
-    </div>
+    <a className="card tile" href={href} draggable={drag ? 'true' : undefined} onDragStart={onDragStart}>
+      <h2>{title}</h2>
+      {sub && <span className="muted">{sub}</span>}
+      <div className="meta">{chips.map((c, i) => <span key={i} className={`chip${c[1] ? ` ${c[1]}` : ''}`}>{c[0]}</span>)}</div>
+    </a>
   );
 }
 
-// Every question set, sorted into your folders. Drag a set's card onto a folder (or use its "Move to" menu); drag it
-// onto "Not in a folder" to take it out.
-export default function SetsPage({ theme }) {
+// The coding sets, then your library laid out like a file explorer: folders and sets side by side. Click a folder
+// to open it; drag a set onto a folder to file it, or onto "move out" inside a folder to take it back out.
+export default function SetsPage({ folderId, theme }) {
   const st = useStore();
   const { prompt, confirm } = useDialogs();
-  const [over, setOver] = useState(null);   // folder id, or 'none' while a card is dragged over a zone
-  const ongoing = Object.values(st.runs).filter((r) => !r.completedAt);
+  const [over, setOver] = useState(null);
   const folders = foldersSorted();
-
-  // Every set as { id, title, card }: the coding sets first, then the library's.
-  const all = [
-    ...st.catalog.sets.map((set) => ({ id: set.id, title: set.name, card: <CodingSetCard set={set} ongoing={ongoing} stats={st.stats[set.id]} /> })),
-    ...Object.values(st.library.sets).sort((a, b) => a.title.localeCompare(b.title)).map((set) => ({ id: set.id, title: set.title, card: <LibrarySetCard set={set} /> })),
-  ];
-  const inFolder = (f) => all.filter((x) => f.items.some((i) => i.setId === x.id));
-  const loose = all.filter((x) => !folderOf(x.id));
+  const folder = folderId ? st.libFolders[folderId] || null : null;
+  const sets = Object.values(st.library.sets).sort((a, b) => a.title.localeCompare(b.title));
+  const here = folder ? sets.filter((x) => folder.items.some((i) => i.setId === x.id)) : sets.filter((x) => !folderOf(x.id));
 
   const guard = (fn) => async (...args) => { try { await fn(...args); } catch (e) { toast(e.message, 'bad'); } };
   const make = guard(async () => {
     const name = await prompt({ title: 'New folder', label: 'Folder name' });
     if (name !== null) await createFolder(name);
   });
-  const rename = guard(async (f) => {
-    const name = await prompt({ title: 'Rename folder', label: 'Folder name', initial: f.name });
-    if (name !== null) await renameFolder(f.id, name);
+  const rename = guard(async () => {
+    const name = await prompt({ title: 'Rename folder', label: 'Folder name', initial: folder.name });
+    if (name !== null) await renameFolder(folder.id, name);
   });
-  const remove = async (f) => {
-    if (await confirm({ title: `Delete the folder "${f.name}"?`, body: 'Only the folder is deleted. Its sets move back to "Not in a folder" and keep all their questions and stats.', confirmText: 'Delete', danger: true })) await deleteFolder(f.id);
+  const remove = async () => {
+    if (!(await confirm({ title: `Delete the folder "${folder.name}"?`, body: 'Only the folder is deleted. Its sets move back to your library and keep all their questions and stats.', confirmText: 'Delete', danger: true }))) return;
+    await deleteFolder(folder.id);
+    window.location.hash = '#/sets';
   };
-  const drop = guard(async (e, folderId) => {
-    e.preventDefault();
-    setOver(null);
-    const setId = readDrag(e);
-    if (setId) await moveSet(setId, folderId);
-  });
-  const zone = (id) => ({
+  const target = (id, toFolder) => ({
     onDragOver: (e) => { if (hasDrag(e)) { e.preventDefault(); setOver(id); } },
-    onDragLeave: (e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOver(null); },
-    onDrop: (e) => drop(e, id === 'none' ? null : id),
-    className: `folder-zone${over === id ? ' over' : ''}`,
+    onDragLeave: () => setOver(null),
+    onDrop: guard(async (e) => {
+      e.preventDefault();
+      setOver(null);
+      const setId = readDrag(e);
+      if (setId) await moveSet(setId, toFolder);
+    }),
   });
-  const tile = (x) => (
-    <div key={x.id} className="set-tile" draggable onDragStart={(e) => startDrag(e, x.id)}>
-      {x.card}
-      <select className="move" value={(folderOf(x.id) || { id: '' }).id} aria-label={`Move ${x.title} to a folder`} onChange={(e) => guard(moveSet)(x.id, e.target.value || null)}>
-        <option value="">Not in a folder</option>
-        {folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-      </select>
-    </div>
-  );
 
+  const ongoing = Object.values(st.runs).filter((r) => !r.completedAt);
   return (
-    <Shell theme={theme} crumbs={[{ label: 'Question sets' }]}>
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <p className="muted" style={{ margin: 0 }}>
-          {folders.length ? 'Drag a set onto a folder to file it there, or use the menu under it.' : 'Make a folder to sort your sets into, then drag a set onto it.'}
-        </p>
-        <button type="button" className="btn" onClick={make}><Icon name="plus" /> New folder</button>
-      </div>
-
-      {folders.map((f) => (
-        <section key={f.id} {...zone(f.id)}>
-          <div className="section-title">
-            <h2>{f.name}</h2><span className="muted">{plural(inFolder(f).length, 'set')}</span>
-            <span className="spacer" />
-            <button type="button" className="btn ghost sm" onClick={() => rename(f)}><Icon name="pencil" /> Rename</button>
-            <button type="button" className="btn ghost sm" onClick={() => remove(f)}><Icon name="trash" /> Delete</button>
+    <Shell theme={theme} crumbs={[{ label: 'Question sets', href: folder ? '#/sets' : undefined }, ...(folder ? [{ label: folder.name }] : [])]}>
+      {!folder && (
+        <section>
+          <div className="section-title"><h2>Coding question sets</h2></div>
+          <div className="explorer-grid">
+            {st.catalog.sets.map((set) => {
+              const stats = st.stats[set.id];
+              const solved = stats ? Object.values(stats.questions).filter((q) => q.correct > 0).length : 0;
+              const active = ongoing.filter((r) => r.setId === set.id).length;
+              return (
+                <Tile key={set.id} href={`#/set/${set.id}`} title={set.name} sub={set.description}
+                  chips={[[plural(questionCount(set), 'question')], [`${solved} solved`, solved ? 'ok' : ''], ...(active ? [[`${plural(active, 'run')} in progress`, 'accent']] : [])]} />
+              );
+            })}
           </div>
-          {inFolder(f).length === 0 ? <p className="zone-hint">Empty. Drag a set here.</p> : <div className="grid">{inFolder(f).map(tile)}</div>}
         </section>
-      ))}
+      )}
 
-      <section {...(folders.length ? zone('none') : {})}>
-        {folders.length > 0 && <div className="section-title"><h2>Not in a folder</h2><span className="muted">{loose.length}</span></div>}
-        {folders.length > 0 && loose.length === 0 ? <p className="zone-hint">Every set is in a folder. Drag one here to take it out.</p> : <div className="grid">{loose.map(tile)}</div>}
+      <section>
+        <div className="section-title">
+          <h2>{folder ? folder.name : 'Your library'}</h2><span className="muted">{folder ? plural(here.length, 'set') : sets.length}</span>
+          <span className="spacer" />
+          {folder
+            ? <><button type="button" className="btn ghost sm" onClick={rename}><Icon name="pencil" /> Rename</button><button type="button" className="btn ghost sm" onClick={remove}><Icon name="trash" /> Delete folder</button></>
+            : <button type="button" className="btn ghost sm" onClick={make}><Icon name="plus" /> New folder</button>}
+        </div>
+        {folderId && !folder && <div className="empty">That folder no longer exists. <a href="#/sets">Back to your library</a></div>}
+        {folder && <div className={`drop-out${over === 'out' ? ' over' : ''}`} {...target('out', null)}>Drag a set here to move it out of this folder, or <a href="#/sets">go back to the library</a>.</div>}
+        {(!folderId || folder) && (
+          here.length === 0 && (folder || folders.length === 0) ? (
+            <div className="empty">
+              {folder ? 'This folder is empty.' : 'Question sets from folders on this computer (practice PDFs, quiz screenshots) show up here. Nothing is uploaded: the app keeps a copy in this browser. Use the + button at the bottom right to get started.'}
+            </div>
+          ) : (
+            <div className="explorer-grid" style={folder ? { marginTop: 12 } : undefined}>
+              {!folder && folders.map((f) => (
+                <a key={f.id} href={`#/sets/${f.id}`} className={`card tile folder${over === f.id ? ' over' : ''}`} {...target(f.id, f.id)}>
+                  <h2><Icon name="folder" /> {f.name}</h2>
+                  <div className="meta"><span className="chip">{f.items.filter((i) => st.library.sets[i.setId]).length === 0 ? 'Empty' : plural(f.items.filter((i) => st.library.sets[i.setId]).length, 'set')}</span></div>
+                </a>
+              ))}
+              {here.map((set) => (
+                <Tile key={set.id} href={`#/lib/${encodeURIComponent(set.id)}`} title={set.title} sub={set.course} drag onDragStart={(e) => startDrag(e, set.id)}
+                  chips={[[plural(set.manifest.questions.length, 'question')], [plural(new Set(set.manifest.questions.map((q) => q.section)).size, 'section')], ...(set.missing.length ? [[`${plural(set.missing.length, 'file')} missing`, 'warn']] : [])]} />
+              ))}
+            </div>
+          )
+        )}
       </section>
 
-      <LibraryTools />
+      <LibraryNotes />
+      <AddFab />
     </Shell>
   );
 }

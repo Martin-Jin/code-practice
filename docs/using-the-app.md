@@ -34,7 +34,7 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 
 ## Pages
 
-- **Dashboard** (`#/`): a banner with a greeting that changes each visit (and a button to resume your latest session), then every question set, **Your library**, every run in progress, and finished runs. Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.
+- **Dashboard** (`#/`): a banner with a greeting that changes each visit (and a button to resume your latest session), then every run in progress and finished runs. The question sets are on their own tab, **Question sets** (`#/sets`). Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.
 - **Set page**: choose a test mode and start a run. Also lists your runs in that set and links to its stats.
 - **Library** (on the dashboard): question sets from folders on your computer. See [Your own question sets](#your-own-question-sets).
 - **Run**: the workspace described below.
@@ -84,27 +84,26 @@ It works, but a phone is a cramped place to write C++: the on-screen keyboard co
 
 ## Your own question sets
 
-The dashboard's **Your library** section shows question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it.
+The **Question sets** tab shows the coding sets, then **Your library**: question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it. Each set is a tile; click it to open it, where **Browse**, **Stats**, **Add a question** and **Remove** are.
 
-Press **How to add questions** beside **Your library** for a short guide to everything below (and [adding-questions.md](adding-questions.md) for the full one).
+Press **How to add questions** under **Your library** for a short guide to everything below (and [adding-questions.md](adding-questions.md) for the full one).
 
-1. Press **Add or update a folder…** and choose a folder. It works in Firefox, Edge and Chrome. Firefox and Chrome may say they are "uploading" the files; they are only being read on this computer.
-2. The app lists the sets it found, with how many questions, the size and whether each is new, changed or up to date. Sets with problems say why, and PDFs without a manifest are listed as not imported.
+1. Press the round **+** button at the bottom right of **Question sets**, then **Add or update a folder of sets or PDFs** (hover a button to see what it does), and choose a folder. It works in Firefox, Edge and Chrome. Firefox and Chrome may say they are "uploading" the files; they are only being read on this computer.
+2. The app lists the sets it found, with how many questions, the size and whether each is new, changed or up to date. Sets with problems say why. A PDF with no manifest beside it is read straight away, one at a time (about half a minute for a 250-page PDF), and listed as a set with a warning if the question count does not match the cover.
 3. Tick the sets and press **Import**. They are copied into this browser, so the folder is not needed again until it changes. Your folder is never modified.
-4. **Browse** shows a set's questions by section; click a title to open it. **Remove** deletes the copy in this browser (not your folder).
-   - A PDF with no manifest beside it shows **Find the questions**: the app reads the PDF and lists the questions it finds, with a warning if the count does not match the cover. It takes about half a minute for a 250-page PDF.
+4. Click a set's tile to open it and **Browse** its questions by section; click a title to open one. **Remove from this browser** deletes the copy in this browser (not your folder).
 5. After you change files in the folder, choose it again: only changed sets and files are copied.
 
 ### Making your own questions
 
-**Add a question…** (on the dashboard, or on the My questions page) makes a question from a screenshot, with no folder involved.
+The **+** button's **Add a question from a screenshot** (also **Add a question** on a set's page, or Ctrl+K) makes a question from a screenshot, with no folder involved.
 
 1. Paste a screenshot with `Ctrl+V` (or drop an image, or press **Choose an image**). Drag a box over the part to keep, then **Keep the selection** (or **Keep the whole image**). Images are scaled to at most 1400 px wide.
 2. Give it a title in the form `Topic - what is asked` (search finds questions by it), a section, a source and optionally marks, tags and typed wording (maths between `$` signs).
 3. Add the parts to answer: a number with its unit, multiple choice, or self-marked. Add a solution image or text if you have one.
 4. **Save question** puts it in **My questions**, a set of its own on the dashboard that behaves like any other (practice sessions, answers, difficult flag, search). Its questions and images are kept in this browser and are part of a backup (unlike sets copied from a folder, there is no folder to get them back from). **Delete** on a question in the list, or **Delete all my questions**, removes them.
 
-Questions can also be added to a folder's manifest by an AI agent: give it [question-set-format.md](question-set-format.md). A practice PDF must be laid out in a particular way for **Find the questions** to work: see [practice-pdf-prompt.md](practice-pdf-prompt.md).
+Questions can also be added to a folder's manifest by an AI agent: give it [question-set-format.md](question-set-format.md). A practice PDF must be laid out in a particular way for the app to find its questions: see [practice-pdf-prompt.md](practice-pdf-prompt.md).
 
 ### Practising a library set
 
@@ -151,4 +150,22 @@ In your browser's "clear browsing data" window, **cached images and files** is s
 
 ## Folders
 
-On **Question sets**, **New folder** makes a folder to sort your sets into (the coding sets and the sets in your library alike). Drag a set's card onto a folder to file it there, drag it onto **Not in a folder** to take it out, or use the menu under the card. A set is in one folder at a time. Deleting a folder only deletes the folder: its sets go back to **Not in a folder** with all their questions and stats. Folders are part of a backup.
+## Folders
+
+**Your library** on **Question sets** works like a file explorer: folders and sets sit side by side. **New folder** makes one. Click a folder to open it (an empty one just says so). Drag a set's tile onto a folder tile to file it there; inside a folder, drag a set onto the strip at the top to move it back out. A set's page also has a **Folder** menu, for doing the same without dragging. A set is in one folder at a time. Deleting a folder only deletes the folder: its sets go back to your library with all their questions and stats. Folders are part of a backup.
+
+## Command palette (Ctrl+K)
+
+Ctrl+K opens a palette from anywhere (the page behind it dims and blurs). Type to find a command and press Enter. A command that needs more asks for each piece in turn and fills in the best match as you type, so **move a set to a folder** is: `Ctrl+K`, `move`, Enter, the set's name, Enter, the folder's name, Enter. Typing a folder name that does not exist offers to create it. Enter or Tab picks the highlighted choice, Backspace on an empty box goes back a step, Esc closes.
+
+| Command | What it does |
+| --- | --- |
+| Add a question | Opens the add-a-question dialog. |
+| Upload questions | Opens the folder chooser for sets or PDFs. |
+| Move question set to folder | Set, then folder (or "No folder" to move it out). |
+| New folder | Asks for a name. |
+| Open a question set / Show stats for a question set | Asks for the set (library or coding). |
+| Go to the dashboard / question sets | Navigates. |
+| Switch theme, Open settings, Keyboard shortcuts, Back up now | As named. |
+
+The palette is not used while the code editor has focus (Monaco keeps Ctrl+K for its own chords); press Esc or click outside the editor first.

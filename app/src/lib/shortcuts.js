@@ -15,6 +15,7 @@ export const ACTIONS = [
 
 // Shortcuts that cannot be changed (shown in the help dialog for completeness).
 export const FIXED = [
+  { group: 'Anywhere', label: 'Command palette: add a question, upload, move a set to a folder, go to a set, and more', combo: 'Ctrl+K' },
   { group: 'Anywhere', label: 'Search question sets and questions (dashboard)', combo: '/' },
   { group: 'Anywhere', label: 'Show or hide the formula sheets (practice questions)', combo: 'Alt+T' },
 ];
