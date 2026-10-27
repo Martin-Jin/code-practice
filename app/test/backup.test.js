@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  buildBackup, parseBackup, summarise, mergeStores, mergeSettings, totalAttempts, backupDue, backupFileName,
+  buildBackup, buildShare, parseBackup, summarise, mergeStores, mergeSettings, totalAttempts, backupDue, backupFileName,
   VERSION, DUE_AFTER_ATTEMPTS,
 } from '../shared/backup.js';
 
@@ -135,4 +135,30 @@ test('a backup is due only after enough new attempts and enough time', () => {
 
 test('the file name carries the local date', () => {
   assert.equal(backupFileName(new Date(2026, 2, 5, 23, 59)), 'code-practice-backup-2026-03-05.json');
+});
+
+test("a backup carries only this app's settings, and ignores other apps' keys in a file it reads", () => {
+  const b = buildBackup({ stores: {}, settings: { runner: 'local', theme: 'dark', 'collapsed:x': '1', 'taskflow:v1:tasks': '[]', 'firebase:authUser:abc': '{}', 'taskflow:v1:aiGeminiApiKey': 'k' } });
+  assert.deepEqual(Object.keys(b.settings).sort(), ['collapsed:x', 'runner', 'theme']);
+  const raw = { ...b, settings: { ...b.settings, 'taskflow:v1:tasks': '[]', 'firebase:authUser:abc': '{}' } };
+  assert.deepEqual(Object.keys(parseBackup(JSON.stringify(raw)).settings).sort(), ['collapsed:x', 'runner', 'theme']);
+});
+
+test('a share file holds only the questions made in the app and their answer keys, and is marked as a share', () => {
+  const stores = {
+    libMine: [{ id: 'mine', manifest: { questions: [] }, images: {}, updatedAt: '2026-03-01T00:00:00Z' }],
+    libEdits: [{ key: 'mine/q1', setId: 'mine', uid: 'q1', parts: [], updatedAt: '2026-03-01T00:00:00Z' }, { key: 'pdf/q9', setId: 'pdf', uid: 'q9', parts: [], updatedAt: '2026-03-01T00:00:00Z' }],
+    libProgress: [{ key: 'mine/q1', setId: 'mine', uid: 'q1', answers: {}, updatedAt: '2026-03-01T00:00:00Z' }],
+    runs: [{ id: 'r', setId: 's', questions: [], state: {}, updatedAt: '2026-03-01T00:00:00Z' }],
+  };
+  const file = buildShare({ stores });
+  assert.equal(file.kind, 'share');
+  assert.deepEqual(file.settings, {});
+  const parsed = parseBackup(JSON.stringify(file));
+  assert.equal(parsed.kind, 'share');
+  assert.equal(parsed.stores.libMine.length, 1);
+  assert.deepEqual(parsed.stores.libEdits.map((r) => r.key), ['mine/q1']);
+  assert.equal(parsed.stores.libProgress.length, 0);
+  assert.equal(parsed.stores.runs.length, 0);
+  assert.equal(parseBackup(JSON.stringify(buildBackup({ stores: {}, settings: {} }))).kind, 'backup');
 });

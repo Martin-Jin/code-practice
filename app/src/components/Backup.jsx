@@ -1,10 +1,15 @@
 import { useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
-import { backupStatus, downloadBackup, restoreBackup, reloadApp } from '../lib/backup.js';
+import { backupStatus, downloadBackup, downloadShare, restoreBackup, reloadApp } from '../lib/backup.js';
 import { parseBackup, summarise } from '../../shared/backup.js';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import { toast } from './Toasts.jsx';
+
+function shareQuestions() {
+  const name = downloadShare();
+  toast(name ? `Saved ${name} to your downloads. It holds only the questions you made in the app.` : 'There are no questions made in the app to share yet. Use the + button to add some.', name ? 'info' : 'bad');
+}
 
 function backUpNow() {
   const name = downloadBackup();
@@ -32,29 +37,30 @@ function RestoreDialog({ backup, fileName, close }) {
     }
   };
 
-  const options = [
+  const share = backup.kind === 'share';
+  const options = share ? [{ id: 'merge', title: 'Add these questions', desc: 'Adds the questions in this file to your own. Nothing you have is removed or replaced.' }] : [
     { id: 'merge', title: 'Merge (recommended)', desc: 'Keeps what is in this browser and adds what the file has. Where both have the same run or question, the newer one wins.' },
     { id: 'replace', title: 'Replace everything', desc: 'Erases every run, stat and setting in this browser first, then loads the file.' },
   ];
   return (
     <Modal
-      title="Restore this backup?" onClose={() => !busy && close(false)}
+      title={share ? 'Add shared questions?' : 'Restore this backup?'} onClose={() => !busy && close(false)}
       footer={(
         <>
           <button type="button" className="btn" disabled={busy} onClick={() => close(false)}>Cancel</button>
           <button type="button" className={`btn ${mode === 'replace' ? 'danger solid' : 'primary'}`} disabled={busy} onClick={go}>
-            {busy ? 'Restoring…' : mode === 'replace' ? 'Replace everything' : 'Merge'}
+            {busy ? 'Working…' : share ? 'Add questions' : mode === 'replace' ? 'Replace everything' : 'Merge'}
           </button>
         </>
       )}
     >
       <p><b>{fileName}</b>, made {new Date(sum.createdAt).toLocaleString('en-NZ', { dateStyle: 'medium', timeStyle: 'short' })}.</p>
-      <ul className="muted" style={{ paddingLeft: 18 }}>
+      {share ? <p className="muted">{plural(backup.stores.libMine.reduce((n, r) => n + r.manifest.questions.length, 0), 'question')} in {plural(backup.stores.libMine.length, 'set')}: {backup.stores.libMine.map((r) => r.manifest.title).join(', ')}.</p> : <ul className="muted" style={{ paddingLeft: 18 }}>
         <li>{plural(sum.runs, 'run')} ({sum.finishedRuns} finished) and {plural(sum.attempts, 'attempt')} in the stats</li>
         <li>{setNames.length ? setNames.join(', ') : 'No question sets'}</li>
         {(sum.libraryQuestions > 0 || sum.libraryRuns > 0) && <li>Your library: {plural(sum.libraryQuestions, 'question')} with progress and {plural(sum.libraryRuns, 'practice session')}</li>}
         <li>{plural(sum.settings, 'setting')}</li>
-      </ul>
+      </ul>}
       <div className="modes">
         {options.map((o) => (
           <div key={o.id} className={`mode${mode === o.id ? ' selected' : ''}`}>
@@ -91,12 +97,13 @@ export function BackupSection() {
     <>
       <h3>Backup</h3>
       <p className="muted">
-        Your progress is saved in this browser only, and clearing site data deletes it. A backup is one file with every run, draft and stat from every question set, plus these settings.
+        Your progress is saved in this browser only, and clearing site data deletes it. A backup is one file with every run, draft and stat from every question set, plus this app's settings (nothing from other pages on the same site). To give someone your own questions without your progress, use Export my questions to share; they open it with Restore, which only adds to what they have.
       </p>
       <p>Last backup: <b>{timeAgo(status.at)}</b>{status.newAttempts > 0 && <span className="muted"> ({plural(status.newAttempts, 'attempt')} since)</span>}</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <button type="button" className="btn primary" onClick={backUpNow}>Back up now</button>
         <button type="button" className="btn" onClick={() => file.current.click()}>Restore from a backup…</button>
+        <button type="button" className="btn" onClick={shareQuestions} title="A file with only the questions you made in the app (not your progress or settings), to give to someone else">Export my questions to share</button>
         <input ref={file} type="file" accept=".json,application/json" hidden onChange={onFile} />
       </div>
     </>

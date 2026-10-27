@@ -6,7 +6,7 @@ Short answer: yes, but not by handing it the whole backup file.
 
 A backup (Settings > Back up now) is plain JSON, and an agent can edit it: your own questions are in `stores.libMine` (a manifest plus the images as data URLs) and answer keys in `stores.libEdits`. A restore keeps, record by record, the one with the newer `updatedAt`, so an edited record only wins if the agent sets `updatedAt` to now.
 
-But the file also holds `settings`, a copy of the browser's localStorage for the site's address. If another app has run on the same address (for example another local app on `localhost`), that includes its data, possibly with credentials. Do not give the file to an agent or commit it (`code-practice-backup-*.json` is ignored by git for that reason).
+A backup made before this was changed also held `settings` copied from everything in the browser's localStorage for the site's address, including other apps on the same address (a GitHub Pages site serves all of a user's projects from one address), possibly with credentials. Newer backups hold only this app's own settings, and a restore ignores any other keys. Even so, do not commit a backup (`code-practice-backup-*.json` and `code-practice-questions-*.json` are ignored by git), and for someone else use **Export my questions to share** (see [using-the-app.md](using-the-app.md)) rather than a full backup.
 
 ## Better: a `.questions.json` in a folder
 

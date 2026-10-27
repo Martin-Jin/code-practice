@@ -135,7 +135,8 @@ In your browser's "clear browsing data" window, **cached images and files** is s
 
 **Settings > Backup** keeps a copy outside the browser.
 
-- **Back up now** downloads one file, `code-practice-backup-YYYY-MM-DD.json`. It holds every run, draft and stat from every question set, plus your settings (theme, runner, shortcuts, pane sizes). Question sets themselves are not in it, because they come with the app.
+- **Back up now** downloads one file, `code-practice-backup-YYYY-MM-DD.json`. It holds every run, draft and stat from every question set, plus this app's own settings (theme, runner, shortcuts, pane sizes). Nothing else in the browser's storage is included, so other pages on the same site (a GitHub Pages address is shared by all your projects) are not part of it.
+- **Export my questions to share** downloads `code-practice-questions-YYYY-MM-DD.json` with only the questions you made in the app (and the answer keys on them): no progress, runs, stats, folders or settings. Give it to someone; they open it with **Restore from a backup…**, which only adds the questions to theirs and never replaces anything. Sets imported from a PDF are not in it, because they come from the PDF, which you share as a file. Question sets themselves are not in it, because they come with the app.
 - **Restore from a backup…** reads such a file and shows what is in it before changing anything. Choose how:
   - **Merge** (the default) keeps what is in this browser and adds what the file has. Where both have the same run or question, the newer one wins, and counters are never added together, so restoring the same file twice changes nothing.
   - **Replace everything** erases the runs, stats and settings here first. Use it on a clean machine.

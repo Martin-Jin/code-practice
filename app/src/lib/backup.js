@@ -1,7 +1,7 @@
 // Browser side of backups: collects the saved data, downloads it, and restores a file. The
 // file format and the merge rules are in shared/backup.js.
 import {
-  STORES, buildBackup, mergeStores, mergeSettings, backupDue, backupFileName, totalAttempts, DUE_AFTER_DAYS,
+  STORES, buildBackup, mergeStores, mergeSettings, backupDue, backupFileName, totalAttempts, DUE_AFTER_DAYS, buildShare, shareFileName, isOwnSetting,
 } from '../../shared/backup.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
@@ -23,7 +23,7 @@ function readSettings() {
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (!META.includes(key)) out[key] = localStorage.getItem(key);
+      if (isOwnSetting(key)) out[key] = localStorage.getItem(key);
     }
   } catch { /* storage blocked */ }
   return out;
@@ -32,7 +32,7 @@ function readSettings() {
 function writeSettings(settings, clearFirst) {
   try {
     if (clearFirst) for (const key of Object.keys(readSettings())) localStorage.removeItem(key);
-    for (const [key, value] of Object.entries(settings)) if (!META.includes(key)) localStorage.setItem(key, value);
+    for (const [key, value] of Object.entries(settings)) if (isOwnSetting(key)) localStorage.setItem(key, value);
   } catch { /* storage blocked */ }
 }
 
@@ -60,6 +60,27 @@ function remember(createdAt) {
   const at = readKey(AT_KEY);
   writeKey(AT_KEY, at && Date.parse(at) > Date.parse(createdAt) ? at : createdAt);
   writeKey(ATTEMPTS_KEY, String(totalAttempts(Object.values(state.stats))));
+}
+
+function download(file, name) {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(file)], { type: 'application/json' }));
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+}
+
+// Downloads only the questions made in the app and their answer keys, to give to someone else (see buildShare).
+// Returns the file name, or null when there is nothing of that kind to share.
+export function downloadShare() {
+  const now = new Date();
+  const file = buildShare({ stores: currentRecords(), now });
+  if (!file.stores.libMine.length) return null;
+  const name = shareFileName(now);
+  download(file, name);
+  return name;
 }
 
 export function downloadBackup() {

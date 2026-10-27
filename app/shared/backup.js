@@ -56,11 +56,33 @@ export const STORES = {
   libMine: { key: 'id', valid: (r) => isObject(r.manifest) && isObject(r.images), merge: newer },
 };
 
+// The settings this app keeps in localStorage. The page may share its address with other apps (a GitHub Pages site serves
+// all of a user's projects from one origin), so only these are backed up, restored or cleared: nothing else in
+// localStorage is this app's to touch, and a backup never carries another app's data or credentials.
+export const OWN_SETTINGS = [
+  'runner', 'autoSuggest', 'prioritise', 'shortcuts', 'theme', 'wandbox-compiler', 'online-ack', 'taskTab', 'taskOpen', 'sideOpen',
+  'outputOpen', 'sizes', 'editMode', 'formulaOpen', 'formulaWidth',
+];
+export const isOwnSetting = (key) => OWN_SETTINGS.includes(key) || key.startsWith('collapsed:');
+
 export function buildBackup({ stores, settings, now = new Date() }) {
   const out = {};
   for (const name of Object.keys(STORES)) out[name] = stores[name] || [];
-  return { format: FORMAT, version: VERSION, createdAt: now.toISOString(), stores: out, settings };
+  const own = Object.fromEntries(Object.entries(settings || {}).filter(([k]) => isOwnSetting(k)));
+  return { format: FORMAT, version: VERSION, createdAt: now.toISOString(), stores: out, settings: own };
 }
+
+// A file to hand to someone else: only the questions made in the app (libMine) and the answer keys and notes on them. No
+// progress, runs, stats, folders or settings. It is an ordinary backup file with kind "share", which a restore only
+// merges (never replaces), so it cannot wipe the other person's data.
+export function buildShare({ stores, now = new Date() }) {
+  const mine = stores.libMine || [];
+  const ids = new Set(mine.map((r) => r.id));
+  const file = buildBackup({ stores: { libMine: mine, libEdits: (stores.libEdits || []).filter((r) => ids.has(r.setId)) }, settings: {}, now });
+  return { ...file, kind: 'share' };
+}
+
+export const shareFileName = (date = new Date()) => backupFileName(date).replace('backup', 'questions');
 
 // Reads a backup file's text. Throws an Error whose message can be shown to the user.
 export function parseBackup(text) {
@@ -86,8 +108,8 @@ export function parseBackup(text) {
   }
 
   const settings = {};
-  if (isObject(raw.settings)) for (const [k, v] of Object.entries(raw.settings)) if (typeof v === 'string') settings[k] = v;
-  return { createdAt: raw.createdAt, stores, settings };
+  if (isObject(raw.settings)) for (const [k, v] of Object.entries(raw.settings)) if (typeof v === 'string' && isOwnSetting(k)) settings[k] = v;
+  return { createdAt: raw.createdAt, stores, settings, kind: raw.kind === 'share' ? 'share' : 'backup' };
 }
 
 export const totalAttempts = (statsList) =>
