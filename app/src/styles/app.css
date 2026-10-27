@@ -615,3 +615,6 @@ dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center
 .tag-options { position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 40; list-style: none; margin: 0; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); }
 .tag-options li { padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--text); }
 .tag-options li.active { background: var(--surface-2); }
+
+.edit-toggle { color: var(--muted); }
+.edit-toggle.on { color: var(--accent); background: var(--surface-2); }

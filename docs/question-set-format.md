@@ -131,7 +131,7 @@ Each set can have formula sheets (PDFs or images). In a question of an imported 
 For a set the app indexed from a PDF (Chromium browsers, such as Edge or Chrome), **Link the PDF file** keeps a handle to the file. Then:
 
 - When the file changes (checked when the page opens and when the window is focused, or with **Check for changes**), the set is indexed again and keeps its progress, as described above. A file that no longer reads as a practice PDF is refused and the old copy stays.
-- **Add a question** can also append it to the PDF as a new question page and solution page in the PDF layout. **Edit mode** can draw a replacement image or wording over a question's or solution's part of the page. **Delete** can remove a question's pages. These write into the linked file. The PDF's cover is not updated, so the indexer may warn that the cover lists fewer questions than were found.
+- **Add a question** can also append it to the PDF as a new question page and solution page in the PDF layout. Edit mode (the pen beside a question's title) can draw a replacement image or wording over a question's or solution's part of the page. **Delete** can remove a question's pages. These write into the linked file. The PDF's cover is not updated, so the indexer may warn that the cover lists fewer questions than were found.
 - Without a link, or in a browser that cannot link files (Firefox), the same changes download an updated PDF, which you replace your original with. The app's stored copy is updated either way.
 - A question's title can be changed in the app but not in the PDF. Marks, tags, answers and notes are not in the PDF at all.
 - Deleting a question without the PDF option hides it in the app only; indexing again does not bring it back.

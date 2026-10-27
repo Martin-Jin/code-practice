@@ -114,7 +114,11 @@ export default function QuestionView({ setId, uid, run, theme }) {
             {difficult && <span className="chip warn">Difficult</span>}
             {question.source && <span className="muted">{question.source}</span>}
           </div>
-          <h1 className="title-with-icon" style={{ margin: '8px 0 14px' }}>{question.title}{editMode && pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</h1>
+          <h1 className="title-with-icon" style={{ margin: '8px 0 14px' }}>{question.title}
+            <button type="button" className={`btn ghost sm icon-only edit-toggle${editMode ? ' on' : ''}`} aria-pressed={editMode} onClick={toggleEdit}
+              title={editMode ? 'Leave edit mode' : 'Edit this question'} aria-label={editMode ? 'Leave edit mode' : 'Edit this question'}><Icon name="pencil" /></button>
+          </h1>
+          {editMode && <div className="edit-row">Question {pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</div>}
           <Stem set={set} question={question} />
           {editMode && <div className="edit-row">Answers {pencil(`Edit the answer key${edited ? ' (changed)' : ''}`, () => setPanel('key'))}</div>}
           <ol className="parts">
@@ -148,7 +152,6 @@ export default function QuestionView({ setId, uid, run, theme }) {
                 <Icon name="flag" /> {difficult ? 'Marked difficult' : 'Mark as difficult'}
               </button>
               <button type="button" className="btn" aria-pressed={panel === 'solution'} onClick={() => setPanel(panel === 'solution' ? null : 'solution')} title="Show or hide the solution (S)">Solution</button>
-              <button type="button" className="btn" aria-pressed={editMode} onClick={toggleEdit} title="Edit mode shows the controls that change this question, such as the answer key"><Icon name="pencil" /> Edit mode</button>
               <button type="button" className="btn" aria-pressed={formulaOpen} onClick={toggleFormula} title="Show or hide the formula sheets (Alt+T)">Formulas{sheetsOf(setId).length ? ` (${sheetsOf(setId).length})` : ''}</button>
             </div>
             <label className="stack" style={{ gap: 4 }}>
