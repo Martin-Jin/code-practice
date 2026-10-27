@@ -29,7 +29,7 @@ const BANNER = {
 // follow the session's questions and a strip along the top shows how each one went.
 export default function QuestionView({ setId, uid, run, theme }) {
   const st = useStore();
-  const { open } = useDialogs();
+  const { open, confirm } = useDialogs();
   const set = st.library.sets[setId];
   const all = set ? effectiveQuestions(set) : [];
   const questions = run ? run.questions.map((id) => all.find((q) => q.uid === id)).filter(Boolean) : all;
@@ -65,6 +65,10 @@ export default function QuestionView({ setId, uid, run, theme }) {
     if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) setResult(check(setId, uid, question).overall);
   };
   const reset = () => { resetAnswers(setId, uid); setResult(null); };
+  const resetStats = async () => {
+    const ok = await confirm({ title: 'Reset the checks?', body: 'The count of times this question was checked, and how many were right, goes back to zero. Your typed answers and notes are kept.', confirmText: 'Reset' });
+    if (ok) { resetChecks(setId, uid); setResult(null); }
+  };
   const toggleDifficult = () => setDifficult(setId, uid, !(progress && progress.difficult));
 
   useEffect(() => {
@@ -119,7 +123,10 @@ export default function QuestionView({ setId, uid, run, theme }) {
               title={editMode ? 'Leave edit mode' : 'Edit this question'} aria-label={editMode ? 'Leave edit mode' : 'Edit this question'}><Icon name="pencil" /></button>
           </h1>
           {progress && progress.attempts > 0 && (
-            <p className="muted" style={{ margin: '-6px 0 24px' }}>Checked {plural(progress.attempts, 'time')}: {progress.right} right, {progress.wrong} not right.</p>
+            <p className="muted checked-line">
+              Checked {plural(progress.attempts, 'time')}: {progress.right} right, {progress.wrong} not right.
+              <button type="button" className="btn ghost sm icon-only" onClick={resetStats} title="Reset the checks for this question" aria-label="Reset the checks for this question"><Icon name="refresh" /></button>
+            </p>
           )}
           {editMode && <div className="edit-row">Question {pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</div>}
           <Stem set={set} question={question} />
