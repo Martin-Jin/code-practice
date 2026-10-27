@@ -138,4 +138,4 @@ For a set the app indexed from a PDF (Chromium browsers, such as Edge or Chrome)
 
 ## Where the copies live
 
-Imported sets are kept in the browser's IndexedDB (`libSets` for the manifests, `libFiles` for the PDFs and images; `libFormulas` lists the formula sheets and `libHandles` holds the linked PDF files). They are copies, so they are not part of a backup: add the folder again to restore them. Your progress on them is stored separately and is part of a backup. Clearing "cookies and site data" removes the copies, so keep the folder.
+A backup can carry them (Settings > Backup, with the checkbox for PDFs and images), so they are not only copies you must re-add. Imported sets are kept in the browser's IndexedDB (`libSets` for the manifests, `libFiles` for the PDFs and images; `libFormulas` lists the formula sheets and `libHandles` holds the linked PDF files). They are copies, so they are not part of a backup: add the folder again to restore them. Your progress on them is stored separately and is part of a backup. Clearing "cookies and site data" removes the copies, so keep the folder.

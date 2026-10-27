@@ -216,7 +216,7 @@ export function HelpDialog({ close }) {
       <ul>
         <li>Open a question, click the pen beside its title to edit it, then the pen beside <b>Answers</b> to add the answer, so the app can check what you type.</li>
         <li><b>Mark as difficult</b> (or press D) flags a question. Turn on <b>Settings &gt; Practice</b> to draw those more often.</li>
-        <li>Practise a set from its page, and press <b>Back up now</b> in Settings now and then: your progress is only in this browser.</li>
+        <li>Practise a set from its page, and press <b>Back up now</b> in Settings now and then: your progress is only in this browser. Tick <b>Include my imported sets</b> there to put the PDFs in the backup too (a zip), so another computer can restore the sets themselves.</li>
       </ul>
 
       <h3>More coding questions</h3>

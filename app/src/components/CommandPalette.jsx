@@ -70,7 +70,7 @@ function commands(st, ctx) {
     { id: 'theme', label: 'Switch theme', hint: 'auto, light, dark', keywords: 'dark light mode', run: () => ctx.theme.toggle() },
     { id: 'settings', label: 'Open settings', keywords: 'preferences runner backup', run: () => ctx.open(({ close }) => <SettingsDialog close={close} />) },
     { id: 'shortcuts', label: 'Keyboard shortcuts', keywords: 'help keys', run: () => ctx.open(({ close }) => <ShortcutsDialog close={close} />) },
-    { id: 'backup', label: 'Back up now', hint: 'download a backup file', keywords: 'save export', run: () => toast(`Saved ${downloadBackup()}.`) },
+    { id: 'backup', label: 'Back up now', hint: 'download a backup file', keywords: 'save export', run: async () => toast(`Saved ${await downloadBackup()}.`) },
   ];
 }
 

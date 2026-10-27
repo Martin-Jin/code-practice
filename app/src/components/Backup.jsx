@@ -1,22 +1,23 @@
 import { useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
-import { backupStatus, downloadBackup, downloadShare, restoreBackup, reloadApp } from '../lib/backup.js';
-import { parseBackup, summarise } from '../../shared/backup.js';
+import { backupStatus, downloadBackup, downloadShare, restoreBackup, readBackupFile, reloadApp } from '../lib/backup.js';
+import { summarise } from '../../shared/backup.js';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import { toast } from './Toasts.jsx';
 
-function shareQuestions() {
-  const name = downloadShare();
-  toast(name ? `Saved ${name} to your downloads. It holds only the questions you made in the app.` : 'There are no questions made in the app to share yet. Use the + button to add some.', name ? 'info' : 'bad');
+async function shareQuestions(files) {
+  try {
+    const name = await downloadShare({ files });
+    toast(name ? `Saved ${name} to your downloads.${files ? '' : ' It holds only the questions you made in the app.'}` : 'There is nothing to share yet. Use the + button to add questions.', name ? 'info' : 'bad');
+  } catch (e) { toast(`Could not make the file: ${e.message}`, 'bad'); }
 }
 
-function backUpNow() {
-  const name = downloadBackup();
-  toast(`Saved ${name} to your downloads.`);
+async function backUpNow(files = false) {
+  try { toast(`Saved ${await downloadBackup({ files })} to your downloads.`); } catch (e) { toast(`Could not make the backup: ${e.message}`, 'bad'); }
 }
 
-function RestoreDialog({ backup, fileName, close }) {
+function RestoreDialog({ backup, zip, fileName, close }) {
   const st = useStore();
   const [mode, setMode] = useState('merge');
   const [busy, setBusy] = useState(false);
@@ -27,7 +28,7 @@ function RestoreDialog({ backup, fileName, close }) {
   const go = async () => {
     setBusy(true);
     try {
-      await restoreBackup(backup, mode);
+      await restoreBackup(backup, mode, zip);
       close(true);
       toast('Restored. Reloading the page…');
       setTimeout(reloadApp, 700);
@@ -55,9 +56,10 @@ function RestoreDialog({ backup, fileName, close }) {
       )}
     >
       <p><b>{fileName}</b>, made {new Date(sum.createdAt).toLocaleString('en-NZ', { dateStyle: 'medium', timeStyle: 'short' })}.</p>
-      {share ? <p className="muted">{plural(backup.stores.libMine.reduce((n, r) => n + r.manifest.questions.length, 0), 'question')} in {plural(backup.stores.libMine.length, 'set')}: {backup.stores.libMine.map((r) => r.manifest.title).join(', ')}.</p> : <ul className="muted" style={{ paddingLeft: 18 }}>
+      {share ? <p className="muted">{plural(backup.stores.libMine.reduce((n, r) => n + r.manifest.questions.length, 0), 'question')} in {plural(backup.stores.libMine.length, 'set')} of your own{backup.stores.libMine.length ? `: ${backup.stores.libMine.map((r) => r.manifest.title).join(', ')}` : ''}.{backup.library.length > 0 && ` Also ${plural(backup.library.length, 'imported set')} with ${backup.library.length === 1 ? 'its' : 'their'} PDFs and images: ${backup.library.map((r) => r.title).join(', ')}. A set you already have keeps your copy and only gains the questions added to it.`}</p> : <ul className="muted" style={{ paddingLeft: 18 }}>
         <li>{plural(sum.runs, 'run')} ({sum.finishedRuns} finished) and {plural(sum.attempts, 'attempt')} in the stats</li>
         <li>{setNames.length ? setNames.join(', ') : 'No question sets'}</li>
+        {sum.librarySets > 0 && <li>{plural(sum.librarySets, 'imported set')} with their PDFs and images, recreated if this browser lacks them</li>}
         {(sum.libraryQuestions > 0 || sum.libraryRuns > 0) && <li>Your library: {plural(sum.libraryQuestions, 'question')} with progress and {plural(sum.libraryRuns, 'practice session')}</li>}
         <li>{plural(sum.settings, 'setting')}</li>
       </ul>}
@@ -79,19 +81,24 @@ function RestoreDialog({ backup, fileName, close }) {
 
 // Inside the Settings dialog.
 export function BackupSection() {
-  useStore();   // re-render after a backup so "last backup" updates
+  const st = useStore();   // re-render after a backup so "last backup" updates
   const { open } = useDialogs();
   const file = useRef(null);
+  const [files, setFiles] = useState(false);   // also include the imported sets' PDFs and images
+  const [busy, setBusy] = useState(false);
   const status = backupStatus();
+  const imported = Object.values(st.library.sets).filter((x) => !x.userOwned);
+  const megabytes = Math.round(imported.reduce((n, x) => n + x.bytes, 0) / 1048576);
 
   const onFile = async (e) => {
     const chosen = e.target.files[0];
     e.target.value = '';   // so choosing the same file again still fires
     if (!chosen) return;
-    let backup;
-    try { backup = parseBackup(await chosen.text()); } catch (err) { toast(err.message, 'bad'); return; }
-    open(({ close }) => <RestoreDialog backup={backup} fileName={chosen.name} close={close} />);
+    let read;
+    try { read = await readBackupFile(chosen); } catch (err) { toast(err.message, 'bad'); return; }
+    open(({ close }) => <RestoreDialog backup={read.backup} zip={read.zip} fileName={chosen.name} close={close} />);
   };
+  const run = async (fn) => { setBusy(true); await fn(files); setBusy(false); };
 
   return (
     <>
@@ -100,11 +107,18 @@ export function BackupSection() {
         Your progress is saved in this browser only, and clearing site data deletes it. A backup is one file with every run, draft and stat from every question set, plus this app's settings (nothing from other pages on the same site). To give someone your own questions without your progress, use Export my questions to share; they open it with Restore, which only adds to what they have.
       </p>
       <p>Last backup: <b>{timeAgo(status.at)}</b>{status.newAttempts > 0 && <span className="muted"> ({plural(status.newAttempts, 'attempt')} since)</span>}</p>
+      {imported.length > 0 && (
+        <label className="check">
+          <input type="checkbox" checked={files} onChange={(e) => setFiles(e.target.checked)} />
+          <span>Include my imported sets with their PDFs and images (a zip file of about {megabytes} MB)</span>
+        </label>
+      )}
+      {files && <p className="muted">With this, a restore on another computer recreates the sets themselves, so the folders need not be added again. If you give the export to someone, remember that course PDFs may not be yours to pass on. Progress is never in the export.</p>}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button type="button" className="btn primary" onClick={backUpNow}>Back up now</button>
-        <button type="button" className="btn" onClick={() => file.current.click()}>Restore from a backup…</button>
-        <button type="button" className="btn" onClick={shareQuestions} title="A file with only the questions you made in the app (not your progress or settings), to give to someone else">Export my questions to share</button>
-        <input ref={file} type="file" accept=".json,application/json" hidden onChange={onFile} />
+        <button type="button" className="btn primary" disabled={busy} onClick={() => run(backUpNow)}>{busy ? 'Working…' : 'Back up now'}</button>
+        <button type="button" className="btn" disabled={busy} onClick={() => file.current.click()}>Restore from a backup…</button>
+        <button type="button" className="btn" disabled={busy} onClick={() => run(shareQuestions)} title="Only the questions you made in the app and their answer keys, never your progress or settings, to give to someone else">Export my questions to share</button>
+        <input ref={file} type="file" accept=".json,.zip,application/json,application/zip" hidden onChange={onFile} />
       </div>
     </>
   );
@@ -121,7 +135,7 @@ export function BackupReminder() {
       <span>
         {plural(status.newAttempts, 'attempt')} since your last backup ({status.at ? timeAgo(status.at) : 'none yet'}). Progress is saved only in this browser, and clearing site data deletes it.
       </span>
-      <button type="button" className="btn sm primary" onClick={backUpNow}>Back up now</button>
+      <button type="button" className="btn sm primary" onClick={() => backUpNow()}>Back up now</button>
       <button type="button" className="btn sm" onClick={() => setHidden(true)}>Not now</button>
     </div>
   );

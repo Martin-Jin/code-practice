@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildBackup, buildShare, parseBackup, summarise, mergeStores, mergeSettings, totalAttempts, backupDue, backupFileName,
-  VERSION, DUE_AFTER_ATTEMPTS,
+  VERSION, PLAIN_VERSION, DUE_AFTER_ATTEMPTS,
 } from '../shared/backup.js';
 
 const run = (id, updatedAt, extra = {}) => ({
@@ -22,7 +22,7 @@ const sample = () => buildBackup({
 
 test('a backup survives a round trip through JSON text', () => {
   const b = sample();
-  assert.equal(b.version, VERSION);
+  assert.equal(b.version, PLAIN_VERSION);
   const back = parseBackup(JSON.stringify(b));
   assert.deepEqual(back.stores, b.stores);
   assert.deepEqual(back.settings, b.settings);
@@ -162,3 +162,18 @@ test('a share file holds only the questions made in the app and their answer key
   assert.equal(parsed.stores.runs.length, 0);
   assert.equal(parseBackup(JSON.stringify(buildBackup({ stores: {}, settings: {} }))).kind, 'backup');
 });
+
+test('a backup with imported sets is version 2, parses, and one with a damaged set is refused', () => {
+  const library = { sets: [{ id: 'pdf', title: 'PDF', manifest: { questions: [] }, files: { 'a.pdf': { size: 1, modified: 1 } } }], formulas: [{ setId: 'pdf', sheets: [] }] };
+  const file = buildBackup({ stores: {}, settings: {}, library });
+  assert.equal(file.version, VERSION);
+  assert.equal(file.includesFiles, true);
+  const parsed = parseBackup(JSON.stringify(file));
+  assert.equal(parsed.library.length, 1);
+  assert.equal(summarise(parsed).librarySets, 1);
+  assert.throws(() => parseBackup(JSON.stringify({ ...file, library: [{ id: 'x' }] })), /imported sets/);
+  assert.equal(parseBackup(JSON.stringify(buildBackup({ stores: {}, settings: {} }))).library.length, 0);
+  const share = buildShare({ stores: { libMine: [] }, library });
+  assert.equal(share.kind, 'share');
+  assert.equal(share.library.length, 1);
+});

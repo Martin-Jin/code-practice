@@ -3,7 +3,11 @@
 // tests share them. Adding a store to the app means adding it to STORES; older backup files
 // then still load, with that store empty.
 export const FORMAT = 'code-practice-backup';
-export const VERSION = 1;
+// Version 1 files hold the saved records and settings. Version 2 files also carry the user's imported sets (their manifests,
+// listed under `library`, and the formula sheet lists under `formulas`); the PDFs and images themselves sit beside the
+// JSON in a zip (see shared/zip.js). A plain backup is still written as version 1.
+export const VERSION = 2;
+export const PLAIN_VERSION = 1;
 
 // A backup is "due" after this many attempts since the last one, once it is this old.
 export const DUE_AFTER_ATTEMPTS = 20;
@@ -65,20 +69,22 @@ export const OWN_SETTINGS = [
 ];
 export const isOwnSetting = (key) => OWN_SETTINGS.includes(key) || key.startsWith('collapsed:');
 
-export function buildBackup({ stores, settings, now = new Date() }) {
+export function buildBackup({ stores, settings, now = new Date(), library = null }) {
   const out = {};
   for (const name of Object.keys(STORES)) out[name] = stores[name] || [];
   const own = Object.fromEntries(Object.entries(settings || {}).filter(([k]) => isOwnSetting(k)));
-  return { format: FORMAT, version: VERSION, createdAt: now.toISOString(), stores: out, settings: own };
+  const file = { format: FORMAT, version: library ? VERSION : PLAIN_VERSION, createdAt: now.toISOString(), stores: out, settings: own };
+  if (library) Object.assign(file, { includesFiles: true, library: library.sets, formulas: library.formulas });
+  return file;
 }
 
 // A file to hand to someone else: only the questions made in the app (libMine) and the answer keys and notes on them. No
 // progress, runs, stats, folders or settings. It is an ordinary backup file with kind "share", which a restore only
 // merges (never replaces), so it cannot wipe the other person's data.
-export function buildShare({ stores, now = new Date() }) {
+export function buildShare({ stores, now = new Date(), library = null }) {
   const mine = stores.libMine || [];
   const ids = new Set(mine.map((r) => r.id));
-  const file = buildBackup({ stores: { libMine: mine, libEdits: (stores.libEdits || []).filter((r) => ids.has(r.setId)) }, settings: {}, now });
+  const file = buildBackup({ stores: { libMine: mine, libEdits: (stores.libEdits || []).filter((r) => ids.has(r.setId)) }, settings: {}, now, library });
   return { ...file, kind: 'share' };
 }
 
@@ -109,7 +115,12 @@ export function parseBackup(text) {
 
   const settings = {};
   if (isObject(raw.settings)) for (const [k, v] of Object.entries(raw.settings)) if (typeof v === 'string' && isOwnSetting(k)) settings[k] = v;
-  return { createdAt: raw.createdAt, stores, settings, kind: raw.kind === 'share' ? 'share' : 'backup' };
+  // Imported sets, when the file carries them (a zip). A damaged entry is an error, like a damaged record.
+  const library = raw.library === undefined ? [] : raw.library;
+  const formulas = raw.formulas === undefined ? [] : raw.formulas;
+  if (!Array.isArray(library) || !library.every((r) => isObject(r) && typeof r.id === 'string' && isObject(r.manifest) && Array.isArray(r.manifest.questions) && isObject(r.files))) throw new Error('The imported sets in that file are damaged.');
+  if (!Array.isArray(formulas) || !formulas.every((r) => isObject(r) && typeof r.setId === 'string' && Array.isArray(r.sheets))) throw new Error('The formula sheets in that file are damaged.');
+  return { createdAt: raw.createdAt, stores, settings, library, formulas, kind: raw.kind === 'share' ? 'share' : 'backup' };
 }
 
 export const totalAttempts = (statsList) =>
@@ -126,6 +137,7 @@ export function summarise(backup) {
     attempts: totalAttempts(stats),
     libraryQuestions: backup.stores.libProgress.length,
     libraryRuns: backup.stores.libRuns.length,
+    librarySets: (backup.library || []).length,
     settings: Object.keys(backup.settings).length,
   };
 }

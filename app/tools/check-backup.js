@@ -4,6 +4,7 @@
 // Exit code 0 when the file would restore cleanly with every question usable, 1 otherwise.
 import fs from 'node:fs';
 import { parseBackup } from '../shared/backup.js';
+import { isZip, readZip } from '../shared/zip.js';
 import { validateQuestionSet, questionProblems, neededFiles } from '../shared/questionset.js';
 
 const file = process.argv[2];
@@ -15,7 +16,10 @@ if (!file) {
 const problems = [];
 let backup;
 try {
-  backup = parseBackup(fs.readFileSync(file, 'utf8'));
+  const bytes = new Uint8Array(fs.readFileSync(file));
+  // a backup made with the PDFs included is a zip with backup.json in it
+  const text = isZip(bytes) ? new TextDecoder().decode(await readZip(bytes).get('backup.json')()) : new TextDecoder().decode(bytes);
+  backup = parseBackup(text);
 } catch (e) {
   console.error(`NOT A VALID BACKUP: ${e.message}`);
   process.exit(1);

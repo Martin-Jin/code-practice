@@ -8,6 +8,8 @@ A backup (Settings > Back up now) is plain JSON, and an agent can edit it: your 
 
 A backup made before this was changed also held `settings` copied from everything in the browser's localStorage for the site's address, including other apps on the same address (a GitHub Pages site serves all of a user's projects from one address), possibly with credentials. Newer backups hold only this app's own settings, and a restore ignores any other keys. Even so, do not commit a backup (`code-practice-backup-*.json` and `code-practice-questions-*.json` are ignored by git), and for someone else use **Export my questions to share** (see [using-the-app.md](using-the-app.md)) rather than a full backup.
 
+A backup made with the PDFs included is a `.zip`; the JSON described here is its `backup.json`, and `check-backup.js` reads the zip directly. Edit only that JSON, never the files under `files/`.
+
 ## Better: a `.questions.json` in a folder
 
 An agent can add or change questions in a `.questions.json` file beside your PDF with no risk to your progress. Use the [question set format](question-set-format.md); the prompt in the vault's `Add question prompt.md` does exactly this. Then add the folder again in the app. Progress stays, because it is filed under each question's `uid`.
