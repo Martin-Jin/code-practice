@@ -7,6 +7,7 @@ import { DialogProvider } from './components/Dialogs.jsx';
 import ToastHost from './components/Toasts.jsx';
 import Dashboard from './views/Dashboard.jsx';
 import SetsPage from './views/SetsPage.jsx';
+import FoldersPage from './views/FoldersPage.jsx';
 import SetPage from './views/SetPage.jsx';
 import Stats from './views/Stats.jsx';
 import LibrarySet from './views/LibrarySet.jsx';
@@ -15,7 +16,7 @@ import QuestionView from './views/QuestionView.jsx';
 import PracticeView from './views/PracticeView.jsx';
 import RunView from './views/run/RunView.jsx';
 
-// #/  #/sets  #/set/<id>  #/set/<id>/stats  #/lib/<id>  #/lib/<id>/stats  #/q/<set id>/<uid>  #/practice/<id>  #/practice/<id>/<uid|summary>  #/run/<id>  #/run/<id>/<question>  #/run/<id>/summary
+// #/  #/folders  #/folders/<id>  #/sets  #/set/<id>  #/set/<id>/stats  #/lib/<id>  #/lib/<id>/stats  #/q/<set id>/<uid>  #/practice/<id>  #/practice/<id>/<uid|summary>  #/run/<id>  #/run/<id>/<question>  #/run/<id>/summary
 function useRoute() {
   const read = () => window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   const [parts, setParts] = useState(read);
@@ -30,6 +31,7 @@ function useRoute() {
 function Screen({ theme }) {
   const [view, id, extra] = useRoute();
   if (view === 'run' && id) return <RunView key={id} runId={id} param={extra} theme={theme} />;
+  if (view === 'folders') return <FoldersPage folderId={id} theme={theme} />;
   if (view === 'sets') return <SetsPage theme={theme} />;
   if (view === 'set' && id && extra === 'stats') return <Stats setId={id} theme={theme} />;
   if (view === 'set' && id) return <SetPage setId={id} theme={theme} />;

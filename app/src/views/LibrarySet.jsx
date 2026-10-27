@@ -12,6 +12,8 @@ import { toast } from '../components/Toasts.jsx';
 import { Modal } from '../components/Dialogs.jsx';
 import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf } from '../lib/pdfsync.js';
 import { saveEdit } from '../lib/practice.js';
+import FolderDock from '../components/FolderDock.jsx';
+import { foldersSorted, addToFolder, startDrag } from '../lib/folders.js';
 
 const reportText = (r) => (r ? `${r.kept} questions kept their progress, ${r.added} new${r.droppedTitles.length ? `, ${r.droppedTitles.length} no longer in the PDF` : ''}.` : 'The PDF has not changed.');
 
@@ -143,12 +145,14 @@ export default function LibrarySet({ setId, theme }) {
         </section>
       )}
 
+      <div className="with-dock">
+      <div className="stack" style={{ gap: 24, minWidth: 0 }}>
       {sections.map((s) => (
         <section key={s.name}>
           <div className="section-title"><h2>{s.name}</h2><span className="muted">{s.questions.length}</span></div>
           <div className="run-list">
             {s.questions.map((q) => (
-              <div key={q.uid} className="card run-row" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto' }}>
+              <div key={q.uid} className="card run-row draggable" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto auto' }} draggable onDragStart={(e) => startDrag(e, { setId, uid: q.uid })}>
                 <div style={{ minWidth: 0 }}>
                   <div className="title" title={q.title}><a href={`#/q/${encodeURIComponent(setId)}/${encodeURIComponent(q.uid)}`}>{q.title}</a></div>
                   <div className="sub">
@@ -159,12 +163,20 @@ export default function LibrarySet({ setId, theme }) {
                     {progressChips(getProgress(setId, q.uid))}
                   </div>
                 </div>
+                <select className="folder-pick" value="" aria-label={`Add ${q.title} to a folder`} title="Add to a folder (or drag the row onto a folder)"
+                  onChange={(e) => { const f = foldersSorted().find((x) => x.id === e.target.value); if (f) addToFolder(f.id, setId, q.uid).then((added) => toast(added ? `Added to ${f.name}.` : `Already in ${f.name}.`)); }}>
+                  <option value="">Folder…</option>
+                  {foldersSorted().map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
                 {(record.userOwned || q.own || (canSync(record) && q.stem.pdf)) && <button type="button" className="btn ghost sm" onClick={() => removeQuestion(q)} aria-label={`Delete ${q.title}`}>Delete</button>}
               </div>
             ))}
           </div>
         </section>
       ))}
+      </div>
+      <FolderDock />
+      </div>
     </Shell>
   );
 }

@@ -52,6 +52,7 @@ export const STORES = {
   libProgress: { key: 'key', valid: (r) => hasIds(r) && isObject(r.answers), merge: newer },
   libEdits: { key: 'key', valid: hasIds, merge: newer },
   libRuns: { key: 'id', valid: (r) => typeof r.setId === 'string' && Array.isArray(r.questions) && typeof r.updatedAt === 'string', merge: newer },
+  libFolders: { key: 'id', valid: (r) => typeof r.name === 'string' && Array.isArray(r.items), merge: newer },
   libMine: { key: 'id', valid: (r) => isObject(r.manifest) && isObject(r.images), merge: newer },
 };
 

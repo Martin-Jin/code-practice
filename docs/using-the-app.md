@@ -148,3 +148,7 @@ In your browser's "clear browsing data" window, **cached images and files** is s
 
 - The runner stops a program after 10 s (local) or at wandbox.org's own limit (online). That is reported as a timeout, with the test that was running.
 - Hidden tests are hidden only in the sense of CodeRunner: their *results* appear after a run. Their source is in the question files and the published catalog, because the repo is public.
+
+## Folders
+
+**Folders** (top bar) holds your own collections of questions, taken from any set in your library. On a set's page, drag a question row onto a folder in the panel at the right, or use the **Folder…** menu on the row. On the Folders page, drag a question within a folder to reorder it, or onto another folder in the list to move it; **Remove** takes it out of the folder. A folder only lists questions: they stay in their sets with their stats. Folders are part of a backup.

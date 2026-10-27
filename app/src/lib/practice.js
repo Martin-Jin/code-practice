@@ -14,11 +14,12 @@ export const keyOf = (setId, uid) => `${setId}/${uid}`;
 const now = () => new Date().toISOString();
 
 export async function loadPractice() {
-  const [progress, edits, runs, mine] = await Promise.all(['libProgress', 'libEdits', 'libRuns', 'libMine'].map((s) => db.getAll(s)));
+  const [progress, edits, runs, mine, folders] = await Promise.all(['libProgress', 'libEdits', 'libRuns', 'libMine', 'libFolders'].map((s) => db.getAll(s)));
   for (const r of progress) state.libProgress[r.key] = r;
   for (const r of edits) state.libEdits[r.key] = r;
   for (const r of runs) state.libRuns[r.id] = r;
   for (const r of mine) state.libMine[r.id] = r;
+  for (const r of folders) state.libFolders[r.id] = r;
   syncMine();
 }
 
