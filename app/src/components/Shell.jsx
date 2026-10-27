@@ -10,19 +10,10 @@ import Keys from './Keys.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
 import { BackupSection } from './Backup.jsx';
+import KebabMenu from './KebabMenu.jsx';
 
 export const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
 export const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
-
-// Shows the current mode; a click switches to the next one (auto, light, dark).
-export function ThemeButton({ theme }) {
-  const label = `Theme: ${THEME_LABEL[theme.mode]}. Click for ${THEME_LABEL[theme.next]}.`;
-  return (
-    <button type="button" className="btn ghost icon-only" onClick={theme.toggle} title={label} aria-label={label}>
-      <Icon name={THEME_ICON[theme.mode]} />
-    </button>
-  );
-}
 
 export function SettingsDialog({ close }) {
   const st = useStore();
@@ -152,29 +143,20 @@ export function HelpDialog({ close }) {
   );
 }
 
-export function HelpButton() {
+// Settings, help and the theme switch behind one three-dot button, so the top bar stays short on a phone.
+function NavMenu({ theme }) {
   const { open } = useDialogs();
   return (
-    <button type="button" className="btn ghost icon-only" onClick={() => open(({ close }) => <HelpDialog close={close} />)}
-      title="Help: keyboard shortcuts" aria-label="Help: keyboard shortcuts">
-      <Icon name="help" />
-    </button>
-  );
-}
-
-export function SettingsButton() {
-  const { open } = useDialogs();
-  const st = useStore();
-  return (
-    <button type="button" className="btn ghost icon-only" onClick={() => open(({ close }) => <SettingsDialog close={close} />)}
-      title={`Settings. Code is compiled with: ${RUNNERS[st.runner].label}`} aria-label={`Settings, runner: ${RUNNERS[st.runner].label}`}>
-      <Icon name="gear" />
-    </button>
+    <KebabMenu label="Settings, help and theme" items={[
+      { label: 'Settings', icon: 'gear', onClick: () => open(({ close }) => <SettingsDialog close={close} />) },
+      { label: 'Help: keyboard shortcuts', icon: 'help', onClick: () => open(({ close }) => <HelpDialog close={close} />) },
+      { label: `Theme: ${THEME_LABEL[theme.mode]}`, icon: THEME_ICON[theme.mode], onClick: theme.toggle },
+    ]} />
   );
 }
 
 // The app's pages: the dashboard (what you are in the middle of) and the question sets (everything you can start).
-const TABS = [['dashboard', 'Dashboard', '#/'], ['sets', 'Question sets', '#/sets']];
+const TABS = [['dashboard', 'Dashboard', '#/', 'home'], ['sets', 'Question sets', '#/sets', 'questions']];
 const tabOfHash = () => (/^#\/(sets|set|lib|q)(\/|$)/.test(window.location.hash) ? 'sets' : /^#\/?$/.test(window.location.hash) ? 'dashboard' : null);
 
 // Top bar for the dashboard, set and stats pages. `hero` is a banner between the bar and the page (the landing page's).
@@ -182,9 +164,13 @@ export default function Shell({ crumbs = [], theme, hero = null, children }) {
   return (
     <>
       <nav className="shell-nav">
-        <a className="brand" href="#/"><span className="logo"><Logo /></span>Practice Questions</a>
+        <a className="brand" href="#/"><span className="logo"><Logo /></span><span className="brand-name">Practice Questions</span></a>
         <div className="top-tabs" role="navigation" aria-label="Pages">
-          {TABS.map(([id, label, href]) => <a key={id} href={href} aria-current={tabOfHash() === id ? 'page' : undefined}>{label}</a>)}
+          {TABS.map(([id, label, href, icon]) => (
+            <a key={id} href={href} title={label} aria-label={label} aria-current={tabOfHash() === id ? 'page' : undefined}>
+              <Icon name={icon} /><span className="tab-label">{label}</span>
+            </a>
+          ))}
         </div>
         <div className="crumbs">
           {crumbs.map((c, i) => (
@@ -196,9 +182,7 @@ export default function Shell({ crumbs = [], theme, hero = null, children }) {
         </div>
         <span className="spacer" />
         <GlobalSearch />
-        <SettingsButton />
-        <HelpButton />
-        <ThemeButton theme={theme} />
+        <NavMenu theme={theme} />
       </nav>
       {hero}
       <main className="page">{children}</main>

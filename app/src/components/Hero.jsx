@@ -29,7 +29,11 @@ function draw(ctx, w, h, symbols, colour) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   const focal = Math.max(w, h) * 0.5;
-  for (const s of symbols) {
+  // a narrow picture gets fewer, smaller symbols so it isn't crowded behind the text
+  const k = Math.min(1, w / 900);
+  const shown = Math.max(30, Math.round(symbols.length * k));
+  for (let i = 0; i < shown; i++) {
+    const s = symbols[i];
     const a = alphaOf(s.z);
     if (a <= 0.01) continue;
     const scale = 1 / s.z;
@@ -37,7 +41,7 @@ function draw(ctx, w, h, symbols, colour) {
     ctx.save();
     ctx.translate(w / 2 + s.x * focal * scale, h / 2 + s.y * focal * scale);
     ctx.rotate(s.tilt);
-    ctx.font = `${s.italic ? 'italic ' : ''}${Math.round(s.size * scale)}px Georgia, 'Times New Roman', serif`;
+    ctx.font = `${s.italic ? 'italic ' : ''}${Math.round(s.size * scale * (0.6 + 0.4 * k))}px Georgia, 'Times New Roman', serif`;
     ctx.fillText(s.text, 0, 0);
     ctx.restore();
   }

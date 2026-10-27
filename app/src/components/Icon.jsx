@@ -1,4 +1,5 @@
 const PATHS = {
+  home: <path d="M2.5 7.5L8 2.5l5.5 5M4 6.8V13h8V6.8M6.8 13V9.5h2.4V13" />,
   check: <path d="M3 8.5l3.2 3.2L13 4.8" />,
   x: <path d="M4 4l8 8M12 4l-8 8" />,
   play: <path d="M5 3v10l8-5z" />,
