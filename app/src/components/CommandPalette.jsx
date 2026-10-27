@@ -74,7 +74,7 @@ function commands(st, ctx) {
   ];
 }
 
-// Ctrl+K: a command palette. Type to find a command, Enter to run it. A command that needs more (which set, which
+// Alt+K: a command palette (Ctrl+K is the browser's own). Type to find a command, Enter to run it. A command that needs more (which set, which
 // folder) asks for each piece in turn and fills in the best match as you type, so it is: command, two words, Enter.
 export default function CommandPalette({ theme }) {
   const st = useStore();
@@ -83,8 +83,7 @@ export default function CommandPalette({ theme }) {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey || e.code !== 'KeyK') return;
-      if (e.target.closest && e.target.closest('.monaco-editor')) return;   // Monaco uses Ctrl+K for its own chords
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.code !== 'KeyK') return;
       if (document.querySelector('dialog[open]:not(.palette)')) return;
       e.preventDefault();
       e.stopPropagation();

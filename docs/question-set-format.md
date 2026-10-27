@@ -114,7 +114,7 @@ A file named by the set but missing from the folder does not stop the import eit
 
 ## Questions made in the app
 
-**Add a question** (the **+** button, a set's page or Ctrl+K) asks which set the question is for, then the question itself. A name that matches an existing set fills in that set's usual section, source and tags; a new name makes a new set. Sets made this way are stored in the browser (store `libMine`, one record per set), with the same question format and the images as data URLs, and are part of a backup. No folder may use the id of one of them: the import screen refuses a manifest that does. "My questions" is the first such set.
+**Add a question** (the **+** button, a set's page or Alt+K) asks which set the question is for, then the question itself. A name that matches an existing set fills in that set's usual section, source and tags; a new name makes a new set. Sets made this way are stored in the browser (store `libMine`, one record per set), with the same question format and the images as data URLs, and are part of a backup. No folder may use the id of one of them: the import screen refuses a manifest that does. "My questions" is the first such set.
 
 A question added to a set **imported from a folder** is marked `own` and kept with the stored copy of that set. Importing the folder again carries it over. It is not in a backup (the stored sets are copies), so keep the question in the folder's manifest too if you want it to survive clearing site data.
 

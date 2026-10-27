@@ -96,7 +96,7 @@ Press **How to add questions** under **Your library** for a short guide to every
 
 ### Making your own questions
 
-The **+** button's **Add a question from a screenshot** (also **Add a question** on a set's page, or Ctrl+K) makes a question from a screenshot, with no folder involved.
+The **+** button's **Add a question from a screenshot** (also **Add a question** on a set's page, or Alt+K) makes a question from a screenshot, with no folder involved.
 
 1. Paste a screenshot with `Ctrl+V` (or drop an image, or press **Choose an image**). Drag a box over the part to keep, then **Keep the selection** (or **Keep the whole image**). Images are scaled to at most 1400 px wide.
 2. Give it a title in the form `Topic - what is asked` (search finds questions by it), a section, a source and optionally marks, tags and typed wording (maths between `$` signs).
@@ -154,9 +154,9 @@ In your browser's "clear browsing data" window, **cached images and files** is s
 
 **Your library** on **Question sets** works like a file explorer: folders and sets sit side by side. **New folder** makes one. Click a folder to open it (an empty one just says so). Drag a set's tile onto a folder tile to file it there; inside a folder, drag a set onto the strip at the top to move it back out. A set's page also has a **Folder** menu, for doing the same without dragging. A set is in one folder at a time. Deleting a folder only deletes the folder: its sets go back to your library with all their questions and stats. Folders are part of a backup.
 
-## Command palette (Ctrl+K)
+## Command palette (Alt+K)
 
-Ctrl+K opens a palette from anywhere (the page behind it dims and blurs). Type to find a command and press Enter. A command that needs more asks for each piece in turn and fills in the best match as you type, so **move a set to a folder** is: `Ctrl+K`, `move`, Enter, the set's name, Enter, the folder's name, Enter. Typing a folder name that does not exist offers to create it. Enter or Tab picks the highlighted choice, Backspace on an empty box goes back a step, Esc closes.
+Alt+K opens a palette from anywhere (the page behind it dims and blurs). Type to find a command and press Enter. A command that needs more asks for each piece in turn and fills in the best match as you type, so **move a set to a folder** is: `Alt+K`, `move`, Enter, the set's name, Enter, the folder's name, Enter. Typing a folder name that does not exist offers to create it. Enter or Tab picks the highlighted choice, Backspace on an empty box goes back a step, Esc closes.
 
 | Command | What it does |
 | --- | --- |
@@ -168,4 +168,4 @@ Ctrl+K opens a palette from anywhere (the page behind it dims and blurs). Type t
 | Go to the dashboard / question sets | Navigates. |
 | Switch theme, Open settings, Keyboard shortcuts, Back up now | As named. |
 
-The palette is not used while the code editor has focus (Monaco keeps Ctrl+K for its own chords); press Esc or click outside the editor first.
+It is Alt+K rather than Ctrl+K because browsers keep Ctrl+K for their own search box.

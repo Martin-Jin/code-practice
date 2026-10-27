@@ -4,6 +4,7 @@ import { plural } from '../lib/format.js';
 import { foldersSorted, folderOf, createFolder, renameFolder, deleteFolder, moveSet, startDrag, hasDrag, readDrag } from '../lib/folders.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
+import KebabMenu from '../components/KebabMenu.jsx';
 import { AddFab, LibraryNotes } from '../components/Library.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 import { toast } from '../components/Toasts.jsx';
@@ -37,14 +38,14 @@ export default function SetsPage({ folderId, theme }) {
     const name = await prompt({ title: 'New folder', label: 'Folder name' });
     if (name !== null) await createFolder(name);
   });
-  const rename = guard(async () => {
-    const name = await prompt({ title: 'Rename folder', label: 'Folder name', initial: folder.name });
-    if (name !== null) await renameFolder(folder.id, name);
+  const rename = guard(async (f) => {
+    const name = await prompt({ title: 'Rename folder', label: 'Folder name', initial: f.name });
+    if (name !== null) await renameFolder(f.id, name);
   });
-  const remove = async () => {
-    if (!(await confirm({ title: `Delete the folder "${folder.name}"?`, body: 'Only the folder is deleted. Its sets move back to your library and keep all their questions and stats.', confirmText: 'Delete', danger: true }))) return;
-    await deleteFolder(folder.id);
-    window.location.hash = '#/sets';
+  const remove = async (f) => {
+    if (!(await confirm({ title: `Delete the folder "${f.name}"?`, body: 'Only the folder is deleted. Its sets move back to your library and keep all their questions and stats.', confirmText: 'Delete', danger: true }))) return;
+    await deleteFolder(f.id);
+    if (folder) window.location.hash = '#/sets';
   };
   const target = (id, toFolder) => ({
     onDragOver: (e) => { if (hasDrag(e)) { e.preventDefault(); setOver(id); } },
@@ -82,7 +83,7 @@ export default function SetsPage({ folderId, theme }) {
           <h2>{folder ? folder.name : 'Your library'}</h2><span className="muted">{folder ? plural(here.length, 'set') : sets.length}</span>
           <span className="spacer" />
           {folder
-            ? <><button type="button" className="btn ghost sm" onClick={rename}><Icon name="pencil" /> Rename</button><button type="button" className="btn ghost sm" onClick={remove}><Icon name="trash" /> Delete folder</button></>
+            ? <KebabMenu label="Folder options" items={[{ label: 'Rename', icon: 'pencil', onClick: () => rename(folder) }, { label: 'Delete folder', icon: 'trash', danger: true, onClick: () => remove(folder) }]} />
             : <button type="button" className="btn ghost sm" onClick={make}><Icon name="plus" /> New folder</button>}
         </div>
         {folderId && !folder && <div className="empty">That folder no longer exists. <a href="#/sets">Back to your library</a></div>}
@@ -94,12 +95,18 @@ export default function SetsPage({ folderId, theme }) {
             </div>
           ) : (
             <div className="explorer-grid" style={folder ? { marginTop: 12 } : undefined}>
-              {!folder && folders.map((f) => (
-                <a key={f.id} href={`#/sets/${f.id}`} className={`card tile folder${over === f.id ? ' over' : ''}`} {...target(f.id, f.id)}>
-                  <h2><Icon name="folder" /> {f.name}</h2>
-                  <div className="meta"><span className="chip">{f.items.filter((i) => st.library.sets[i.setId]).length === 0 ? 'Empty' : plural(f.items.filter((i) => st.library.sets[i.setId]).length, 'set')}</span></div>
-                </a>
-              ))}
+              {!folder && folders.map((f) => {
+                const inside = sets.filter((x) => f.items.some((i) => i.setId === x.id));
+                return (
+                  <div key={f.id} className="folder-wrap">
+                    <a href={`#/sets/${f.id}`} className={`card tile folder${over === f.id ? ' over' : ''}`} {...target(f.id, f.id)}>
+                      <h2><Icon name="folder" /> {f.name}</h2>
+                      <span className="muted folder-info">{inside.length === 0 ? 'Empty' : `${plural(inside.length, 'set')}: ${inside.slice(0, 3).map((x) => x.title).join(', ')}${inside.length > 3 ? ', …' : ''}`}</span>
+                    </a>
+                    <KebabMenu label={`Options for ${f.name}`} items={[{ label: 'Rename', icon: 'pencil', onClick: () => rename(f) }, { label: 'Delete folder', icon: 'trash', danger: true, onClick: () => remove(f) }]} />
+                  </div>
+                );
+              })}
               {here.map((set) => (
                 <Tile key={set.id} href={`#/lib/${encodeURIComponent(set.id)}`} title={set.title} sub={set.course} drag onDragStart={(e) => startDrag(e, set.id)}
                   chips={[[plural(set.manifest.questions.length, 'question')], [plural(new Set(set.manifest.questions.map((q) => q.section)).size, 'section')], ...(set.missing.length ? [[`${plural(set.missing.length, 'file')} missing`, 'warn']] : [])]} />

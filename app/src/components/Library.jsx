@@ -198,7 +198,7 @@ export function HelpDialog({ close }) {
 
       <h3>A screenshot, or a question you write</h3>
       <ol className="steps">
-        <li>Press the <b>+</b> button, then <b>Add a question</b> (or press Ctrl+K and choose <b>Add a question</b>). Say which set it is for, then press Ctrl+V to paste a screenshot (or drop or choose an image).</li>
+        <li>Press the <b>+</b> button, then <b>Add a question</b> (or press Alt+K and choose <b>Add a question</b>). Say which set it is for, then press Ctrl+V to paste a screenshot (or drop or choose an image).</li>
         <li>Drag a box over the question, give it a title, a section and the parts to answer (a number with its unit, multiple choice, or self-marked).</li>
         <li>Press <b>Save question</b>. It goes in <b>My questions</b>, and is included in a backup.</li>
       </ol>
@@ -206,7 +206,7 @@ export function HelpDialog({ close }) {
       <h3>Folders and shortcuts</h3>
       <ul>
         <li><b>New folder</b> in <b>Your library</b> makes a folder. Drag a set's tile onto it, or use the <b>Folder</b> menu on the set's page.</li>
-        <li><b>Ctrl+K</b> opens the command palette: add a question, upload, move a set to a folder (type the set, then the folder, then Enter), go to a set, and more.</li>
+        <li><b>Alt+K</b> opens the command palette: add a question, upload, move a set to a folder (type the set, then the folder, then Enter), go to a set, and more.</li>
       </ul>
 
       <h3>Let an agent do it</h3>

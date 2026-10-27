@@ -548,7 +548,17 @@ a.tile:hover { text-decoration: none; border-color: var(--accent); }
 .tile[draggable="true"] { cursor: grab; }
 .tile.over, .drop-out.over { border-color: var(--accent); background: var(--surface-2); outline: 2px solid var(--accent); }
 .drop-out { border: 1px dashed var(--control-border); border-radius: 10px; padding: 10px 14px; color: var(--muted); }
-.explorer-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.explorer-grid { display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 960px) { .explorer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .explorer-grid { grid-template-columns: minmax(0, 1fr); } }
+.tile { padding: 12px 14px; gap: 6px; }
+.tile h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile > .muted { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; }
+.folder-wrap { position: relative; }
+.folder-wrap > a.tile { height: 100%; box-sizing: border-box; padding-right: 44px; }
+.folder-wrap .kebab { position: absolute; top: 6px; right: 6px; }
+.folder-wrap .kebab .btn { width: 30px; height: 30px; }
+.folder-wrap .menu { z-index: 25; }
 
 /* ---------- floating add button ---------- */
 .fab { position: fixed; right: 24px; bottom: 24px; z-index: 30; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
