@@ -14,6 +14,7 @@ import { Modal } from '../components/Dialogs.jsx';
 import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf, moveQuestionInPdf } from '../lib/pdfsync.js';
 import KebabMenu from '../components/KebabMenu.jsx';
 import { saveEdit, clearEditField } from '../lib/practice.js';
+import { fuzzyFilter } from '../lib/fuzzy.js';
 import { foldersSorted, folderOf, moveSet } from '../lib/folders.js';
 
 const reportText = (r) => (r ? `${r.kept} questions kept their progress, ${r.added} new${r.droppedTitles.length ? `, ${r.droppedTitles.length} no longer in the PDF` : ''}.` : 'The PDF has not changed.');
@@ -106,13 +107,16 @@ function progressChips(p) {
   );
 }
 
-const PART_LABEL = { numeric: 'number', mcq: 'choice', self: 'self-mark' };
+const PER_SECTION = 5;
+const PART_LABEL ={ numeric: 'number', mcq: 'choice', self: 'self-mark' };
 
 // An imported set: its questions grouped by section, in the order the manifest lists them.
 export default function LibrarySet({ setId, theme }) {
   const st = useStore();
   const { confirm, open, prompt } = useDialogs();
   const record = st.library.sets[setId];
+  const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState([]);
 
   if (!record) {
     return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">There is no imported set called "{setId}". <a href="#/">Back to the dashboard</a></div></Shell>;
@@ -125,6 +129,11 @@ export default function LibrarySet({ setId, theme }) {
     if (!s) sections.push(s = { name: q.section, questions: [] });
     s.questions.push(q);
   }
+
+  // Search keeps the section grouping, with the best match first inside each section.
+  const searching = query.trim() !== '';
+  const hits = searching ? fuzzyFilter(questions.map((q) => ({ label: q.title, sub: q.section, keywords: q.source || '', q })), query, Infinity).map((r) => r.item.q) : questions;
+  const shown = sections.map((s) => ({ name: s.name, questions: hits.filter((q) => q.section === s.name) })).filter((s) => s.questions.length > 0);
 
   const runs = Object.values(st.libRuns).filter((r) => r.setId === setId).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
@@ -185,11 +194,18 @@ export default function LibrarySet({ setId, theme }) {
         </section>
       )}
 
-      {sections.map((s) => (
+      <div className="row" style={{ marginTop: 18 }}>
+        <input type="search" aria-label="Search the questions in this set" placeholder="Search questions in this set" value={query} onChange={(e) => setQuery(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
+      </div>
+      {searching && shown.length === 0 && <div className="empty">No question matches "{query.trim()}".</div>}
+
+      {shown.map((s) => {
+        const visible = expanded.includes(s.name) ? s.questions : s.questions.slice(0, PER_SECTION);
+        return (
         <section key={s.name}>
           <div className="section-title"><h2>{s.name}</h2><span className="muted">{s.questions.length}</span></div>
           <div className="run-list">
-            {s.questions.map((q) => (
+            {visible.map((q) => (
               <div key={q.uid} className="card run-row" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto auto' }}>
                 <div style={{ minWidth: 0 }}>
                   <div className="title" title={q.title}><a href={`#/q/${encodeURIComponent(setId)}/${encodeURIComponent(q.uid)}`}>{q.title}</a></div>
@@ -209,8 +225,14 @@ export default function LibrarySet({ setId, theme }) {
               </div>
             ))}
           </div>
+          {s.questions.length > PER_SECTION && (
+            <button type="button" className="btn ghost sm" style={{ marginTop: 8 }} onClick={() => setExpanded((list) => (list.includes(s.name) ? list.filter((x) => x !== s.name) : [...list, s.name]))}>
+              {visible.length === s.questions.length ? 'Show fewer' : `See more (${s.questions.length - PER_SECTION})`}
+            </button>
+          )}
         </section>
-      ))}
+        );
+      })}
     </Shell>
   );
 }

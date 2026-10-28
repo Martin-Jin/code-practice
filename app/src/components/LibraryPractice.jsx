@@ -23,11 +23,13 @@ export function LibraryPracticePicker({ set }) {
   const [mode, setMode] = useState('random');
   const [count, setCount] = useState(10);
   const [sections, setSections] = useState([]);
-  const [name, setName] = useState('');
+  const { prompt } = useDialogs();
   const names = [...new Set(set.manifest.questions.map((q) => q.section))];
   const toggle = (s) => setSections((list) => (list.includes(s) ? list.filter((x) => x !== s) : [...list, s]));
 
-  const start = () => {
+  const start = async () => {
+    const name = await prompt({ title: 'Start session', label: 'Session name (optional)', placeholder: 'Leave blank for an automatic name', confirmText: 'Start' });
+    if (name === null) return;
     try {
       const run = createLibRun({ setId: set.id, mode, options: { count: Number(count), sections }, name });
       window.location.hash = `#/practice/${run.id}`;
@@ -38,11 +40,10 @@ export function LibraryPracticePicker({ set }) {
 
   const picker = (id) => (
     <div className={`mode${mode === id ? ' selected' : ''}`} key={id}>
-      <label>
-        <input type="radio" name="lib-mode" checked={mode === id} onChange={() => setMode(id)} />
+      <div className="m-head">
         <span className="m-title">{LIB_MODE_LABELS[id]}</span>
         <span className="m-desc">{DESC[id]}</span>
-      </label>
+      </div>
       {mode === id && id === 'random' && (
         <div className="m-opts">
           <div className="row">
@@ -68,9 +69,14 @@ export function LibraryPracticePicker({ set }) {
   return (
     <section>
       <div className="section-title"><h2>Practise</h2>{st.prioritise && <span className="chip accent">Drawing hard questions more often</span>}</div>
-      <div className="modes">{MODES.map(picker)}</div>
+      <div className="row" style={{ marginBottom: 10 }}>
+        <label htmlFor="lib-mode">Practice mode</label>
+        <select id="lib-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+          {MODES.map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
+        </select>
+      </div>
+      <div className="modes">{picker(mode)}</div>
       <div className="row" style={{ marginTop: 14 }}>
-        <input type="text" placeholder="Session name (optional)" value={name} onChange={(e) => setName(e.target.value)} style={{ flex: 1, minWidth: 160 }} maxLength={80} />
         <button type="button" className="btn primary lg" onClick={start}>Start</button>
       </div>
     </section>
