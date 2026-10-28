@@ -42,6 +42,7 @@ Fill in the blanks, then paste everything below the line into your agent.
 **Course:** [course name or code]
 **Target PDF:** [the practice questions PDF to build or extend, or "none, make a new one"]
 **Sources to merge:** [tutorial sheets, problem sheets, practice tests and worked examples, and the folders they are in]
+**Answer keys:** [yes or no, blank = yes: also record each question's final answers so the app can check typed answers]
 
 Merge the sources into the target PDF so every question sits in one place with its worked solution, using exactly the layout in `docs/practice-pdf-prompt.md` ("The layout"). Do not change the repo; write the PDF into the folder of the target (or the sources, for a new one).
 
@@ -50,4 +51,11 @@ Merge the sources into the target PDF so every question sits in one place with i
 3. **Each entry** is a question page followed by its solution pages, laid out as in "The layout". Crop the question and the solution from the source, tight, keeping vector where the source is vector. A crop never includes a neighbouring question or cuts a line of working in half. Never shrink a solution to fit one page; let it run over extra pages.
 4. **Placement and numbering.** Put each question in the section it belongs to by topic; add a section only when none fits. Renumber the whole file 1 to N so titles, headers, cover and bookmarks agree. Never reword an existing question's title or `Source:` label. Give each new question a title `Topic - what is asked` (plain ASCII, unique) and a distinct source label. Leave every existing page as it is apart from its numbers. The cover lists every section with its questions and page numbers, links each entry to its page, and carries the count; PDF bookmarks mirror it.
 5. **Before finishing.** Render and view the cover and every new question and solution page; fix anything cut off, an incomplete or unreadably small crop, missing working space, and a wrong header, footer or page number. Check the cover count matches the entries, the numbering is continuous and every link lands on the right page, and the page count is the old count plus the new pages. Then run `node tools/index-pdf.js --dry-run "<PDF>"` from the repo's `app` folder: it must report as many questions as the cover and no unplaced pages. Fix the PDF if not.
-6. **Hand-over.** Report the questions added by source and section, the questions skipped (duplicate or no solution), the backup location, and the page count before and after. Delete a source only if asked, and only after every question in it has been checked in the output.
+6. **Answer keys** (unless the blank says no). While cropping each solution, note the final answer of every part that its worked solution or source shows. Never work one out yourself: a wrong key marks right answers wrong. Once the PDF passes step 5, run `node tools/index-pdf.js "<PDF>"` from the repo's `app` folder; it writes `<PDF name>.questions.json` beside the PDF and keeps any keys already in it. Then, for each question you noted answers for, replace its `parts` in that manifest (see `docs/question-set-format.md`, "Parts"):
+   - A number: `{ "label": "a", "type": "numeric", "unit": "kg", "answer": 0.297, "dp": 3 }`. Copy the value and unit exactly, with `dp` the decimal places the question asks for. Read handwriting only from the final-answer line, as an image.
+   - A multiple-choice question: an `mcq` part with `options` and `correct` (option numbers from 0).
+   - Use `label` `""` for a single part, otherwise `a`, `b`, `c` as the question does.
+   - Leave conceptual questions and any part with no clear final answer as they are (a single `self` part).
+   - Never change a question's `uid`, `title` or `source`.
+   Without the repo, skip this step and say so in the hand-over.
+7. **Hand-over.** Report the questions added by source and section, the questions skipped (duplicate or no solution), the questions given answer keys and those left as `self`, the backup location, and the page count before and after. Delete a source only if asked, and only after every question in it has been checked in the output.
