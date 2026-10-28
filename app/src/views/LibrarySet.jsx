@@ -14,7 +14,9 @@ import { Modal } from '../components/Dialogs.jsx';
 import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf, moveQuestionInPdf } from '../lib/pdfsync.js';
 import KebabMenu from '../components/KebabMenu.jsx';
 import { saveEdit, clearEditField } from '../lib/practice.js';
-import { fuzzyFilter } from '../lib/fuzzy.js';
+import { Fab } from '../components/Library.jsx';
+import { MoveDialog } from './SetsPage.jsx';
+import QuickSearch from '../components/QuickSearch.jsx';
 import { foldersSorted, folderOf, moveSet } from '../lib/folders.js';
 
 const reportText = (r) => (r ? `${r.kept} questions kept their progress, ${r.added} new${r.droppedTitles.length ? `, ${r.droppedTitles.length} no longer in the PDF` : ''}.` : 'The PDF has not changed.');
@@ -115,7 +117,6 @@ export default function LibrarySet({ setId, theme }) {
   const st = useStore();
   const { confirm, open, prompt } = useDialogs();
   const record = st.library.sets[setId];
-  const [query, setQuery] = useState('');
   const [expanded, setExpanded] = useState([]);
 
   if (!record) {
@@ -130,10 +131,15 @@ export default function LibrarySet({ setId, theme }) {
     s.questions.push(q);
   }
 
-  // Search keeps the section grouping, with the best match first inside each section.
-  const searching = query.trim() !== '';
-  const hits = searching ? fuzzyFilter(questions.map((q) => ({ label: q.title, sub: q.section, keywords: q.source || '', q })), query, Infinity).map((r) => r.item.q) : questions;
-  const shown = sections.map((s) => ({ name: s.name, questions: hits.filter((q) => q.section === s.name) })).filter((s) => s.questions.length > 0);
+  // The search palette (the same one as the quick search) over this set's questions; choosing one opens it.
+  const search = () => open(({ close }) => (
+    <QuickSearch onClose={close} placeholder={`Search the ${plural(questions.length, 'question')} in ${record.title}`}
+      items={questions.map((q) => ({
+        key: q.uid, label: q.title, sub: q.section, keywords: q.source || '',
+        badge: q.marks !== null ? plural(q.marks, 'mark') : undefined,
+        onSelect: () => { window.location.hash = `#/q/${encodeURIComponent(setId)}/${encodeURIComponent(q.uid)}`; },
+      }))} />
+  ));
 
   const runs = Object.values(st.libRuns).filter((r) => r.setId === setId).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
@@ -166,23 +172,19 @@ export default function LibrarySet({ setId, theme }) {
     try { await (record.userOwned ? deleteMineQuestion(setId, q.uid) : deleteOwnQuestion(setId, q.uid)); } catch (e) { toast(`Could not delete it: ${e.message}`, 'bad'); }
   };
 
+  const moveToFolder = async () => {
+    const dest = await open(({ close }) => <MoveDialog picked={new Set([`s:${setId}`])} initial={(folderOf(setId) || { id: '' }).id} close={close} />);
+    if (dest === null) return;
+    try { await moveSet(setId, dest || null); toast(dest ? `Moved to ${st.libFolders[dest].name}.` : 'Moved out of its folder.'); } catch (e) { toast(e.message, 'bad'); }
+  };
+
   return (
     <Shell theme={theme} crumbs={[{ label: record.title }]}>
       <div className="page-head">
-        <h1 className="title-with-icon">{record.title} <a className="btn ghost icon-only" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /></a></h1>
+        <h1 className="title-with-icon">{record.title} <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
-        <div className="row">
-          {foldersSorted().length > 0 && (
-            <select aria-label="Folder" value={(folderOf(setId) || { id: '' }).id} onChange={(e) => moveSet(setId, e.target.value || null)}>
-              <option value="">Not in a folder</option>
-              {foldersSorted().map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
-            </select>
-          )}
-          <button type="button" className="btn primary" onClick={() => open(({ close }) => <AddQuestionDialog close={close} setId={setId} />)}>Add a question</button>
-          <button type="button" className="btn danger" onClick={remove}>{record.userOwned ? 'Delete all my questions' : 'Remove from this browser'}</button>
-        </div>
       </div>
 
       {canSync(record) && <PdfBar record={record} />}
@@ -194,12 +196,7 @@ export default function LibrarySet({ setId, theme }) {
         </section>
       )}
 
-      <div className="row" style={{ marginTop: 18 }}>
-        <input type="search" aria-label="Search the questions in this set" placeholder="Search questions in this set" value={query} onChange={(e) => setQuery(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
-      </div>
-      {searching && shown.length === 0 && <div className="empty">No question matches "{query.trim()}".</div>}
-
-      {shown.map((s) => {
+      {sections.map((s) => {
         const visible = expanded.includes(s.name) ? s.questions : s.questions.slice(0, PER_SECTION);
         return (
         <section key={s.name}>
@@ -233,6 +230,11 @@ export default function LibrarySet({ setId, theme }) {
         </section>
         );
       })}
+      <Fab icon="pencil" label="Edit this set" swap options={[
+        ['Add a question', 'plus', () => open(({ close }) => <AddQuestionDialog close={close} setId={setId} />)],
+        ...(foldersSorted().length > 0 ? [['Move to a folder', 'folder', moveToFolder]] : []),
+        [record.userOwned ? 'Delete all my questions' : 'Remove from this browser', 'trash', remove],
+      ]} />
     </Shell>
   );
 }

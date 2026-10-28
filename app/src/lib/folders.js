@@ -1,6 +1,6 @@
 // Folders: the user's own way of sorting question sets (both the coding sets and the sets in their library) on the
 // Question sets page. A set is in at most one folder; sets in none are listed under "Not in a folder". A folder only
-// lists set ids, so removing a set or deleting a folder never touches the questions or their stats. Saved to
+// lists set ids (and sits in a parent folder through `parentId`), so removing a set or deleting a folder never touches the questions or their stats. Saved to
 // IndexedDB (store libFolders) and part of a backup.
 import * as db from './db.js';
 import { state, notify } from './store.js';
@@ -25,15 +25,38 @@ const cleanName = (name, except = null) => {
   return clean;
 };
 
-export async function createFolder(name) {
-  const folder = { id: newId(), name: cleanName(name), items: [], updatedAt: now() };
+export async function createFolder(name, parentId = null) {
+  const folder = { id: newId(), name: cleanName(name), items: [], parentId: parentId || null, updatedAt: now() };
   await save(folder);
   return folder;
 }
 
 export const renameFolder = (id, name) => save({ ...state.libFolders[id], name: cleanName(name, id) });
 
+// Folders nest: `parentId` is the folder a folder sits in, or absent at the top level.
+export const foldersIn = (parentId) => foldersSorted().filter((f) => (f.parentId || null) === (parentId || null));
+export function descendantIds(id) {
+  const out = [];
+  const walk = (p) => foldersIn(p).forEach((f) => { out.push(f.id); walk(f.id); });
+  walk(id);
+  return out;
+}
+// The folders from the top down to (and including) this one.
+export function folderPath(id) {
+  const path = [];
+  for (let f = state.libFolders[id]; f && !path.includes(f); f = state.libFolders[f.parentId]) path.unshift(f);
+  return path;
+}
+
+export async function moveFolder(id, parentId) {
+  if (parentId === id || (parentId && descendantIds(id).includes(parentId))) throw new Error('A folder cannot go inside itself.');
+  const folder = state.libFolders[id];
+  if ((folder.parentId || null) !== (parentId || null)) await save({ ...folder, parentId: parentId || null });
+}
+
 export async function deleteFolder(id) {
+  // Folders inside it move up one level rather than being lost.
+  for (const child of foldersIn(id)) await save({ ...child, parentId: state.libFolders[id].parentId || null });
   await db.transact(['libFolders'], (t) => t.objectStore('libFolders').delete(id));
   delete state.libFolders[id];
   notify();

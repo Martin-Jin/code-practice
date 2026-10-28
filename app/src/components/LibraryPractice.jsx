@@ -74,11 +74,9 @@ export function LibraryPracticePicker({ set }) {
         <select id="lib-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
           {MODES.map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
         </select>
+        <button type="button" className="btn primary" onClick={start}>Start</button>
       </div>
       <div className="modes">{picker(mode)}</div>
-      <div className="row" style={{ marginTop: 14 }}>
-        <button type="button" className="btn primary lg" onClick={start}>Start</button>
-      </div>
     </section>
   );
 }

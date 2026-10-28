@@ -573,6 +573,13 @@ a.tile:hover { text-decoration: none; border-color: var(--accent); }
 .tile { padding: 12px 14px; gap: 6px; }
 .tile h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tile > .muted { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; }
+.tile.selected { border-color: var(--accent); background: var(--surface-2); outline: 2px solid var(--accent); }
+.tile h2 .tile-tick { margin-right: 8px; vertical-align: -2px; }
+/* An icon button that slides out its name on hover or keyboard focus. */
+.btn.icon-only.reveal { width: auto; min-width: 32px; padding: 0 8px; overflow: hidden; }
+.btn.reveal .label { max-width: 0; overflow: hidden; white-space: nowrap; font-size: 13px; font-weight: 600; transition: max-width .3s ease, margin .3s ease; }
+.btn.reveal:hover .label, .btn.reveal:focus-visible .label { max-width: 120px; margin-left: 8px; }
+@media (prefers-reduced-motion: reduce) { .btn.reveal .label { transition: none; } }
 .folder-wrap { position: relative; }
 .folder-wrap > a.tile { height: 100%; box-sizing: border-box; padding-right: 44px; }
 .folder-wrap .kebab { position: absolute; top: 6px; right: 6px; }
@@ -584,6 +591,7 @@ a.tile:hover { text-decoration: none; border-color: var(--accent); }
 .fab-main { width: 56px; height: 56px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgb(0 0 0 / 28%); transition: transform .2s ease; }
 .fab-main .icon { width: 24px; height: 24px; stroke-width: 2; }
 .fab.open .fab-main { transform: rotate(135deg); }
+.fab.swap.open .fab-main { transform: none; }
 .fab-opt { display: flex; flex-direction: row-reverse; align-items: center; height: 48px; margin-right: 4px; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 24px; background: var(--surface); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; box-shadow: 0 3px 12px rgb(0 0 0 / 22%);
   opacity: 0; transform: translateY(14px) scale(.7); transform-origin: bottom right; pointer-events: none; transition: opacity .18s ease, transform .22s cubic-bezier(.2, 1.3, .4, 1); }
 .fab.open .fab-opt { opacity: 1; transform: none; pointer-events: auto; }

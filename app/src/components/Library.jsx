@@ -240,11 +240,9 @@ function StorageNote() {
   );
 }
 
-// The floating add button: press it and two round buttons pop up; hovering one slides out what it does.
-// "Add or update a folder" chooses a folder of sets or PDFs; "Add a question" makes one from a screenshot.
-export function AddFab() {
-  const { open } = useDialogs();
-  const input = useRef(null);
+// The round button at the bottom right that fans out a few labelled options. `options`: [[label, icon, run]].
+// With `swap` the main icon turns into a cross while open (otherwise the plus turns by itself).
+export function Fab({ options, icon, label, swap, children }) {
   const [expanded, setExpanded] = useState(false);
   const box = useRef(null);
 
@@ -257,6 +255,28 @@ export function AddFab() {
     return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
   }, [expanded]);
 
+  return (
+    <div className={`fab${expanded ? ' open' : ''}${swap ? ' swap' : ''}`} ref={box}>
+      {options.map(([label, icon, run], i) => (
+        <button key={label} type="button" className="fab-opt" style={{ transitionDelay: expanded ? `${(options.length - 1 - i) * 50}ms` : '0ms' }}
+          tabIndex={expanded ? 0 : -1} aria-label={label} onClick={() => { setExpanded(false); run(); }}>
+          <span className="ico"><Icon name={icon} /></span>
+          <span className="label">{label}</span>
+        </button>
+      ))}
+      <button type="button" className="fab-main" aria-expanded={expanded} aria-label={expanded ? 'Close the menu' : label} title={label} onClick={() => setExpanded(!expanded)}>
+        <Icon name={swap && expanded ? 'x' : icon} />
+      </button>
+      {children}
+    </div>
+  );
+}
+
+// The floating add button: press it and two round buttons pop up; hovering one slides out what it does.
+// "Add or update a folder" chooses a folder of sets or PDFs; "Add a question" makes one from a screenshot.
+export function AddFab() {
+  const { open } = useDialogs();
+  const input = useRef(null);
   const onChoose = (e) => {
     const files = [...e.target.files];
     e.target.value = '';   // so choosing the same folder again still fires
@@ -267,19 +287,9 @@ export function AddFab() {
     ['Add or update a folder of sets or PDFs', 'folder', () => input.current.click()],
   ];
   return (
-    <div className={`fab${expanded ? ' open' : ''}`} ref={box}>
-      {options.map(([label, icon, run], i) => (
-        <button key={label} type="button" className="fab-opt" style={{ transitionDelay: expanded ? `${(options.length - 1 - i) * 50}ms` : '0ms' }}
-          tabIndex={expanded ? 0 : -1} aria-label={label} onClick={() => { setExpanded(false); run(); }}>
-          <span className="ico"><Icon name={icon} /></span>
-          <span className="label">{label}</span>
-        </button>
-      ))}
-      <button type="button" className="fab-main" aria-expanded={expanded} aria-label={expanded ? 'Close the add menu' : 'Add to your library'} title="Add to your library" onClick={() => setExpanded(!expanded)}>
-        <Icon name="plus" />
-      </button>
+    <Fab options={options} icon="plus" label="Add to your library">
       <input ref={input} type="file" webkitdirectory="" multiple hidden onChange={onChoose} />
-    </div>
+    </Fab>
   );
 }
 
