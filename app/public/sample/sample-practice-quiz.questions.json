@@ -1,0 +1,162 @@
+{
+  "format": "practice-question-set",
+  "version": 1,
+  "id": "sample-practice-quiz",
+  "title": "Sample practice quiz",
+  "course": "Sample course",
+  "pdf": null,
+  "questions": [
+    {
+      "uid": "q-sample-start-here",
+      "title": "Start here - how a question is laid out",
+      "section": "Start here",
+      "source": "Sample sheet 0",
+      "marks": 0,
+      "tags": ["tutorial", "read me"],
+      "stem": {
+        "text": "This question has **no parts to answer**, so it is just read.\n\nEvery question has a wording like this one (text, with maths between dollar signs, such as $v^2 = u^2 + 2as$, or an image), then **parts**: a number with its unit, a multiple-choice question, or a self-marked part. Open the next questions to try each kind.\n\nPress the pen beside the title to edit a question, and the pen beside **Answers** to set or correct its answer key."
+      },
+      "parts": [],
+      "solution": { "text": "Nothing to solve here. Check the **Notes** box below for a place to keep reminders, and press D to mark a question as difficult." },
+      "notes": "Notes you type here are saved in this browser and included in a backup.",
+      "flags": []
+    },
+    {
+      "uid": "q-sample-stopping-distance",
+      "title": "Kinematics - stopping distance of a car",
+      "section": "Mechanics",
+      "source": "Sample sheet 1, Q1",
+      "marks": 4,
+      "tags": ["kinematics", "constant acceleration", "suvat"],
+      "stem": {
+        "text": "A car travelling at $90\\ \\text{km/h}$ brakes with a constant deceleration of $5\\ \\text{m/s}^2$ until it stops."
+      },
+      "parts": [
+        { "label": "a", "type": "numeric", "prompt": "How far does it travel while braking?", "unit": "m", "answer": 62.5, "dp": 1 },
+        { "label": "b", "type": "numeric", "prompt": "How long does the braking take?", "unit": "s", "answer": 5, "dp": 2 }
+      ],
+      "solution": {
+        "text": "Convert first: $90\\ \\text{km/h} = 25\\ \\text{m/s}$.\n\n(a) $s = \\dfrac{v^2}{2a} = \\dfrac{25^2}{2 \\times 5} = 62.5\\ \\text{m}$.\n\n(b) $t = \\dfrac{v}{a} = \\dfrac{25}{5} = 5.00\\ \\text{s}$."
+      },
+      "notes": "Convert km/h to m/s before using any formula.",
+      "flags": []
+    },
+    {
+      "uid": "q-sample-cable-tension",
+      "title": "Statics - tension in the cables holding a lamp",
+      "section": "Mechanics",
+      "source": "Sample sheet 1, Q2",
+      "marks": 5,
+      "tags": ["statics", "equilibrium", "free body diagram"],
+      "stem": {
+        "text": "A $50\\ \\text{kg}$ lamp hangs from two identical cables, each $30^\\circ$ from the vertical, as shown. Take $g = 9.81\\ \\text{m/s}^2$.",
+        "image": "images/cables.svg"
+      },
+      "parts": [
+        { "label": "", "type": "numeric", "prompt": "Find the tension in one cable.", "unit": "N", "answer": 283.2, "dp": 1, "relTol": 0.005 }
+      ],
+      "solution": {
+        "images": ["images/cables-solution.svg"],
+        "text": "Vertical equilibrium: $2T\\cos 30^\\circ = mg$, so $T = \\dfrac{50 \\times 9.81}{2\\cos 30^\\circ} = 283.2\\ \\text{N}$."
+      },
+      "flags": []
+    },
+    {
+      "uid": "q-sample-pipe-flow",
+      "title": "Fluids - flow rate through a pipe",
+      "section": "Fluids",
+      "source": "Sample sheet 2, Q1",
+      "marks": 3,
+      "tags": ["continuity", "flow rate"],
+      "stem": {
+        "text": "Water flows at a mean speed of $2\\ \\text{m/s}$ through a pipe of internal diameter $50\\ \\text{mm}$."
+      },
+      "parts": [
+        { "label": "", "type": "numeric", "prompt": "Find the volume flow rate.", "unit": "L/s", "answer": 3.93, "dp": 2 }
+      ],
+      "solution": {
+        "text": "$A = \\pi d^2 / 4 = \\pi (0.05)^2 / 4 = 1.963 \\times 10^{-3}\\ \\text{m}^2$.\n\n$Q = Av = 3.927 \\times 10^{-3}\\ \\text{m}^3/\\text{s} = 3.93\\ \\text{L/s}$."
+      },
+      "flags": []
+    },
+    {
+      "uid": "q-sample-gas-pressure",
+      "title": "Ideal gas - pressure after heating at constant volume",
+      "section": "Thermodynamics",
+      "source": "Sample sheet 3, Q1",
+      "marks": 4,
+      "tags": ["ideal gas", "isochoric"],
+      "stem": {
+        "text": "A sealed rigid tank holds an ideal gas at $200\\ \\text{kPa}$ and $300\\ \\text{K}$. It is heated to $450\\ \\text{K}$."
+      },
+      "parts": [
+        { "label": "a", "type": "numeric", "prompt": "What is the final pressure?", "unit": "kPa", "answer": 300, "dp": 1 },
+        { "label": "b", "type": "mcq", "prompt": "Which kind of process is this?", "options": ["Isothermal", "Isobaric", "Isochoric", "Adiabatic"], "correct": [2] }
+      ],
+      "solution": {
+        "text": "(a) The volume is fixed, so $P_2 = P_1 T_2 / T_1 = 200 \\times 450 / 300 = 300\\ \\text{kPa}$.\n\n(b) Constant volume is **isochoric**."
+      },
+      "flags": []
+    },
+    {
+      "uid": "q-sample-carnot",
+      "title": "Cycles - which statements about a Carnot cycle are true",
+      "section": "Thermodynamics",
+      "source": "Sample sheet 3, Q2",
+      "marks": 3,
+      "tags": ["carnot", "efficiency", "second law"],
+      "stem": { "text": "Select **all** the statements that are true." },
+      "parts": [
+        {
+          "label": "", "type": "mcq", "multi": true, "prompt": "Which are true?",
+          "options": [
+            "It is a reversible cycle.",
+            "Its efficiency depends only on the two reservoir temperatures.",
+            "No engine between the same two reservoirs can be more efficient.",
+            "It only works with an ideal gas.",
+            "It rejects no heat."
+          ],
+          "correct": [0, 1, 2]
+        }
+      ],
+      "solution": { "text": "The efficiency $1 - T_C/T_H$ is independent of the working fluid, and it rejects heat to the cold reservoir like every heat engine." },
+      "flags": []
+    },
+    {
+      "uid": "q-sample-entropy",
+      "title": "Concepts - what entropy measures",
+      "section": "Thermodynamics",
+      "source": "Sample sheet 3, Q3",
+      "marks": 2,
+      "tags": ["entropy", "concept"],
+      "stem": { "text": "In your own words, explain what entropy measures and why it never decreases for an isolated system." },
+      "parts": [
+        { "label": "", "type": "self", "prompt": "Write your explanation, then compare it with the solution and mark yourself." }
+      ],
+      "solution": { "text": "Entropy measures how spread out (how many microscopic arrangements) a system's energy is. An isolated system moves towards the most probable arrangement, so its entropy never decreases." },
+      "flags": []
+    },
+    {
+      "uid": "q-sample-wall-conduction",
+      "title": "Conduction - heat loss through a wall",
+      "section": "Heat transfer",
+      "source": "Sample sheet 4, Q1",
+      "marks": 6,
+      "tags": ["conduction", "fourier's law", "thermal resistance"],
+      "stem": {
+        "text": "A wall of area $10\\ \\text{m}^2$ and thickness $0.2\\ \\text{m}$ has thermal conductivity $k = 0.5\\ \\text{W/(m K)}$. The inside surface is at $20^\\circ\\text{C}$ and the outside at $0^\\circ\\text{C}$."
+      },
+      "parts": [
+        { "label": "a", "type": "numeric", "prompt": "Find the heat flux.", "unit": "W/m^2", "answer": 50, "dp": 0 },
+        { "label": "b", "type": "numeric", "prompt": "Find the total heat loss.", "unit": "W", "answer": 500, "dp": 0 },
+        { "label": "c", "type": "mcq", "prompt": "What happens to the heat loss if the thickness doubles?", "options": ["It doubles", "It halves", "It stays the same", "It quadruples"], "correct": [1] },
+        { "label": "d", "type": "self", "prompt": "Explain the answer to (c) using thermal resistance." }
+      ],
+      "solution": {
+        "text": "(a) $q'' = k \\Delta T / L = 0.5 \\times 20 / 0.2 = 50\\ \\text{W/m}^2$.\n\n(b) $Q = q'' A = 500\\ \\text{W}$.\n\n(c) Resistance is $L/(kA)$, so doubling $L$ halves the heat loss."
+      },
+      "notes": "Parts of one question can mix numbers, choices and self-marked answers.",
+      "flags": []
+    }
+  ]
+}

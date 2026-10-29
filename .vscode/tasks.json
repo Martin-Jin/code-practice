@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Configure MECHENG270 practice tests",
+            "label": "Configure practice tests",
             "type": "process",
             "command": "cmake",
             "args": [
@@ -17,14 +17,14 @@
             "problemMatcher": []
         },
         {
-            "label": "Build MECHENG270 practice tests",
+            "label": "Build practice tests",
             "type": "process",
             "command": "cmake",
             "args": [
                 "--build",
                 "${workspaceFolder}\\build"
             ],
-            "dependsOn": "Configure MECHENG270 practice tests",
+            "dependsOn": "Configure practice tests",
             "dependsOrder": "sequence",
             "group": {
                 "kind": "build",

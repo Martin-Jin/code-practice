@@ -264,7 +264,7 @@ export default function AddQuestionDialog({ close, setId }) {
             <summary>More: source, marks, tags, solution</summary>
             <div className="stack" style={{ marginTop: 10 }}>
               <div className="row">
-                <label className="grow">Source <input type="text" value={source} placeholder="MECHENG222 Quiz 1, Q3" style={{ width: '100%' }} onChange={(e) => typed('source', setSource)(e.target.value)} /></label>
+                <label className="grow">Source <input type="text" value={source} placeholder="COURSE101 Quiz 1, Q3" style={{ width: '100%' }} onChange={(e) => typed('source', setSource)(e.target.value)} /></label>
                 <label>Marks <input type="number" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => setMarks(e.target.value)} /></label>
               </div>
               <label className="stack">Tags (comma separated search words)

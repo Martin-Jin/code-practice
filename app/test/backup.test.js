@@ -6,7 +6,7 @@ import {
 } from '../shared/backup.js';
 
 const run = (id, updatedAt, extra = {}) => ({
-  id, setId: 'mecheng270', createdAt: '2026-01-01T00:00:00Z', updatedAt, questions: [1, 2], state: { 1: { code: 'a' }, 2: { code: 'b' } }, ...extra,
+  id, setId: 'course101', createdAt: '2026-01-01T00:00:00Z', updatedAt, questions: [1, 2], state: { 1: { code: 'a' }, 2: { code: 'b' } }, ...extra,
 });
 const qs = (attempts, lastAt, extra = {}) => ({ attempts, correct: 0, wrong: attempts, compileErrors: 0, crashes: 0, lastAt, firstSolvedAt: null, lastStatus: 'failed', ...extra });
 const stats = (setId, questions, extra = {}) => ({ setId, questions, runsStarted: 1, runsCompleted: 0, since: '2026-01-01T00:00:00Z', ...extra });
@@ -14,7 +14,7 @@ const stats = (setId, questions, extra = {}) => ({ setId, questions, runsStarted
 const sample = () => buildBackup({
   stores: {
     runs: [run('r1', '2026-03-01T00:00:00Z'), run('r2', '2026-03-02T00:00:00Z', { completedAt: '2026-03-02T01:00:00Z' })],
-    stats: [stats('mecheng270', { 1: qs(3, '2026-03-01T00:00:00Z'), 2: qs(2, '2026-03-02T00:00:00Z') })],
+    stats: [stats('course101', { 1: qs(3, '2026-03-01T00:00:00Z'), 2: qs(2, '2026-03-02T00:00:00Z') })],
   },
   settings: { theme: 'dark', runner: 'online' },
   now: new Date('2026-03-05T10:00:00Z'),
@@ -80,7 +80,7 @@ test('summary counts what a restore would bring in', () => {
   const s = summarise(sample());
   assert.equal(s.runs, 2);
   assert.equal(s.finishedRuns, 1);
-  assert.deepEqual(s.sets, ['mecheng270']);
+  assert.deepEqual(s.sets, ['course101']);
   assert.equal(s.attempts, 5);
   assert.equal(s.settings, 2);
 });
@@ -162,18 +162,18 @@ test('a share file holds only the questions made in the app and their answer key
   assert.equal(parsed.stores.runs.length, 0);
   assert.equal(parseBackup(JSON.stringify(buildBackup({ stores: {}, settings: {} }))).kind, 'backup');
 });
-
-test('a backup with imported sets is version 2, parses, and one with a damaged set is refused', () => {
-  const library = { sets: [{ id: 'pdf', title: 'PDF', manifest: { questions: [] }, files: { 'a.pdf': { size: 1, modified: 1 } } }], formulas: [{ setId: 'pdf', sheets: [] }] };
-  const file = buildBackup({ stores: {}, settings: {}, library });
-  assert.equal(file.version, VERSION);
-  assert.equal(file.includesFiles, true);
-  const parsed = parseBackup(JSON.stringify(file));
-  assert.equal(parsed.library.length, 1);
-  assert.equal(summarise(parsed).librarySets, 1);
-  assert.throws(() => parseBackup(JSON.stringify({ ...file, library: [{ id: 'x' }] })), /imported sets/);
-  assert.equal(parseBackup(JSON.stringify(buildBackup({ stores: {}, settings: {} }))).library.length, 0);
-  const share = buildShare({ stores: { libMine: [] }, library });
-  assert.equal(share.kind, 'share');
-  assert.equal(share.library.length, 1);
-});
+
+test('a backup with imported sets is version 2, parses, and one with a damaged set is refused', () => {
+  const library = { sets: [{ id: 'pdf', title: 'PDF', manifest: { questions: [] }, files: { 'a.pdf': { size: 1, modified: 1 } } }], formulas: [{ setId: 'pdf', sheets: [] }] };
+  const file = buildBackup({ stores: {}, settings: {}, library });
+  assert.equal(file.version, VERSION);
+  assert.equal(file.includesFiles, true);
+  const parsed = parseBackup(JSON.stringify(file));
+  assert.equal(parsed.library.length, 1);
+  assert.equal(summarise(parsed).librarySets, 1);
+  assert.throws(() => parseBackup(JSON.stringify({ ...file, library: [{ id: 'x' }] })), /imported sets/);
+  assert.equal(parseBackup(JSON.stringify(buildBackup({ stores: {}, settings: {} }))).library.length, 0);
+  const share = buildShare({ stores: { libMine: [] }, library });
+  assert.equal(share.kind, 'share');
+  assert.equal(share.library.length, 1);
+});

@@ -1,5 +1,5 @@
 ﻿// ============================================================================
-//  MECHENG270 practice questions - test runner
+//  Practice questions - command-line test runner
 //
 //  Change kQuestion to pick which question to test:
 //      1..86  -> run just that question

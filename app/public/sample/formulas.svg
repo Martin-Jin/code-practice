@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420" font-family="Georgia, serif" font-size="17">
+  <rect width="600" height="420" fill="#ffffff" stroke="#ccc"/>
+  <text x="24" y="40" font-size="22" font-weight="bold">Sample formula sheet</text>
+  <text x="24" y="76" font-weight="bold">Mechanics</text>
+  <text x="24" y="102">v² = u² + 2as          s = ut + ½at²          F = ma</text>
+  <text x="24" y="146" font-weight="bold">Fluids</text>
+  <text x="24" y="172">Q = A v          A = πd² / 4          P + ½ρv² + ρgh = constant</text>
+  <text x="24" y="216" font-weight="bold">Thermodynamics</text>
+  <text x="24" y="242">PV = nRT          P₁V₁/T₁ = P₂V₂/T₂          η_Carnot = 1 − T_C / T_H</text>
+  <text x="24" y="286" font-weight="bold">Heat transfer</text>
+  <text x="24" y="312">q″ = k ΔT / L          Q = q″ A          R = L / (kA)</text>
+  <text x="24" y="376" font-size="14" fill="#666">Open it from a question with the Formulas button (Alt+T).</text>
+</svg>

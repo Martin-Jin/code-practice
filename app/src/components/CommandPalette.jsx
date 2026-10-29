@@ -3,6 +3,8 @@ import { useStore } from '../lib/store.js';
 import { fuzzyFilter } from '../lib/fuzzy.js';
 import { foldersSorted, folderOf, createFolder, moveSet } from '../lib/folders.js';
 import { downloadBackup } from '../lib/backup.js';
+import { removeSet } from '../lib/library.js';
+import { deleteMine } from '../lib/mine.js';
 import { useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
 import { ImportDialog } from './Library.jsx';
@@ -67,6 +69,25 @@ function commands(st, ctx) {
       args: [{ name: 'set', prompt: 'Which question set?', options: (s) => setOptions(s, true) }],
       run: ([id]) => go(id.startsWith('code:') ? `#/set/${id.slice(5)}/stats` : `#/lib/${encodeURIComponent(id)}/stats`)(),
     },
+    {
+      id: 'delete-set', label: 'Delete question set', hint: 'then type the set; asks before deleting', keywords: 'remove library clear',
+      args: [{ name: 'set', prompt: 'Which question set to delete?', options: (s) => setOptions(s, false) }],
+      run: async ([id]) => {
+        const set = st.library.sets[id];
+        if (!set) return;
+        const mine = set.userOwned;
+        const ok = await ctx.confirm({
+          title: mine ? `Delete all of ${set.title}?` : `Delete ${set.title}?`,
+          body: mine ? 'This deletes the questions you made in this set, with their images. They are only kept in this browser and in your backups.'
+            : 'This deletes the copy kept in this browser, with its formula sheets. Your folder is not touched, and you can add it again later. Your progress on it is kept.',
+          confirmText: 'Delete', danger: true,
+        });
+        if (!ok) return;
+        await (mine ? deleteMine(id) : removeSet(id));
+        toast(`Deleted ${set.title}.`);
+        if (window.location.hash.includes(encodeURIComponent(id))) window.location.hash = '#/sets';
+      },
+    },
     { id: 'dashboard', label: 'Go to the dashboard', keywords: 'home runs', run: go('#/') },
     { id: 'sets', label: 'Go to question sets', keywords: 'library folders', run: go('#/sets') },
     { id: 'theme', label: 'Switch theme', hint: 'auto, light, dark', keywords: 'dark light mode', run: () => ctx.theme.toggle() },
@@ -99,7 +120,7 @@ export default function CommandPalette({ theme }) {
   }, []);
 
   if (!openNow) return null;
-  return <Palette st={st} ctx={{ open: dialogs.open, theme }} onClose={() => setOpenNow(false)} />;
+  return <Palette st={st} ctx={{ open: dialogs.open, confirm: dialogs.confirm, theme }} onClose={() => setOpenNow(false)} />;
 }
 
 function Palette({ st, ctx, onClose }) {

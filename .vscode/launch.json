@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug MECHENG270 practice tests",
+            "name": "Debug practice tests",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\build\\practice.exe",
@@ -13,7 +13,7 @@
             "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
-            "preLaunchTask": "Build MECHENG270 practice tests"
+            "preLaunchTask": "Build practice tests"
         }
     ]
 }

@@ -667,16 +667,16 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 .welcome-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .welcome .tabs { flex: none; padding: 0 22px; }
 .tut { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.tut-top { flex: none; padding: 10px 28px; border-bottom: 1px solid var(--border); }
-.tut-find { display: flex; gap: 8px; align-items: center; }
-.tut-find input[type=text] { flex: 1; min-width: 0; }
+.tut-find-slot { margin-right: auto; display: flex; align-items: center; }
+.tut-find { display: flex; gap: 6px; align-items: center; }
+.tut-find input[type=text] { width: 210px; height: 30px; font-size: 13px; }
 .tut-find .count { white-space: nowrap; font-size: 12.5px; }
 .tut-index { margin: 14px 0 6px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
 .tut-index h3 { margin: 0 0 6px; font-size: 14px; }
 .tut-index ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; }
 .tut-index a { text-decoration: none; }
 .tut-index a:hover { text-decoration: underline; }
-.tut-scroll { position: relative; overflow: auto; flex: 1; min-height: 0; padding: 4px 64px 24px 28px; }
+.tut-scroll { position: relative; overflow: auto; flex: 1; min-height: 0; padding: 4px 76px 24px 28px; }
 .tut section { margin: 16px 0 26px; display: grid; gap: 10px; }
 .tut section h3, .changelog h3 { margin: 0; }
 .tut section p, .tut section ul, .tut section ol { margin: 0; }
@@ -687,7 +687,7 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 .changelog article { margin-bottom: 18px; display: grid; gap: 4px; }
 .changelog article ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 .changelog h3 .chip { margin-left: 8px; }
-.tut-rail { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); display: grid; gap: 2px; justify-items: end; }
+.tut-rail { position: absolute; right: 30px; top: 50%; transform: translateY(-50%); display: grid; gap: 2px; justify-items: end; }
 .tut-rail .dot { display: flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; cursor: pointer; font: inherit; }
 .tut-rail .name { font-size: 11px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; white-space: nowrap; max-width: 0; opacity: 0; padding: 1px 0; border-width: 0; overflow: hidden; transition: max-width 0.5s ease, opacity 0.6s ease, padding 0.5s ease; }
 .tut-rail .dot.on.say .name { max-width: 200px; opacity: 1; padding: 1px 7px; border-width: 1px; box-shadow: 0 2px 8px rgb(0 0 0 / 14%); }
@@ -756,3 +756,6 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 .welcome-title { display: inline-flex; align-items: center; gap: 10px; }
 .welcome-title .logo-mark { color: var(--accent); }
 .welcome .m-head { padding-right: 56px; }
+.tut-title { margin: 10px 0 4px; }
+.tut-title h2 { margin: 0 0 2px; font-size: 26px; letter-spacing: -0.01em; }
+.tut-title p { margin: 0; }

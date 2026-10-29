@@ -1,0 +1,33 @@
+{
+  "id": "sample",
+  "name": "Sample coding quiz",
+  "language": "cpp",
+  "description": "A small sample set that shows the format: short C++ questions with visible and hidden tests, a fix-the-bug question, a restricted question and an extra question that is not assessed.",
+  "questionDirs": [
+    { "dir": "questions", "solutions": "solutions" },
+    { "dir": "extra_questions/questions", "solutions": "extra_questions/solutions" }
+  ],
+  "groups": {
+    "core": "Core topics",
+    "extra": "Extra practice (not assessed)"
+  },
+  "categories": [
+    { "id": "arrays", "name": "Arrays", "group": "core", "questions": [1] },
+    { "id": "printing", "name": "Printing", "group": "core", "questions": [2] },
+    { "id": "numbers", "name": "Numbers", "group": "core", "questions": [3] },
+    { "id": "linked-lists", "name": "Linked lists", "group": "core", "questions": [4] },
+    { "id": "debugging", "name": "Fix the bug", "group": "core", "questions": [5] },
+    { "id": "recursion", "name": "Recursion", "group": "core", "questions": [6] },
+    { "id": "complex", "name": "Complex numbers", "group": "core", "questions": [7] },
+    { "id": "strings", "name": "Strings", "group": "core", "questions": [8] },
+    { "id": "stacks", "name": "Stacks", "group": "extra", "questions": [9] }
+  ],
+  "practice": {
+    "name": "Practice test",
+    "fixed": [{ "category": "arrays", "count": 1 }],
+    "pick": {
+      "count": 3,
+      "from": ["printing", "numbers", "linked-lists", "debugging", "recursion", "complex", "strings"]
+    }
+  }
+}

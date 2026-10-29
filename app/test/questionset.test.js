@@ -10,7 +10,7 @@ const question = (uid, extra = {}) => ({
   parts: [{ label: 'a', type: 'numeric', prompt: 'Find the mass.', unit: 'kg', answer: 0.297, dp: 3 }],
   solution: null, flags: [], ...extra,
 });
-const manifest = (extra = {}) => ({ format: 'practice-question-set', version: 1, id: 'me222-quiz', title: 'ME222 quiz', course: 'MECHENG222', pdf: null, questions: [question('q-00000001')], ...extra });
+const manifest = (extra = {}) => ({ format: 'practice-question-set', version: 1, id: 'me222-quiz', title: 'ME222 quiz', course: 'COURSE101', pdf: null, questions: [question('q-00000001')], ...extra });
 
 test('resolveRef accepts plain relative paths and rejects anything that escapes the folder', () => {
   assert.equal(resolveRef('images/q1.png'), 'images/q1.png');

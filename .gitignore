@@ -13,4 +13,7 @@ app/public/catalog.json
 TODO.md
 
 code-practice-backup-*.json
+
+# Course question sets kept only on the owner's machine (the repo ships only sets/sample).
+sets/mecheng270/
 code-practice-questions-*.json

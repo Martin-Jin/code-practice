@@ -1,27 +1,15 @@
-// The app's mark: two rings of eight hand-drawn petals, each with a fan of lines. It is drawn in the current text
-// colour (the theme's accent in the header), so it follows light and dark.
-const petal = (base, length, spread) => {
-  const y = (t) => (50 - base - length * t).toFixed(2);
-  const x = (s) => (50 + spread * s).toFixed(2);
-  const outline = `M${x(-0.34)} ${y(0)}L${x(-1)} ${y(0.7)}Q${x(-0.9)} ${y(1)} ${x(0)} ${y(1)}Q${x(0.9)} ${y(1)} ${x(1)} ${y(0.7)}L${x(0.34)} ${y(0)}Z`;
-  let hatch = '';
-  for (const s of [-0.62, -0.31, 0, 0.31, 0.62]) hatch += `M${x(s * 0.25)} ${y(0.1)}L${x(s)} ${y(0.86)}`;
-  return { outline, hatch };
-};
-const RINGS = [
-  { ...petal(12.5, 17, 5.6), offset: 0 },
-  { ...petal(30, 18, 6.6), offset: 22.5 },
-];
+// The app's mark: a flower of six petals around a centre, a ring of twelve rounded bars and an outer ring of eighteen dots. It is
+// drawn in the current text colour (the theme's accent in the header), so it follows light and dark. public/favicon.svg is the
+// same drawing in the brand red.
+const turns = (count, offset = 0) => Array.from({ length: count }, (_, i) => offset + (i * 360) / count);
 
 export default function Logo({ size = 32 }) {
   return (
-    <svg className="logo-mark" viewBox="0 0 100 100" width={size} height={size} aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeLinejoin="round" strokeLinecap="round">
-      {RINGS.map((ring) => [...Array(8)].map((_, i) => (
-        <g key={`${ring.offset}-${i}`} transform={`rotate(${ring.offset + i * 45} 50 50)`}>
-          <path d={ring.outline} strokeWidth="2.4" />
-          <path d={ring.hatch} strokeWidth="1.5" opacity=".8" />
-        </g>
-      )))}
+    <svg className="logo-mark" viewBox="-100 -100 200 200" width={size} height={size} aria-hidden="true" focusable="false" fill="currentColor">
+      <circle r="9" />
+      {turns(6).map((a) => <ellipse key={`p${a}`} cy="-27" rx="7" ry="11" transform={`rotate(${a})`} />)}
+      {turns(12, 15).map((a) => <rect key={`b${a}`} x="-4.5" y="-62" width="9" height="20" rx="4.5" transform={`rotate(${a})`} />)}
+      {turns(18).map((a) => <circle key={`d${a}`} cy="-86" r="5" transform={`rotate(${a})`} />)}
     </svg>
   );
 }

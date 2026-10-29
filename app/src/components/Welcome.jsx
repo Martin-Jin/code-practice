@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import Icon from './Icon.jsx';
 import Logo from './Logo.jsx';
@@ -19,7 +20,9 @@ const SECTIONS = [
     id: 'start', title: 'What this is',
     body: (
       <>
-        <p>Two kinds of question side by side: <b>C++ coding questions</b> you write and test in an editor, and <b>your own sets</b> (practice PDFs, screenshots, questions you type). Progress is saved in this browser only, so back it up now and then (last section).</p>
+        <p>{APP_NAME} is a place to keep your question sets and work through them like a quiz: answer, check, mark the hard ones and watch your stats. It holds two kinds of set: <b>C++ coding questions</b> you write and test in an editor, and <b>your own sets</b> (practice PDFs, screenshots, questions you type), where an answer key lets the app check what you type.</p>
+        <p>You can create a set by <b>formatting a practice PDF with an AI agent</b> (or by hand), by adding a folder with a <code>.questions.json</code> file, by pasting a screenshot, or by typing a question in the app. Progress is saved in this browser only, so back it up now and then (last section).</p>
+        <p className="muted">Already know the basics? Skip to <a href="#tut-add" data-jump="add">importing a set</a>, <a href="#tut-pdf" data-jump="pdf">formatting a PDF with an agent</a> or <a href="#tut-coding" data-jump="coding">practising</a>.</p>
         <Shot file="dashboard.jpg" alt="The dashboard, listing runs in progress" />
       </>
     ),
@@ -115,9 +118,9 @@ const SECTIONS = [
 
 const highlights = typeof CSS !== 'undefined' && CSS.highlights && typeof Highlight !== 'undefined';
 
-// The tutorial tab: an index and a search at the top, the sections below, and a column of dots at the right edge, one per
+// The tutorial tab: the sections, with an index at the top of the page, a search in the window's footer (portalled there), and a column of dots at the right edge, one per
 // section, where the section being read shows its name beside its dot and the others shrink to a dot.
-function Tutorial({ findRef }) {
+function Tutorial({ findRef, slot }) {
   const scroller = useRef(null);
   const content = useRef(null);
   const ranges = useRef([]);
@@ -187,7 +190,7 @@ function Tutorial({ findRef }) {
 
   return (
     <div className="tut">
-      <div className="tut-top">
+      {slot && createPortal(
         <div className="tut-find">
           <Icon name="search" />
           <input ref={findRef} type="text" value={query} placeholder="Search this guide (Ctrl+F)" aria-label="Search this guide"
@@ -200,9 +203,16 @@ function Tutorial({ findRef }) {
               <button type="button" className="btn ghost sm" onClick={() => step(1)} aria-label="Next match">Next</button>
             </>
           )}
-        </div>
-      </div>
-      <div className="tut-scroll" ref={scroller} onScroll={onScroll}>
+        </div>, slot)}
+      <div className="tut-scroll" ref={scroller} onScroll={onScroll} onClick={(e) => {
+        const link = e.target.closest && e.target.closest('[data-jump]');
+        const at = link && SECTIONS.findIndex((s) => s.id === link.dataset.jump);
+        if (at >= 0) { e.preventDefault(); goTo(at); }
+      }}>
+        <header className="tut-title">
+          <h2>Welcome to {APP_NAME}</h2>
+          <p className="muted">A short guide to practising, adding your own questions and keeping your progress safe.</p>
+        </header>
         <nav className="tut-index" aria-label="Index">
           <h3>In this guide</h3>
           <ol>
@@ -247,6 +257,7 @@ function Changelog() {
 export function Welcome({ tab: first, close }) {
   const [tab, setTab] = useState(first);
   const findRef = useRef(null);
+  const [slot, setSlot] = useState(null);   // the footer's left side, where the tutorial puts its search
   // The tutorial has its own search, so Ctrl+F goes there while it is showing.
   const onKeyDown = (e) => {
     if (tab === 'tutorial' && (e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'f' && findRef.current) {
@@ -256,13 +267,13 @@ export function Welcome({ tab: first, close }) {
     }
   };
   return (
-    <Modal className="welcome" closeButton title={<span className="welcome-title"><Logo size={30} /><span>{APP_NAME}</span><span className="chip">V{VERSION}</span></span>} onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Got it</button>}>
+    <Modal className="welcome" closeButton title={<span className="welcome-title"><Logo size={30} /><span>{APP_NAME}</span><span className="chip">V{VERSION}</span></span>} onClose={() => close()} footer={<><span className="tut-find-slot" ref={setSlot} /><button type="button" className="btn primary" onClick={() => close()}>Got it</button></>}>
       <div className="welcome-body" onKeyDown={onKeyDown}>
         <div className="tabs" role="tablist">
           <button type="button" role="tab" className="tab" aria-selected={tab === 'tutorial'} onClick={() => setTab('tutorial')}>Tutorial</button>
           <button type="button" role="tab" className="tab" aria-selected={tab === 'changelog'} onClick={() => setTab('changelog')}>What's new</button>
         </div>
-        {tab === 'tutorial' ? <Tutorial findRef={findRef} /> : <Changelog />}
+        {tab === 'tutorial' ? <Tutorial findRef={findRef} slot={slot} /> : <Changelog />}
       </div>
     </Modal>
   );

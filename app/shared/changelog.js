@@ -1,11 +1,20 @@
 // The app's version and its change log (the five latest changes), shown in the welcome window (src/components/Welcome.jsx).
 // Version numbers count pushes to main: 1.00 was the first, so a push that lands after N commits on main is
-// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 69th push is 1.68). Every change a user can see adds an entry at the top,
+// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 70th push is 1.69). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.68';
+export const VERSION = '1.69';
 
 export const CHANGELOG = [
+  {
+    version: '1.69', date: '2026-10-29', title: 'Sample content, a new logo and Delete question set',
+    items: [
+      'New visitors start with a sample practice quiz (answer keys, diagrams, a formula sheet) and a small sample coding quiz, instead of course material.',
+      'Delete question set is in the command palette (Alt+K): type the set and it asks before deleting.',
+      'A new logo and tab icon, and the How to add questions button now sits under the storage note.',
+      'The tutorial has a welcome title and a clearer first section, its search moved to the bottom bar, and there is more room for the scroll bar.',
+    ],
+  },
   {
     version: '1.68', date: '2026-10-29', title: "Renamed to Can'tviz quizzes",
     items: [
@@ -24,22 +33,6 @@ export const CHANGELOG = [
     items: [
       'The command palette (Alt+K) has Export chosen sets, which opens the screen for picking sets, and Add a formula sheet to several sets.',
       'Open the tutorial from Settings (Help) or from the command palette (Alt+K, then "Open the tutorial"), as well as the three-dot menu.',
-    ],
-  },
-  {
-    version: '1.64', date: '2026-10-29', title: 'Tutorial and change log',
-    items: [
-      'A welcome window with a short tutorial (an index, a search and a progress marker) and this change log.',
-      'It opens on the tutorial the first time you visit, and on the change log after each update. Reopen it from the three-dot menu at the top right.',
-    ],
-  },
-  {
-    version: '1.63', date: '2026-10-29', title: 'Formula sheets for many sets, and exporting chosen sets',
-    items: [
-      'The + button can add one formula sheet to several sets at once. Each set keeps its own copy.',
-      'On a set\'s page, Edit this set > Formula sheets lists its sheets so you can remove any.',
-      'Export chosen sets downloads only the sets you tick, with their PDFs, images and formula sheets, and no progress.',
-      'Restoring a zip now brings the formula sheet files back, not just their names.',
     ],
   },
 ];

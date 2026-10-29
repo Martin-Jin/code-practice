@@ -127,7 +127,7 @@ export function validateQuestionSet(raw) {
   if (!isObject(raw) || raw.format !== FORMAT) return { set: null, errors: ['This is not a practice question set (format is not "practice-question-set").'], skipped };
   if (!Number.isInteger(raw.version) || raw.version < 1) errors.push('The version number is missing.');
   else if (raw.version > VERSION) errors.push('It was made for a newer version of the app. Open the newest version of the page.');
-  if (!isText(raw.id) || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(raw.id)) errors.push('The id must be letters, digits, dots, dashes or underscores, like "mecheng222-rigid-body".');
+  if (!isText(raw.id) || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(raw.id)) errors.push('The id must be letters, digits, dots, dashes or underscores, like "course101-rigid-body".');
   if (!isText(raw.title)) errors.push('The title is missing.');
   if (raw.course !== undefined && typeof raw.course !== 'string') errors.push('The course must be text.');
   if (raw.pdf !== undefined && raw.pdf !== null && resolveRef(raw.pdf) === null) errors.push('The pdf must be the name of a file beside the manifest, or null.');

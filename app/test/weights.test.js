@@ -57,24 +57,24 @@ test('weightedSample takes distinct items and favours the heavy ones', () => {
 });
 
 test('C++ random mode leans towards the weighted questions but can still pick others', () => {
-  const set = buildCatalog().sets[0];
+  const set = buildCatalog().sets.find((s) => s.id === 'sample');
   const pool = set.categories.filter((c) => c.group === 'core').flatMap((c) => c.questions);
   const weight = (n) => (n === pool[0] ? weightOf(1) : 1);
   let hits = 0;
   let others = 0;
   for (let seed = 1; seed <= 300; seed++) {
-    const picked = pickQuestions(set, 'random', { count: 3, weight }, seeded(seed));
-    assert.equal(picked.length, 3);
+    const picked = pickQuestions(set, 'random', { count: 2, weight }, seeded(seed));
+    assert.equal(picked.length, 2);
     if (picked.includes(pool[0])) hits++;
     others += picked.filter((n) => n !== pool[0]).length;
   }
-  const baseline = (300 * 3) / pool.length;
-  assert.ok(hits > baseline * 3, `weighted question picked ${hits} times, a uniform draw gives about ${Math.round(baseline)}`);
-  assert.ok(others > 400, 'other questions still come up');
+  const baseline = (300 * 2) / pool.length;
+  assert.ok(hits > baseline * 2, `weighted question picked ${hits} times, a uniform draw gives about ${Math.round(baseline)}`);
+  assert.ok(others > 200, 'other questions still come up');
 });
 
 test('without a weight the C++ modes pick exactly as before', () => {
-  const set = buildCatalog().sets[0];
+  const set = buildCatalog().sets.find((s) => s.id === 'sample');
   assert.deepEqual(pickQuestions(set, 'random', { count: 5 }, seeded(9)), pickQuestions(set, 'random', { count: 5, weight: undefined }, seeded(9)));
 });
 

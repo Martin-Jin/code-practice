@@ -309,10 +309,12 @@ export function LibraryNotes() {
   return (
     <section>
       <p className="muted">
-        Use the <b>+</b> button at the bottom right to add a folder of sets or PDFs, make a question from a screenshot, add a formula sheet to several sets, or export chosen sets.{' '}
-        <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
+        Use the <b>+</b> button at the bottom right to add a folder of sets or PDFs, make a question from a screenshot, add a formula sheet to several sets, or export chosen sets.
       </p>
       <StorageNote />
+      <p>
+        <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
+      </p>
     </section>
   );
 }

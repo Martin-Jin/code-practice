@@ -60,7 +60,7 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 
 ## Test modes
 
-- **Practice test:** a short mixed paper. For MECHENG270 it is 7 questions: 2 from complex numbers, DFT and FFT, plus 1 each from 5 topics chosen at random. The recipe lives in `set.json` (`practice`), so each set defines its own.
+- **Practice test:** a short mixed paper. For a set with a recipe it is a fixed few questions plus one from each of some topics chosen at random (the sample set's is one array question and one other). The recipe lives in `set.json` (`practice`), so each set defines its own.
 - **Random:** a random number of questions (you choose how many) from the assessed topics. Tick the boxes to also draw from quick revision or extra practice.
 - **By topic:** every question in the topics you tick.
 - **All questions:** the whole set. Quick revision and extra practice are off unless you tick them.
@@ -95,6 +95,8 @@ It works, but a phone is a cramped place to write C++: the on-screen keyboard co
 ## Your own question sets
 
 The **Question sets** tab shows the coding sets, then **Your library**: question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it. Each set is a tile; click it to open it, where **Browse**, **Stats**, **Add a question**, **Formula sheets** and **Remove** are.
+
+**Sample content.** A new browser starts with a **Sample practice quiz** in its library (answer keys with units, a multiple-answer choice, self-marked parts, diagrams, notes and a formula sheet) so every feature can be tried on made-up questions, and the app ships one small **Sample coding quiz**. The quiz is imported once per browser (never into one that already has sets, and not again after you delete it). Delete any set with Alt+K, **Delete question set**, then type its name; it asks first.
 
 Press **How to add questions** under **Your library** for a short guide to everything below (and [adding-questions.md](adding-questions.md) for the full one).
 

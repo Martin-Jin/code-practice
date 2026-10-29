@@ -20,7 +20,7 @@ const solutionPage = (n, section, title, i = 1, of = 1, source = 'Book p.1') => 
   it(`Source: ${source}`, 36, 821.9, 120, 7.5),
 ];
 const extraPage = (n, section) => [it(section, 36, 26, 110, 8.5), it(`Question ${n} (extra working space)`, 440, 26, 119, 8.5), it(`Q${n}. Extra working space`, 36, 55.4, 120, 12.5)];
-const cover = (lines, total) => [it('MECHENG222 - Practice Questions', 36, 60, 300, 20), it(`${total} questions. Each question: a page to attempt it.`, 36, 90, 400, 10),
+const cover = (lines, total) => [it('COURSE101 - Practice Questions', 36, 60, 300, 20), it(`${total} questions. Each question: a page to attempt it.`, 36, 90, 400, 10),
   ...lines.map((text, i) => it(text, 36, 130 + i * 14, 400, 10))];
 const page = (number, items, dashY = null) => ({ number, width: W, height: H, items, dashY });
 
@@ -55,7 +55,7 @@ test('a question page is recognised from the generator header, title and footer'
 });
 
 test('text from the copied slide content near the page edge is not read as a header', () => {
-  const noise = [it('MECHENG 211: FLUID MECHANICS', 40, 26, 160, 14), it('Lihua Tang', 36, 26, 50, 10), it('stray', 564, 25, 10, 11.3), it('Source: other', 80, 822, 60, 12)];
+  const noise = [it('COURSE 101: SAMPLE COURSE', 40, 26, 160, 14), it('A. Lecturer', 36, 26, 50, 10), it('stray', 564, 25, 10, 11.3), it('Source: other', 80, 822, 60, 12)];
   const info = classifyPage(questionPage(5, 'Fluid Statics', 'Hydrostatic force', 'FM p.1', noise), W, H);
   assert.equal(info.section, 'Fluid Statics');
   assert.equal(info.footer.source, 'FM p.1');
@@ -70,7 +70,7 @@ test('solution pages are found even when a long title runs under "Worked solutio
 
 test('extra working pages and pages that are neither are recognised', () => {
   assert.deepEqual(classifyPage(extraPage(76, 'Ch 6'), W, H), { kind: 'extra', number: 76 });
-  assert.equal(classifyPage([it('MECHENG222', 36, 60, 100, 20)], W, H), null);
+  assert.equal(classifyPage([it('COURSE101', 36, 60, 100, 20)], W, H), null);
 });
 
 test('findDashedRule picks the long dashed horizontal line near the margins', () => {
@@ -83,10 +83,10 @@ test('findDashedRule picks the long dashed horizontal line near the margins', ()
 });
 
 test('uidFor is stable, lower-case insensitive and short', async () => {
-  const a = await uidFor('MECHENG222', 'Quiz 1, Q3', 'Mass of an assembly');
+  const a = await uidFor('COURSE101', 'Quiz 1, Q3', 'Mass of an assembly');
   assert.match(a, /^q-[0-9a-f]{8}$/);
-  assert.equal(a, await uidFor('mecheng222', 'quiz 1, q3', 'MASS of an assembly'));
-  assert.notEqual(a, await uidFor('MECHENG222', 'Quiz 1, Q3', 'Mass of an assembly', '|2'));
+  assert.equal(a, await uidFor('course101', 'quiz 1, q3', 'MASS of an assembly'));
+  assert.notEqual(a, await uidFor('COURSE101', 'Quiz 1, Q3', 'Mass of an assembly', '|2'));
 });
 
 const samplePages = () => [
@@ -100,10 +100,10 @@ const samplePages = () => [
 ];
 
 test('buildIndex turns pages into a valid manifest', async () => {
-  const { manifest, report } = await buildIndex(samplePages(), 'MECHENG222 - Practice Questions.pdf');
-  assert.equal(manifest.id, 'mecheng222-practice-questions');
-  assert.equal(manifest.course, 'MECHENG222');
-  assert.equal(manifest.pdf, 'MECHENG222 - Practice Questions.pdf');
+  const { manifest, report } = await buildIndex(samplePages(), 'COURSE101 - Practice Questions.pdf');
+  assert.equal(manifest.id, 'course101-practice-questions');
+  assert.equal(manifest.course, 'COURSE101');
+  assert.equal(manifest.pdf, 'COURSE101 - Practice Questions.pdf');
   assert.equal(manifest.questions.length, 2);
   const [q1, q2] = manifest.questions;
   assert.equal(q1.title, 'Vector components - resolve a velocity into i, j, k components', 'the cover has the full title');
@@ -141,7 +141,7 @@ test('questions with the same course, source and title still get different uids'
 });
 
 test('mergeIndex keeps answers, drops vanished PDF questions and keeps screenshot questions', async () => {
-  const { manifest: first } = await buildIndex(samplePages(), 'MECHENG222 - Practice Questions.pdf');
+  const { manifest: first } = await buildIndex(samplePages(), 'COURSE101 - Practice Questions.pdf');
   const saved = JSON.parse(JSON.stringify(first));
   saved.title = 'My own title';
   saved.questions[0].parts = [{ label: 'a', type: 'numeric', unit: 'm/s', answer: 4.5 }];
@@ -151,7 +151,7 @@ test('mergeIndex keeps answers, drops vanished PDF questions and keeps screensho
   saved.questions.push({ uid: 'q-shot0001', title: 'From a screenshot', section: 'Extra', source: '', marks: null, tags: [], flags: [], stem: { image: 'images/a.png' }, parts: [{ label: '', type: 'self' }], solution: null });
   saved.questions.push({ ...saved.questions[1], uid: 'q-gone0001', title: 'Removed from the PDF' });
 
-  const { manifest: again } = await buildIndex(samplePages(), 'MECHENG222 - Practice Questions.pdf');
+  const { manifest: again } = await buildIndex(samplePages(), 'COURSE101 - Practice Questions.pdf');
   const { manifest, dropped } = mergeIndex(saved, again);
   assert.equal(manifest.title, 'My own title');
   assert.equal(dropped, 1);

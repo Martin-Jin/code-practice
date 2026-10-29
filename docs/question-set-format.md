@@ -15,9 +15,9 @@ The code that checks this format is `app/shared/questionset.js`. It is the forma
 
 ```
 any-folder-you-choose/
-  MECHENG222/Practice questions/
-    MECHENG222 - Practice Questions.pdf
-    MECHENG222 - Practice Questions.questions.json   <- a set, names the PDF
+  COURSE101/Practice questions/
+    COURSE101 - Practice Questions.pdf
+    COURSE101 - Practice Questions.questions.json   <- a set, names the PDF
   Rigid body quiz/
     rigid-body.questions.json                         <- a set with no PDF
     images/q-3f9a1c2e.png
@@ -31,9 +31,9 @@ Only files the manifest names are copied. Everything else in the folder (slides,
 {
   "format": "practice-question-set",
   "version": 1,
-  "id": "mecheng222-rigid-body",
-  "title": "MECHENG222 rigid body quiz",
-  "course": "MECHENG222",
+  "id": "course101-rigid-body",
+  "title": "COURSE101 rigid body quiz",
+  "course": "COURSE101",
   "pdf": null,
   "questions": [ ]
 }
@@ -54,7 +54,7 @@ Only files the manifest names are copied. Everything else in the folder (slides,
   "uid": "q-3f9a1c2e",
   "title": "Rigid body kinetics - mass and moment of inertia of a slender-rod assembly",
   "section": "Rigid body kinetics",
-  "source": "MECHENG222 Quiz 1, Q3",
+  "source": "COURSE101 Quiz 1, Q3",
   "marks": 3,
   "tags": ["mass moment of inertia", "slender rod"],
   "stem": { "text": "The assembly is pivoted at $O$ ...", "image": "images/q-3f9a1c2e.png" },

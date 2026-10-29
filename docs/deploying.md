@@ -40,7 +40,7 @@ Press `Ctrl+C` in the terminal to stop it. After changing `app/src`, run `app/st
 ## Developing the app
 
 - `cd app`, then `npm run dev` for hot reload on http://localhost:5173. Compile requests are forwarded to `npm run serve` (start it in a second terminal), so the local runner works in dev too. Run `npm run catalog` first to create `public/catalog.json`.
-- `npm test` runs the unit tests; `npm run verify` runs the full compile check (about 3 minutes for 87 questions).
+- `npm test` runs the unit tests; `npm run verify` runs the full compile check (a few minutes for a large set).
 
 ## Environment variables
 

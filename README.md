@@ -7,7 +7,7 @@ A practice-question and quiz web app, called **Can'tviz quizzes** in the app its
 
 **New here?** [docs/adding-questions.md](docs/adding-questions.md) walks through setting the project up after cloning and adding questions of either kind.
 
-The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style C++ questions for MECHENG270 Part 2 (linked lists, stacks and queues, trees, recursion, searching, complex numbers, DFT/FFT) plus one big revision question.
+The repo ships one small sample set, [`sample`](sets/sample/INDEX.md): nine original CodeRunner-style C++ questions that show the format (arrays, printing, linked lists, a fix-the-bug question, recursion, complex numbers, strings and one extra). A new browser also starts with a **sample practice quiz** in its library, with answer keys, diagrams and a formula sheet, to show the library features. Put your own sets under `sets/` (a folder there is picked up by the app and the build), or follow [docs/adding-questions.md](docs/adding-questions.md).
 
 ## Open it
 
@@ -23,7 +23,7 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 |---|---|
 | [`app/`](docs/architecture.md) | The web app (React, Vite, Monaco) and the small local compile server. |
 | `sets/<set-id>/` | A question set: `set.json`, `questions/`, `solutions/`. Add a folder here to add a set. |
-| [`sets/mecheng270/INDEX.md`](sets/mecheng270/INDEX.md) | Every MECHENG270 question with title, marks and topic. |
+| [`sets/sample/INDEX.md`](sets/sample/INDEX.md) | Every question of the sample set with title, marks and topic. |
 | `framework/` | The small C++ test framework every question uses. You never need to edit it. |
 | `templates/example-set/` | A two-question example set. Copy it to start a new set. |
 | `app/tools/index-pdf.js` | Reads a practice-questions PDF and writes its `.questions.json` beside it (see [question-set-format.md](docs/question-set-format.md)). |
@@ -43,14 +43,14 @@ The first set, [`mecheng270`](sets/mecheng270/INDEX.md), has 87 CodeRunner-style
 | [docs/question-set-format.md](docs/question-set-format.md) | Add practice PDFs or quiz screenshots from your own folders: the `.questions.json` manifest and how sets are found. |
 | [docs/architecture.md](docs/architecture.md) | Change the app: how a Run works, why it is built this way, limits. |
 | [docs/deploying.md](docs/deploying.md) | Publish to GitHub Pages, run the local server, develop the app, see CI. |
-| [sets/mecheng270/INDEX.md](sets/mecheng270/INDEX.md) | Pick a MECHENG270 question by topic and marks. |
+| [sets/sample/INDEX.md](sets/sample/INDEX.md) | Pick a question of the sample set by topic and marks. |
 
 ## Doing a question without the app
 
 You need a C++17 compiler (MinGW g++ or clang++) and CMake 3.16 or newer. In PowerShell, add MinGW to the path first: `$env:Path = "C:\msys64\mingw64\bin;" + $env:Path`.
 
 1. Open `main.cpp` and set `constexpr int kQuestion = 7;` (`0` runs every question and prints a summary).
-2. Open the question file in `sets/mecheng270/questions/` (extras are in `sets/mecheng270/extra_questions/questions/`), read the task, and write your answer between the `YOUR ANSWER STARTS HERE` and `YOUR ANSWER ENDS HERE` markers. Do not edit the provided code or the tests.
+2. Open the question file in `sets/sample/questions/` (the extra is in `sets/sample/extra_questions/questions/`), read the task, and write your answer between the `YOUR ANSWER STARTS HERE` and `YOUR ANSWER ENDS HERE` markers. Do not edit the provided code or the tests.
 3. Build and run, with the VS Code build task (`Ctrl+Shift+B`) and the debug launch, or in PowerShell:
 
    ```powershell

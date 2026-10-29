@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 # Which question set under sets/ to build (every .cpp inside it is a question).
-set(SET_NAME "mecheng270" CACHE STRING "Question set under sets/")
+set(SET_NAME "sample" CACHE STRING "Question set under sets/")
 
 # Developer option: compile the reference solutions instead of your answers
 # (used to check that every test is satisfiable).

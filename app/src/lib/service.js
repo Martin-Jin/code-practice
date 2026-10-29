@@ -11,6 +11,7 @@ import { execute, detectLocal } from './runners.js';
 import { loadLibrary } from './library.js';
 import { loadPractice } from './practice.js';
 import { loadFormulas } from './formulas.js';
+import { seedSample } from './sample.js';
 
 const MAX_STORED_OUTPUT = 100 * 1024;
 const RUNNER_KEY = 'runner';
@@ -31,6 +32,7 @@ export async function boot() {
     await loadLibrary();
     await loadPractice();
     await loadFormulas();
+    await seedSample();
     state.local = await detectLocal();
     let saved = null;
     try { saved = localStorage.getItem(RUNNER_KEY); } catch { /* storage blocked */ }
