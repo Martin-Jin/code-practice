@@ -11,6 +11,15 @@ It also holds your own practice questions that are not code: PDFs, quiz screensh
 
 Both versions look and behave the same. The only difference is the **runner** (where your code is compiled). Switch it in Settings (the gear button on the dashboard, or **Settings…** in the cog menu inside a run). Local g++ appears there only when the local server is running.
 
+## Tutorial and what's new
+
+A welcome window (about half the screen, in the middle) has two tabs: **Tutorial** (how to use the app, how to import sets and how to have an agent format a practice PDF) and **What's new** (the five latest changes, each with its version number).
+
+- It opens by itself the first time you visit, on the tutorial, and again after each update, on **What's new**. It is shown once per version, so closing it keeps it away until the next update.
+- Reopen it any time from the three-dot menu at the top right: **Tutorial and what's new**.
+- The tutorial has an index at the top, a search (Ctrl+F while it is showing searches the guide, Enter for the next match) and a column of dots at the right edge, one per section, where the section you are reading shows its name beside its dot. Clicking an index entry or a dot scrolls to that section.
+- Versions count pushes: `1.00` was the first. The list and the number are in `app/shared/changelog.js`; the tutorial text is in `app/src/components/Welcome.jsx`, its pictures in `app/public/tutorial/`.
+
 ## Help and shortcuts
 
 The **?** button in the top bar of the dashboard, set and stats pages lists every keyboard shortcut. Inside a run, use **Keyboard shortcuts** in the cog menu.

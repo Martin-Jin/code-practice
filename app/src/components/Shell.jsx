@@ -11,6 +11,7 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
 import { BackupSection } from './Backup.jsx';
 import KebabMenu from './KebabMenu.jsx';
+import { openWelcome } from './Welcome.jsx';
 
 export const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
 export const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
@@ -149,6 +150,7 @@ function NavMenu({ theme }) {
   return (
     <KebabMenu label="Settings, help and theme" items={[
       { label: 'Settings', icon: 'gear', onClick: () => open(({ close }) => <SettingsDialog close={close} />) },
+      { label: 'Tutorial and what\'s new', icon: 'questions', onClick: () => openWelcome(open) },
       { label: 'Help: keyboard shortcuts', icon: 'help', onClick: () => open(({ close }) => <HelpDialog close={close} />) },
       { label: `Theme: ${THEME_LABEL[theme.mode]}`, icon: THEME_ICON[theme.mode], onClick: theme.toggle },
     ]} />

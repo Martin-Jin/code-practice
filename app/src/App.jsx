@@ -6,6 +6,7 @@ import useTheme from './components/useTheme.js';
 import { DialogProvider } from './components/Dialogs.jsx';
 import ToastHost from './components/Toasts.jsx';
 import CommandPalette from './components/CommandPalette.jsx';
+import { WelcomeOnStart } from './components/Welcome.jsx';
 import Dashboard from './views/Dashboard.jsx';
 import SetsPage from './views/SetsPage.jsx';
 import SetPage from './views/SetPage.jsx';
@@ -86,6 +87,7 @@ export default function App() {
     <DialogProvider>
       {body}
       {st.ready && !st.error && <CommandPalette theme={theme} />}
+      {st.ready && !st.error && <WelcomeOnStart />}
       <ToastHost />
     </DialogProvider>
   );
