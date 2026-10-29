@@ -167,7 +167,8 @@ export function parseQuestionSet(text) {
 export function applyEdit(question, edit) {
   if (!edit) return question;
   const out = { ...question };
-  if (edit.parts) out.parts = edit.parts;
+  // An answer key saved with no parts means "no key", so the imported parts stay (a self-marked one, with I got it / Not quite).
+  if (edit.parts && edit.parts.length) out.parts = edit.parts;
   if (edit.marks !== undefined) out.marks = edit.marks;
   if (edit.tags) out.tags = edit.tags;
   if (edit.notes !== undefined) out.notes = edit.notes;

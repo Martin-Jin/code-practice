@@ -140,3 +140,10 @@ test('applyEdit lays notes, hiding and replaced content over a question without 
   assert.equal(q.title, 'Old');
   assert.equal(applyEdit(q, { notes: '' }).notes, '');
 });
+
+test('applyEdit keeps the imported parts when an answer key is saved with none', () => {
+  const self = [{ label: '', type: 'self' }];
+  const num = [{ label: 'a', type: 'numeric', unit: '', answer: 3 }];
+  assert.deepEqual(applyEdit({ parts: self }, { parts: [] }).parts, self);
+  assert.deepEqual(applyEdit({ parts: self }, { parts: num }).parts, num);
+});

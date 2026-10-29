@@ -87,7 +87,11 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const runCheck = () => setResult(check(setId, uid, question).overall);
   const onAnswer = (part, value) => {
     // A question with only self-marked parts is finished as soon as it is marked; pressing a mark again takes it back.
-    if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) { setResult(setSelfMark(setId, uid, question, part.label, value, run ? run.id : null)); return; }
+    if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) {
+      const overall = setSelfMark(setId, uid, question, part.label, value, run ? run.id : null);
+      setResult(overall === 'right' || overall === 'wrong' ? overall : null);   // no banner once the mark is taken back
+      return;
+    }
     setAnswer(setId, uid, part.label, value);
     setResult(null);
   };

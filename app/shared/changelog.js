@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.84';
+export const VERSION = '1.85';
 
 export const CHANGELOG = [
+  {
+    version: '1.85', date: '2026-10-30', title: 'Fixes to the I got it / Not quite buttons',
+    items: [
+      'Saving an empty answer key no longer makes I got it / Not quite disappear: with no key, the question keeps its self-marked part.',
+      'Taking a mark back no longer shows the "Answer every part to check them all" message.',
+    ],
+  },
   {
     version: '1.84', date: '2026-10-30', title: 'I got it / Not quite toggle, and no needless Reset',
     items: [
@@ -33,12 +40,6 @@ export const CHANGELOG = [
     version: '1.81', date: '2026-10-30', title: 'The formula sheet sits flush under the top bar',
     items: [
       'The formula sheet now starts exactly under the top bar (no gap, even when the bar wraps on a narrow or zoomed window) and fills the page down to the bottom, still opening over the question.',
-    ],
-  },
-  {
-    version: '1.79', date: '2026-10-30', title: 'A tidier section heading',
-    items: [
-      'The Questions in this set heading on an imported set\'s page is slightly larger and sits closer to the section picker below it.',
     ],
   },
 ];
