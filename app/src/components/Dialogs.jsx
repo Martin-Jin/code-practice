@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import Icon from './Icon.jsx';
 
 // `compact` is for short questions (confirm, prompt): a narrow box with centred text and buttons.
-export function Modal({ title, children, footer, onClose, wide, compact, className = '' }) {
+export function Modal({ title, children, footer, onClose, wide, compact, className = '', closeButton = false }) {
   const ref = useRef(null);
   useEffect(() => {
     const d = ref.current;
@@ -16,7 +17,7 @@ export function Modal({ title, children, footer, onClose, wide, compact, classNa
       onMouseDown={(e) => { if (e.target === ref.current && onClose) onClose(); }}
     >
       <form method="dialog" onSubmit={(e) => e.preventDefault()}>
-        <div className="m-head"><h2>{title}</h2></div>
+        <div className="m-head"><h2>{title}</h2>{closeButton && <button type="button" className="m-x btn ghost icon-only" aria-label="Close" title="Close" onClick={() => onClose && onClose()}><Icon name="x" /></button>}</div>
         <div className="m-body">{children}</div>
         <div className="m-foot">{footer}</div>
       </form>

@@ -749,3 +749,10 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 @keyframes dm-toast { from { opacity: 0; } to { opacity: 1; } }
 @keyframes dm-ripple { from { opacity: 1; transform: scale(0.3); } to { opacity: 0; transform: scale(1.8); } }
 @media (prefers-reduced-motion: reduce) { .dm-cursor, .dm-dim, .dm-line, .dm-bubble, .dm-toast { transition: none; animation: none; opacity: 1; } }
+
+/* The welcome window's header: the app mark, its name and version, and a close button at the right. */
+.modal .m-head { position: relative; }
+.modal .m-x { position: absolute; top: 12px; right: 14px; }
+.welcome-title { display: inline-flex; align-items: center; gap: 10px; }
+.welcome-title .logo-mark { color: var(--accent); }
+.welcome .m-head { padding-right: 56px; }
