@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.75';
+export const VERSION = '1.76';
 
 export const CHANGELOG = [
+  {
+    version: '1.76', date: '2026-10-29', title: 'Delete or select all from the Select menu',
+    items: [
+      'After you tick sets and folders on the Question sets page, the Move button is now an Actions menu: Move to a folder, Delete, Select all and Clear selection. Deleting several sets at once asks once; deleted folders keep their sets.',
+    ],
+  },
   {
     version: '1.75', date: '2026-10-29', title: 'Split random runs by topic, and leave out completed questions',
     items: [
@@ -32,13 +38,6 @@ export const CHANGELOG = [
     version: '1.71', date: '2026-10-29', title: 'Tutorial: how to add your own coding questions',
     items: [
       'The tutorial now explains that coding sets are C++ files in the project, how to add or share one, and where the guides are. Importing and exporting them inside the app is not available yet.',
-    ],
-  },
-  {
-    version: '1.70', date: '2026-10-29', title: 'One prompt that walks you through adding a question set',
-    items: [
-      'The tutorial has a full copy-paste prompt for an AI agent. The agent asks what material you have, builds the practice PDF in the exact layout the app reads, records the answer keys and walks you through importing it.',
-      'The buttons in the animations work: Copy the prompt really copies it, and clicking any other button jumps to that step.',
     ],
   },
 ];

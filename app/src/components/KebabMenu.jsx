@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 
-// A three-dot button that opens a small menu. items: [{ label, icon, onClick, danger }]. `label` names it for screen readers.
-export default function KebabMenu({ items, label = 'More actions', icon = 'more', className = '' }) {
+// A three-dot button (or, with `text`, a labelled button of `buttonClass`) that opens a small menu. items: [{ label, icon, onClick, danger }]. `label` names it for screen readers.
+export default function KebabMenu({ items, label = 'More actions', icon = 'more', className = '', text = '', buttonClass = 'btn ghost icon-only' }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef(null);
   useEffect(() => {
@@ -15,8 +15,8 @@ export default function KebabMenu({ items, label = 'More actions', icon = 'more'
   }, [open]);
   return (
     <div className={`menu-wrap kebab${className ? ` ${className}` : ''}`} ref={wrap}>
-      <button type="button" className="btn ghost icon-only" aria-haspopup="menu" aria-expanded={open} aria-label={label} title={label} onClick={() => setOpen(!open)}>
-        <Icon name={icon} />
+      <button type="button" className={buttonClass} aria-haspopup="menu" aria-expanded={open} aria-label={label} title={label} onClick={() => setOpen(!open)}>
+        <Icon name={icon} />{text && ` ${text}`}
       </button>
       {open && (
         <div className="menu" role="menu" style={{ minWidth: 190, maxHeight: 320, overflowY: 'auto' }}>

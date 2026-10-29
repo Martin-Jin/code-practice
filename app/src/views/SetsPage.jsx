@@ -9,6 +9,8 @@ import { AddFab, LibraryNotes } from '../components/Library.jsx';
 import { useDialogs, Modal } from '../components/Dialogs.jsx';
 import { toast } from '../components/Toasts.jsx';
 import useRangePick from '../lib/rangepick.js';
+import { removeSet } from '../lib/library.js';
+import { deleteMine } from '../lib/mine.js';
 
 const questionCount = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 
@@ -77,6 +79,26 @@ export default function SetsPage({ folderId, theme }) {
     setPicked(new Set());
     setSelecting(false);
   });
+  const deleteSelected = guard(async () => {
+    const setIds = [...picked].filter((k) => k.startsWith('s:')).map((k) => k.slice(2));
+    const folderIds = [...picked].filter((k) => k.startsWith('f:')).map((k) => k.slice(2));
+    const parts = [setIds.length && plural(setIds.length, 'question set'), folderIds.length && plural(folderIds.length, 'folder')].filter(Boolean).join(' and ');
+    const ok = await confirm({
+      title: `Delete ${parts}?`,
+      body: 'Sets lose the copy kept in this browser, with their formula sheets (sets you made yourself lose their questions and images). Your own folders on disk are not touched, and progress on imported sets is kept. A deleted folder keeps its sets: they move back to your library.',
+      confirmText: 'Delete', danger: true,
+    });
+    if (!ok) return;
+    for (const id of setIds) {
+      const set = st.library.sets[id];
+      if (set) await (set.userOwned ? deleteMine(id) : removeSet(id));
+    }
+    for (const id of folderIds) if (st.libFolders[id]) await deleteFolder(id);
+    toast(`Deleted ${parts}.`);
+    setPicked(new Set());
+    setSelecting(false);
+  });
+  const selectAll = () => setPicked(new Set([...folders.map((f) => `f:${f.id}`), ...here.map((x) => `s:${x.id}`)]));
   const rename = guard(async (f) => {
     const name = await prompt({ title: 'Rename folder', label: 'Folder name', initial: f.name });
     if (name !== null) await renameFolder(f.id, name);
@@ -121,7 +143,14 @@ export default function SetsPage({ folderId, theme }) {
         <div className="section-title">
           <h2>{folder ? folder.name : 'Your library'}</h2><span className="muted">{folder ? plural(here.length, 'set') : sets.length}</span>
           <span className="spacer" />
-          {selecting && <button type="button" className="btn primary sm" disabled={picked.size === 0} onClick={moveSelected}><Icon name="move" /> Move{picked.size ? ` (${picked.size})` : ''}</button>}
+          {selecting && (
+            <KebabMenu label="Actions for the selected items" icon="move" text={`Actions${picked.size ? ` (${picked.size})` : ''}`} buttonClass="btn primary sm"
+              items={[
+                ...(picked.size ? [{ label: 'Move to a folder', icon: 'move', onClick: moveSelected }, { label: 'Delete', icon: 'trash', danger: true, onClick: deleteSelected }] : []),
+                { label: 'Select all', icon: 'check', onClick: selectAll },
+                ...(picked.size ? [{ label: 'Clear selection', icon: 'x', onClick: () => setPicked(new Set()) }] : []),
+              ]} />
+          )}
           {(here.length > 0 || folders.length > 0) && (
             <button type="button" className={`btn sm${selecting ? ' primary' : ' ghost'}`} aria-pressed={selecting} onClick={() => { setSelecting(!selecting); setPicked(new Set()); }}>
               <Icon name="check" /> {selecting ? 'Done' : 'Select'}
