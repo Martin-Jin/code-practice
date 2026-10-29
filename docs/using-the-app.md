@@ -13,12 +13,13 @@ Both versions look and behave the same. The only difference is the **runner** (w
 
 ## Tutorial and what's new
 
-A welcome window (about half the screen, in the middle) has two tabs: **Tutorial** (how to use the app, how to import sets and how to have an agent format a practice PDF) and **What's new** (the five latest changes, each with its version number).
+A welcome window (about two-thirds of the screen, in the middle) has two tabs: **Tutorial** (how to use the app, how to import sets and how to have an agent format a practice PDF) and **What's new** (the five latest changes, each with its version number).
 
 - It opens by itself the first time you visit, on the tutorial, and again after each update, on **What's new**. It is shown once per version, so closing it keeps it away until the next update.
 - Reopen it any time from the three-dot menu at the top right (**Tutorial and what's new**), from **Settings > Help**, or from the command palette (Alt+K, then **Open the tutorial**).
-- The tutorial has an index at the top, a search (Ctrl+F while it is showing searches the guide, Enter for the next match) and a column of dots at the right edge, one per section, where the section you are reading shows its name beside its dot. Clicking an index entry or a dot scrolls to that section.
-- Versions count pushes: `1.00` was the first. The list and the number are in `app/shared/changelog.js`; the tutorial text is in `app/src/components/Welcome.jsx`, its pictures in `app/public/tutorial/`.
+- The tutorial opens with an index (part of the page), has a search above it (Ctrl+F while it is showing searches the guide, Enter for the next match) and a column of dots at the right edge, one per section. The section you are reading shows its name beside its dot for a moment, then it fades until you reach another section. Clicking an index entry or a dot scrolls smoothly to that section.
+- Four sections have an animated walkthrough (importing a folder, the PDF agent, formula sheets for several sets, exporting chosen sets) with Pause and Replay. They run only while on screen and stay still for anyone with reduced motion turned on.
+- Versions count pushes: `1.00` was the first. The list and the number are in `app/shared/changelog.js`; the tutorial text is in `app/src/components/Welcome.jsx`, its pictures in `app/public/tutorial/` and its animations in `app/src/components/Demo.jsx`.
 
 ## Help and shortcuts
 

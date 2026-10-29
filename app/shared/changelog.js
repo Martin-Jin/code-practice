@@ -1,11 +1,18 @@
 // The app's version and its change log (the five latest changes), shown in the welcome window (src/components/Welcome.jsx).
 // Version numbers count pushes to main: 1.00 was the first, so a push that lands after N commits on main is
-// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 66th push is 1.65). Every change a user can see adds an entry at the top,
+// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 67th push is 1.66). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.65';
+export const VERSION = '1.66';
 
 export const CHANGELOG = [
+  {
+    version: '1.66', date: '2026-10-29', title: 'Animated tutorial, and a bigger window',
+    items: [
+      'The tutorial shows importing a folder, formatting a PDF with an agent, adding a formula sheet to several sets and exporting chosen sets as short animations, with pause and replay.',
+      'The window is larger and easier to read, the index is now part of the page, and the section name beside the progress dots fades after a moment and returns when you reach a new section.',
+    ],
+  },
   {
     version: '1.65', date: '2026-10-29', title: 'Tutorial and export in the command palette',
     items: [
@@ -34,12 +41,6 @@ export const CHANGELOG = [
     items: [
       'Select several sets and folders and move them together, with folders inside folders.',
       'Search your sets from the command palette (Alt+K).',
-    ],
-  },
-  {
-    version: '1.61', date: '2026-10-28', title: 'Tidier imported-set page',
-    items: [
-      'A mode dropdown and a search over the set\'s questions, and a name prompt when you start a session.',
     ],
   },
 ];

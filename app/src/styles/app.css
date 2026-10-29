@@ -660,21 +660,23 @@ dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center
 .sheet-row + .sheet-row { border-top: 1px solid var(--border); }
 
 /* The welcome window (components/Welcome.jsx): about half the screen, centred, with a tutorial tab and a change log tab. */
-dialog.modal.welcome { width: max(560px, 50vw); max-width: calc(100vw - 32px); height: max(480px, 64vh); max-height: calc(100vh - 32px); }
+dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); height: max(600px, 88vh); max-height: calc(100vh - 32px); }
+.welcome .tut { font-size: 15.5px; line-height: 1.55; }
 .welcome form { display: flex; flex-direction: column; height: 100%; }
 .welcome .m-body { padding: 0; overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; }
 .welcome-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .welcome .tabs { flex: none; padding: 0 22px; }
 .tut { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.tut-top { flex: none; padding: 10px 22px 8px; border-bottom: 1px solid var(--border); display: grid; gap: 8px; }
+.tut-top { flex: none; padding: 10px 28px; border-bottom: 1px solid var(--border); }
 .tut-find { display: flex; gap: 8px; align-items: center; }
 .tut-find input[type=text] { flex: 1; min-width: 0; }
 .tut-find .count { white-space: nowrap; font-size: 12.5px; }
-.tut-index { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 12.5px; align-items: baseline; }
-.tut-index a { color: var(--muted); text-decoration: none; }
-.tut-index a:hover, .tut-index a.on { color: var(--text); }
-.tut-index a.on { font-weight: 700; }
-.tut-scroll { position: relative; overflow: auto; flex: 1; min-height: 0; padding: 4px 56px 20px 22px; }
+.tut-index { margin: 14px 0 6px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
+.tut-index h3 { margin: 0 0 6px; font-size: 14px; }
+.tut-index ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; }
+.tut-index a { text-decoration: none; }
+.tut-index a:hover { text-decoration: underline; }
+.tut-scroll { position: relative; overflow: auto; flex: 1; min-height: 0; padding: 4px 64px 24px 28px; }
 .tut section { margin: 16px 0 26px; display: grid; gap: 10px; }
 .tut section h3, .changelog h3 { margin: 0; }
 .tut section p, .tut section ul, .tut section ol { margin: 0; }
@@ -687,8 +689,8 @@ dialog.modal.welcome { width: max(560px, 50vw); max-width: calc(100vw - 32px); h
 .changelog h3 .chip { margin-left: 8px; }
 .tut-rail { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); display: grid; gap: 2px; justify-items: end; }
 .tut-rail .dot { display: flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; cursor: pointer; font: inherit; }
-.tut-rail .name { font-size: 11px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; white-space: nowrap; max-width: 0; opacity: 0; padding: 1px 0; border-width: 0; overflow: hidden; transition: max-width 0.25s ease, opacity 0.2s ease, padding 0.25s ease; }
-.tut-rail .dot.on .name { max-width: 170px; opacity: 1; padding: 1px 7px; border-width: 1px; box-shadow: 0 2px 8px rgb(0 0 0 / 14%); }
+.tut-rail .name { font-size: 11px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; white-space: nowrap; max-width: 0; opacity: 0; padding: 1px 0; border-width: 0; overflow: hidden; transition: max-width 0.5s ease, opacity 0.6s ease, padding 0.5s ease; }
+.tut-rail .dot.on.say .name { max-width: 200px; opacity: 1; padding: 1px 7px; border-width: 1px; box-shadow: 0 2px 8px rgb(0 0 0 / 14%); }
 .tut-rail .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); opacity: 0.4; transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease; }
 .tut-rail .dot:hover .pip { opacity: 0.8; }
 .tut-rail .dot.on .pip { background: var(--strong); opacity: 1; transform: scale(1.4); }
@@ -697,3 +699,53 @@ dialog.modal.welcome { width: max(560px, 50vw); max-width: calc(100vw - 32px); h
 @keyframes tut-flash { 0% { background: var(--warn-soft); } 100% { background: transparent; } }
 .tut section.flash { animation: tut-flash 1.1s ease-out; border-radius: 8px; box-shadow: 0 0 0 8px transparent; }
 @media (prefers-reduced-motion: reduce) { .tut section.flash { animation: none; } .tut-rail .name, .tut-rail .pip { transition: none; } }
+
+/* Animated walkthroughs in the tutorial (components/Demo.jsx): a 1000 x 600 canvas scaled to fit. */
+.demo { margin: 0 auto; width: 100%; max-width: 780px; display: grid; gap: 4px; }
+.dm-box { position: relative; width: 100%; aspect-ratio: 5 / 3; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); }
+.dm-stage { position: absolute; left: 0; top: 0; width: 1000px; height: 600px; transform-origin: 0 0; font-size: 16px; line-height: 1.4; }
+.dm-bar { height: 46px; display: flex; gap: 22px; align-items: center; padding: 0 28px; background: var(--surface); border-bottom: 1px solid var(--border); font-weight: 600; color: var(--muted); }
+.dm-bar b { color: var(--text); margin-right: 8px; }
+.dm-bar .on { color: var(--text); border-bottom: 2px solid var(--accent); padding: 12px 0 10px; }
+.dm-page { padding: 24px 40px; display: grid; gap: 14px; }
+.dm-page h3 { margin: 0; font-size: 14px; letter-spacing: 0.04em; color: var(--muted); }
+.dm-tile { min-height: 96px; }
+.dm-fab { position: absolute; right: 36px; bottom: 54px; display: grid; gap: 10px; justify-items: end; }
+.dm-opt { display: flex; align-items: center; gap: 10px; }
+.dm-round { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--accent); box-shadow: var(--shadow); }
+.dm-round.small { width: 46px; height: 46px; }
+.dm-round.main { width: 60px; height: 60px; background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.dm-round .icon { width: 22px; height: 22px; }
+.dm-label { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 14px; box-shadow: var(--shadow); }
+.dm-dim { position: absolute; inset: 46px 0 0 0; background: rgb(0 0 0 / 32%); display: grid; place-items: center; animation: dm-in 0.3s ease; }
+.dm-dialog { width: 640px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 20px 60px rgb(0 0 0 / 35%); display: grid; }
+.dm-dialog h2 { margin: 0; padding: 16px 22px 4px; font-size: 20px; }
+.dm-dbody { padding: 8px 22px 14px; display: grid; gap: 10px; }
+.dm-dfoot { padding: 12px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.dm-row { display: flex; gap: 12px; align-items: center; padding: 10px 14px; }
+.dm-search { display: flex; gap: 8px; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; min-height: 40px; }
+.dm-list { display: grid; border: 1px solid var(--border); border-radius: 8px; }
+.dm-list label { display: flex; gap: 10px; align-items: center; padding: 9px 12px; }
+.dm-list label + label { border-top: 1px solid var(--border); }
+.dm-select { justify-self: start; }
+.dm-toast { position: absolute; left: 50%; bottom: 66px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 10px; animation: dm-toast 0.3s ease; }
+.dm-split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 28px 32px 70px; height: 100%; box-sizing: border-box; }
+.dm-pane { display: grid; gap: 14px; align-content: start; }
+.dm-fields { display: grid; gap: 10px; }
+.dm-fill { border-bottom: 1px solid var(--border); padding: 0 6px; display: inline-block; min-width: 220px; }
+.dm-chat { display: grid; gap: 10px; min-height: 150px; align-content: start; }
+.dm-bubble { background: var(--surface-2); border-radius: 10px; padding: 8px 12px; animation: dm-in 0.3s ease; }
+.dm-progress { display: grid; gap: 4px; }
+.dm-line { opacity: 0; animation: dm-in 0.4s ease forwards; }
+.dm-input { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; min-height: 22px; }
+.dm-files { display: flex; gap: 8px; flex-wrap: wrap; min-height: 28px; }
+.dm-caption { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: rgb(20 20 20 / 82%); color: #fff; padding: 7px 16px; border-radius: 99px; font-weight: 600; white-space: nowrap; }
+.dm-caption span { opacity: 0.6; margin-right: 6px; }
+.dm-cursor { position: absolute; left: 0; top: 0; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; z-index: 5; }
+.dm-cursor svg { display: block; filter: drop-shadow(0 2px 3px rgb(0 0 0 / 35%)); }
+.dm-ripple { position: absolute; left: 2px; top: 2px; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; border: 3px solid var(--accent); animation: dm-ripple 0.6s ease-out forwards; }
+.dm-controls { display: flex; justify-content: flex-end; gap: 4px; }
+@keyframes dm-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes dm-toast { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dm-ripple { from { opacity: 1; transform: scale(0.3); } to { opacity: 0; transform: scale(1.8); } }
+@media (prefers-reduced-motion: reduce) { .dm-cursor, .dm-dim, .dm-line, .dm-bubble, .dm-toast { transition: none; animation: none; opacity: 1; } }

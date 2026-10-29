@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import Icon from './Icon.jsx';
+import Demo from './Demo.jsx';
 import { VERSION, CHANGELOG, startTab } from '../../shared/changelog.js';
 
 const DOCS = 'https://github.com/martin-jin/practice-questions/blob/main/docs';
@@ -46,7 +47,7 @@ const SECTIONS = [
           <li>The app lists each set it found, with its question count and whether it is new or changed. Tick the ones you want and press <b>Import</b>.</li>
           <li>The sets appear under <b>Your library</b>. After you change the files, choose the folder again: only what changed is copied.</li>
         </ol>
-        <Shot file="add.jpg" alt="The + button open, showing its four options" />
+        <Demo scene="import" />
         <p>The <b>+</b> also has <b>Add a question from a screenshot</b> (paste an image, drag a box over the question, add the parts to answer), <b>Add a formula sheet to several sets</b> and <b>Export chosen sets</b> (last two sections).</p>
         <p className="muted">Nothing is uploaded. The app keeps copies in this browser, and your folder is never changed. To build the PDF itself with an agent, see the next section.</p>
       </>
@@ -63,6 +64,7 @@ const SECTIONS = [
           <li>Paste it into an agent that can read your files and run commands (Claude Code, for example), opened in this repo so it can finish the answer keys.</li>
           <li>It writes the PDF, and a <code>.questions.json</code> beside it holding the answer keys and units. Import that folder with <b>+ &gt; Add or update a folder</b>.</li>
         </ol>
+        <Demo scene="agent" />
         <p className="muted">Without the repo the agent still builds the PDF, and the app reads it by itself, but every part is self-marked until you add answers. A single question from a screenshot can also come from an agent: see <Ext href={`${DOCS}/question-set-format.md`}>the set format</Ext> and the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext>.</p>
       </>
     ),
@@ -77,6 +79,7 @@ const SECTIONS = [
           <li>To remove one, open the set and press <b>Edit this set &gt; Formula sheets</b>.</li>
           <li>Typed answers are checked once a question has an answer: press the pen beside <b>Answers</b> to add or correct it. Numbers match within 1%, or the decimal places asked for.</li>
         </ul>
+        <Demo scene="formula" />
       </>
     ),
   },
@@ -101,6 +104,7 @@ const SECTIONS = [
           <li><b>Settings &gt; Backup &gt; Back up now</b> saves your progress to one file. Clearing the browser's site data deletes it otherwise. Tick <b>Include my imported sets</b> to put the PDFs in too (a zip).</li>
           <li><b>+ &gt; Export chosen sets</b>: search and tick sets to download just those, with their PDFs, images and formula sheets and no progress. Open the file with <b>Restore from a backup…</b> in Settings.</li>
         </ul>
+        <Demo scene="export" />
         <p className="muted">Course PDFs may not be yours to pass on.</p>
       </>
     ),
@@ -118,6 +122,13 @@ function Tutorial({ findRef }) {
   const [active, setActive] = useState(0);
   const [query, setQuery] = useState('');
   const [found, setFound] = useState({ count: 0, at: 0 });
+  const [say, setSay] = useState(true);   // the current dot shows its section name, then fades
+
+  useEffect(() => {
+    setSay(true);
+    const id = setTimeout(() => setSay(false), 1500);
+    return () => clearTimeout(id);
+  }, [active]);
 
   const onScroll = () => {
     const box = scroller.current;
@@ -188,21 +199,23 @@ function Tutorial({ findRef }) {
             </>
           )}
         </div>
-        <nav className="tut-index" aria-label="Index">
-          <span className="muted">Index</span>
-          {SECTIONS.map((s, i) => (
-            <a key={s.id} href={`#tut-${s.id}`} className={i === active ? 'on' : ''} onClick={(e) => { e.preventDefault(); goTo(i); }}>{i + 1}. {s.title}</a>
-          ))}
-        </nav>
       </div>
       <div className="tut-scroll" ref={scroller} onScroll={onScroll}>
+        <nav className="tut-index" aria-label="Index">
+          <h3>In this guide</h3>
+          <ol>
+            {SECTIONS.map((s, i) => (
+              <li key={s.id}><a href={`#tut-${s.id}`} onClick={(e) => { e.preventDefault(); goTo(i); }}>{s.title}</a></li>
+            ))}
+          </ol>
+        </nav>
         <div ref={content}>
           {SECTIONS.map((s, i) => <section key={s.id} id={`tut-${s.id}`} onAnimationEnd={(e) => e.currentTarget.classList.remove('flash')}><h3>{i + 1}. {s.title}</h3>{s.body}</section>)}
         </div>
       </div>
       <nav className="tut-rail" aria-label="Progress through the guide">
         {SECTIONS.map((s, i) => (
-          <button key={s.id} type="button" className={`dot${i === active ? ' on' : ''}`} aria-label={s.title} aria-current={i === active ? 'step' : undefined} onClick={() => goTo(i)}>
+          <button key={s.id} type="button" className={`dot${i === active ? ` on${say ? ' say' : ''}` : ''}`} aria-label={s.title} aria-current={i === active ? 'step' : undefined} onClick={() => goTo(i)}>
             <span className="name">{s.title}</span><span className="pip" />
           </button>
         ))}
