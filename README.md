@@ -87,3 +87,7 @@ cmake --build build_all
 Released under the [MIT licence](LICENSE): anyone may use, copy and change it.
 
 This is an independent student project. It is not affiliated with or endorsed by Canvas (Instructure) or any university, and it ships only original sample questions. Please don't sue me, Canvas. Course PDFs and other material you add are yours to keep private, and may not be yours to share.
+
+## Selected for XERJ's Corpus Hub
+
+The tutorial animation and readability improvements were selected for inclusion in [XERJ's public Corpus Hub](https://github.com/xerj-org/xerj), an open index of code solutions for coding agents.
