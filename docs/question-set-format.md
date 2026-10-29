@@ -124,7 +124,13 @@ The user can add or correct parts, marks, tags and a PDF question's crop box in 
 
 ## Formula sheets
 
-Each set can have formula sheets (PDFs or images). In a question of an imported set, **Formulas** (or Alt+T) opens a side panel with one tab per sheet; if the set has none, the panel offers an upload. They are copies kept in the browser like the PDFs, so they are not part of a backup.
+Each set can have formula sheets (PDFs or images). In a question of an imported set, **Formulas** (or Alt+T) opens a side panel with one tab per sheet; if the set has none, the panel offers an upload.
+
+- **One sheet for many sets.** The **+** button's **Add a formula sheet to several sets** takes a PDF or image and a list of sets (search them, tick the ones you want, or **Select shown** for everything the search lists). Each ticked set gets its own copy of the file, so a set exported on its own still carries its sheet. A set that already has a sheet with the same name and size is left alone.
+- **Removing sheets.** The trash button in the Formulas panel removes the sheet being shown. A set's **Edit this set** button (bottom right) has **Formula sheets**, which lists every sheet of that set with a **Remove** button. Removing deletes the copy in the browser only, and other sets' copies are not touched.
+- **Exporting.** **Export chosen sets** (the **+** button) downloads the ticked sets as one `.zip` with their questions, answer keys, PDFs, images and formula sheets, and no progress. **Restore from a backup…** in Settings reads it, and the sets come back with their sheets.
+
+The sheets are copies kept in the browser like the PDFs. A backup carries them only in the zip that includes the imported sets' files.
 
 ## Keeping the PDF and the set in step
 
@@ -138,4 +144,4 @@ For a set the app indexed from a PDF (Chromium browsers, such as Edge or Chrome)
 
 ## Where the copies live
 
-A backup can carry them (Settings > Backup, with the checkbox for PDFs and images), so they are not only copies you must re-add. Imported sets are kept in the browser's IndexedDB (`libSets` for the manifests, `libFiles` for the PDFs and images; `libFormulas` lists the formula sheets and `libHandles` holds the linked PDF files). They are copies, so they are not part of a backup: add the folder again to restore them. Your progress on them is stored separately and is part of a backup. Clearing "cookies and site data" removes the copies, so keep the folder.
+A backup can carry them (Settings > Backup, with the checkbox for PDFs and images), and **Export chosen sets** can carry just some, so they are not only copies you must re-add. Imported sets are kept in the browser's IndexedDB (`libSets` for the manifests, `libFiles` for the PDFs, images and formula sheets; `libFormulas` lists the formula sheets and `libHandles` holds the linked PDF files). They are copies, so a plain backup leaves them out: add the folder again, or restore a zip that includes them. Your progress on them is stored separately and is part of a backup. Clearing "cookies and site data" removes the copies, so keep the folder.

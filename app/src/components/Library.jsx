@@ -5,6 +5,7 @@ import { scanFolder, indexPdf, importSet, requestPersistence, storageStatus, mb 
 import Icon from './Icon.jsx';
 import { Modal, useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
+import { FormulaToSetsDialog, ExportSetsDialog } from './SetTools.jsx';
 import { toast } from './Toasts.jsx';
 
 const DOCS = 'https://github.com/martin-jin/practice-questions/blob/main/docs';
@@ -203,6 +204,12 @@ export function HelpDialog({ close }) {
         <li>Press <b>Save question</b>. It goes in <b>My questions</b>, and is included in a backup.</li>
       </ol>
 
+      <h3>Formula sheets and exporting</h3>
+      <ul>
+        <li><b>+</b> then <b>Add a formula sheet to several sets</b>: choose a PDF or image, search and tick the sets. Each set keeps its own copy. To remove one, open the set, press <b>Edit this set</b>, then <b>Formula sheets</b>.</li>
+        <li><b>+</b> then <b>Export chosen sets</b>: search and tick sets to download them as one zip (with their PDFs, images and formula sheets, without progress). Open it with <b>Restore from a backup…</b> in Settings.</li>
+      </ul>
+
       <h3>Folders and shortcuts</h3>
       <ul>
         <li><b>New folder</b> in <b>Your library</b> makes a folder. Drag a set's tile onto it, or use the <b>Folder</b> menu on the set's page.</li>
@@ -272,8 +279,9 @@ export function Fab({ options, icon, label, swap, children }) {
   );
 }
 
-// The floating add button: press it and two round buttons pop up; hovering one slides out what it does.
-// "Add or update a folder" chooses a folder of sets or PDFs; "Add a question" makes one from a screenshot.
+// The floating add button: press it and round buttons pop up; hovering one slides out what it does.
+// "Add or update a folder" chooses a folder of sets or PDFs; "Add a question" makes one from a screenshot; the last two
+// put a formula sheet into several sets and export chosen sets with their files.
 export function AddFab() {
   const { open } = useDialogs();
   const input = useRef(null);
@@ -285,6 +293,8 @@ export function AddFab() {
   const options = [
     ['Add a question from a screenshot', 'task', () => open(({ close }) => <AddQuestionDialog close={close} />)],
     ['Add or update a folder of sets or PDFs', 'folder', () => input.current.click()],
+    ['Add a formula sheet to several sets', 'sidebar', () => open(({ close }) => <FormulaToSetsDialog close={close} />)],
+    ['Export chosen sets', 'exit', () => open(({ close }) => <ExportSetsDialog close={close} />)],
   ];
   return (
     <Fab options={options} icon="plus" label="Add to your library">
@@ -299,7 +309,7 @@ export function LibraryNotes() {
   return (
     <section>
       <p className="muted">
-        Use the <b>+</b> button at the bottom right to add a folder of sets or PDFs, or to make a question from a screenshot.{' '}
+        Use the <b>+</b> button at the bottom right to add a folder of sets or PDFs, make a question from a screenshot, add a formula sheet to several sets, or export chosen sets.{' '}
         <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
       </p>
       <StorageNote />

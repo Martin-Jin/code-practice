@@ -647,3 +647,14 @@ dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center
 .title-with-icon .btn { margin-top: 2px; }
 .btn.ghost.edit-toggle { background: var(--surface-2); border: 1px solid var(--control-border); }
 .checked-line { display: flex; align-items: center; gap: 6px; margin: -6px 0 24px; }
+
+/* Choosing library sets in a dialog: a search box over a scrollable list of ticks. */
+.set-picker { display: grid; gap: 8px; }
+.set-picker .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.set-picker .bar input[type=text] { flex: 1 1 200px; }
+.set-picker .list { display: grid; max-height: 280px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+.set-picker .list label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; cursor: pointer; }
+.set-picker .list label + label { border-top: 1px solid var(--border); }
+.set-picker .list .none { padding: 12px; }
+.sheet-row { display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: 6px 0; }
+.sheet-row + .sheet-row { border-top: 1px solid var(--border); }

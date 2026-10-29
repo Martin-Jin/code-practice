@@ -15,6 +15,7 @@ import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQu
 import KebabMenu from '../components/KebabMenu.jsx';
 import { saveEdit, clearEditField } from '../lib/practice.js';
 import { Fab } from '../components/Library.jsx';
+import { FormulaSheetsDialog } from '../components/SetTools.jsx';
 import { MoveDialog } from './SetsPage.jsx';
 import QuickSearch from '../components/QuickSearch.jsx';
 import { foldersSorted, folderOf, moveSet } from '../lib/folders.js';
@@ -232,6 +233,7 @@ export default function LibrarySet({ setId, theme }) {
       })}
       <Fab icon="pencil" label="Edit this set" swap options={[
         ['Add a question', 'plus', () => open(({ close }) => <AddQuestionDialog close={close} setId={setId} />)],
+        ['Formula sheets', 'sidebar', () => open(({ close }) => <FormulaSheetsDialog setId={setId} close={close} />)],
         ...(foldersSorted().length > 0 ? [['Move to a folder', 'folder', moveToFolder]] : []),
         [record.userOwned ? 'Delete all my questions' : 'Remove from this browser', 'trash', remove],
       ]} />

@@ -14,7 +14,7 @@ export const state = {
   libProgress: {},     // "<set id>/<uid>" -> progress on one imported question (see practice.js)
   libEdits: {},        // "<set id>/<uid>" -> the user's changes to one imported question
   libRuns: {},         // id -> practice session over an imported set
-  libFormulas: {},     // set id -> { setId, sheets: [{ path, name, type }] } formula sheets; not backed up
+  libFormulas: {},     // set id -> { setId, sheets: [{ path, name, type, size }] } formula sheets; only in the zip backup that includes files
   libHandles: {},      // set id -> { setId, handle, name } the PDF file linked to an imported set (see pdfsync.js); not backed up
   libFolders: {},      // id -> { id, name, items: [{ setId }] } the user's folders of question sets (see folders.js)
   libMine: {},         // id -> the user's own questions made in the app

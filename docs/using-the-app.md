@@ -84,7 +84,7 @@ It works, but a phone is a cramped place to write C++: the on-screen keyboard co
 
 ## Your own question sets
 
-The **Question sets** tab shows the coding sets, then **Your library**: question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it. Each set is a tile; click it to open it, where **Browse**, **Stats**, **Add a question** and **Remove** are.
+The **Question sets** tab shows the coding sets, then **Your library**: question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it. Each set is a tile; click it to open it, where **Browse**, **Stats**, **Add a question**, **Formula sheets** and **Remove** are.
 
 Press **How to add questions** under **Your library** for a short guide to everything below (and [adding-questions.md](adding-questions.md) for the full one).
 
@@ -93,6 +93,7 @@ Press **How to add questions** under **Your library** for a short guide to every
 3. Tick the sets and press **Import**. They are copied into this browser, so the folder is not needed again until it changes. Your folder is never modified.
 4. Click a set's tile to open it and **Browse** its questions by section; click a title to open one. **Remove from this browser** deletes the copy in this browser (not your folder).
 5. After you change files in the folder, choose it again: only changed sets and files are copied.
+6. The **+** button also has **Add a formula sheet to several sets** (choose the file, search and tick the sets; each gets its own copy) and **Export chosen sets** (search and tick sets, then download one zip with their PDFs, images and formula sheets, and no progress). On a set's page, **Edit this set > Formula sheets** lists its sheets so you can remove any. Details: [question-set-format.md](question-set-format.md#formula-sheets).
 
 ### Making your own questions
 
@@ -137,7 +138,7 @@ In your browser's "clear browsing data" window, **cached images and files** is s
 
 - **Back up now** downloads one file, `code-practice-backup-YYYY-MM-DD.json`. It holds every run, draft and stat from every question set, plus this app's own settings (theme, runner, shortcuts, pane sizes). Nothing else in the browser's storage is included, so other pages on the same site (a GitHub Pages address is shared by all your projects) are not part of it.
 - **Include my imported sets with their PDFs and images** (a checkbox above those buttons, shown once you have imported sets) makes the backup, or the export below, a `.zip` instead of a small JSON file: the same JSON as `backup.json`, plus every stored PDF, image and formula sheet under `files/`. Restoring it on a computer without those sets recreates them, so the folders need not be added again. A set the computer already has keeps its own copy (and its progress), and only gains questions you added to it. The library is often around 100 MB, so it is off by default. Restore accepts either kind of file.
-- **Export my questions to share** downloads `code-practice-questions-YYYY-MM-DD.json` with only the questions you made in the app (and the answer keys on them): no progress, runs, stats, folders or settings. Give it to someone; they open it with **Restore from a backup…**, which only adds the questions to theirs and never replaces anything. Sets imported from a PDF are not in it unless you tick the checkbox above, which adds them and their PDFs (still no progress). Course PDFs may not be yours to pass on, so tick it only for material you may share. Question sets themselves are not in it, because they come with the app.
+- **Export my questions to share** downloads `code-practice-questions-YYYY-MM-DD.json` with only the questions you made in the app (and the answer keys on them): no progress, runs, stats, folders or settings. Give it to someone; they open it with **Restore from a backup…**, which only adds the questions to theirs and never replaces anything. Sets imported from a PDF are not in it unless you tick the checkbox above, which adds them and their PDFs (still no progress). To share only some sets, use **Export chosen sets** on the **+** button instead. Course PDFs may not be yours to pass on, so tick it only for material you may share. Question sets themselves are not in it, because they come with the app.
 - **Restore from a backup…** reads such a file and shows what is in it before changing anything. Choose how:
   - **Merge** (the default) keeps what is in this browser and adds what the file has. Where both have the same run or question, the newer one wins, and counters are never added together, so restoring the same file twice changes nothing.
   - **Replace everything** erases the runs, stats and settings here first. Use it on a clean machine.

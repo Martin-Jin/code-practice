@@ -7,6 +7,7 @@ import { makeZip, readZip, isZip } from '../../shared/zip.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { getFile } from './library.js';
+import { formulaBlob } from './formulas.js';
 import { discardPendingSaves } from './service.js';
 import { discardPracticeSaves } from './practice.js';
 
@@ -79,18 +80,16 @@ const MIME = { pdf: 'application/pdf', png: 'image/png', jpg: 'image/jpeg', jpeg
 const mimeOf = (name) => MIME[name.split('.').pop().toLowerCase()] || 'application/octet-stream';
 
 // The imported sets for a file that carries them: their records and formula sheet lists, and every stored file (PDFs,
-// images, formula sheets) as zip entries named "files/<set id>/<path>".
-async function collectLibrary() {
-  const sets = Object.values(state.library.sets).filter((s) => !s.userOwned);
-  const formulas = sets.map((s) => state.libFormulas[s.id]).filter(Boolean);
+// images, formula sheets) as zip entries named "files/<set id>/<path>". With `ids`, only those sets; their formula
+// sheets come along even for a set made in the app (which has no record of its own here, see downloadSets).
+async function collectLibrary(ids = null) {
+  const wanted = (id) => !ids || ids.includes(id);
+  const sets = Object.values(state.library.sets).filter((s) => !s.userOwned && wanted(s.id));
+  const formulas = Object.values(state.libFormulas).filter((f) => f.sheets.length && wanted(f.setId) && (ids || state.library.sets[f.setId]));
   const entries = [];
-  for (const set of sets) {
-    const rels = new Set([...Object.keys(set.files), ...((state.libFormulas[set.id] && state.libFormulas[set.id].sheets) || []).map((x) => x.path)]);
-    for (const rel of rels) {
-      const blob = await getFile(set.id, rel);
-      if (blob) entries.push({ name: `files/${set.id}/${rel}`, data: new Uint8Array(await blob.arrayBuffer()) });
-    }
-  }
+  const add = async (setId, rel, blob) => { if (blob) entries.push({ name: `files/${setId}/${rel}`, data: new Uint8Array(await blob.arrayBuffer()) }); };
+  for (const set of sets) for (const rel of Object.keys(set.files)) await add(set.id, rel, await getFile(set.id, rel));
+  for (const f of formulas) for (const x of f.sheets) await add(f.setId, x.path, await formulaBlob(f.setId, x.path));
   return { library: { sets, formulas }, entries };
 }
 
@@ -111,6 +110,21 @@ export async function downloadShare({ files = false } = {}) {
   const file = buildShare({ stores: currentRecords(), now, library: extra && extra.library });
   if (!file.stores.libMine.length && !(extra && extra.library.sets.length)) return null;
   return writeFile(file, extra && extra.entries, shareFileName(now));
+}
+
+// Downloads the chosen sets as a zip to hand to someone, or to keep on its own: each set's questions, answer key, PDF,
+// images and formula sheets, never progress. Sets made in the app are included whole, with their formula sheets. It is a
+// "share" file, so Restore only adds to what the other browser has. Returns the file name, or null when nothing was chosen.
+export async function downloadSets(ids) {
+  const mine = ids.filter((id) => state.libMine[id]);
+  const have = ids.filter((id) => state.library.sets[id]);
+  if (!have.length) return null;
+  const now = new Date();
+  const extra = await collectLibrary(have);
+  const file = buildShare({
+    stores: { libMine: mine.map((id) => state.libMine[id]), libEdits: Object.values(state.libEdits) }, now, library: extra.library,
+  });
+  return writeFile(file, extra.entries, shareFileName(now));
 }
 
 export async function downloadBackup({ files = false } = {}) {
@@ -137,7 +151,7 @@ export async function readBackupFile(file) {
 // already has keeps its own copy (which may be newer, with its progress already filed under the same ids); only the
 // questions you added to it and any files it lacks are taken from the file. 'replace' empties the library first.
 async function restoreLibrary(backup, mode, zip) {
-  if (!backup.library.length) return;
+  if (!backup.library.length && !backup.formulas.length) return;
   const replace = mode === 'replace';
   const puts = [];   // library file records to write
   const records = [];
@@ -162,7 +176,16 @@ async function restoreLibrary(backup, mode, zip) {
   const sheets = new Map();   // set id -> merged formula sheet list
   for (const f of backup.formulas) {
     const have = replace ? [] : (state.libFormulas[f.setId] && state.libFormulas[f.setId].sheets) || [];
-    sheets.set(f.setId, [...have, ...f.sheets.filter((x) => !have.some((h) => h.path === x.path))]);
+    const added = f.sheets.filter((x) => !have.some((h) => h.path === x.path));
+    const kept = [];
+    for (const x of added) {   // a sheet is listed only if its file came with the zip
+      const read = zip && zip.get(`files/${f.setId}/${x.path}`);
+      if (!read) continue;
+      const data = await read();
+      puts.push({ key: `${f.setId}/${x.path}`, setId: f.setId, path: x.path, size: data.length, modified: Date.now(), file: new File([data], x.name, { type: mimeOf(x.name), lastModified: Date.now() }) });
+      kept.push(x);
+    }
+    sheets.set(f.setId, [...have, ...kept]);
   }
   await db.transact(['libSets', 'libFiles', 'libFormulas'], (t) => {
     if (replace) for (const name of ['libSets', 'libFiles', 'libFormulas']) t.objectStore(name).clear();
