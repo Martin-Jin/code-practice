@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.83';
+export const VERSION = '1.84';
 
 export const CHANGELOG = [
+  {
+    version: '1.84', date: '2026-10-30', title: 'I got it / Not quite toggle, and no needless Reset',
+    items: [
+      'I got it and Not quite are now a toggle: pressing the other one swaps the mark, and pressing the same one takes it back, with the right and not right counts following, so a question can no longer be counted twice in one session. A new session starts with both unpressed.',
+      'Reset only shows when there is a typed or chosen answer to clear, not for a question that is only marked I got it / Not quite.',
+    ],
+  },
   {
     version: '1.83', date: '2026-10-30', title: 'Wider side panel, tidier answers, crop moved',
     items: [
@@ -32,13 +39,6 @@ export const CHANGELOG = [
     version: '1.79', date: '2026-10-30', title: 'A tidier section heading',
     items: [
       'The Questions in this set heading on an imported set\'s page is slightly larger and sits closer to the section picker below it.',
-    ],
-  },
-  {
-    version: '1.78', date: '2026-10-30', title: 'Pick a section, and mark a whole section correct',
-    items: [
-      'An imported set\'s page now shows one section at a time. Under Questions in this set, click the underlined section name to turn it into a search box and pick a section from the matching list (arrow keys and Enter work).',
-      'A tick beside it, Mark all correct, counts every question in the shown section as answered correctly, for work you finished before using the app. Questions already right are left alone, and it asks first.',
     ],
   },
 ];

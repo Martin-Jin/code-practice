@@ -99,6 +99,36 @@ export function check(setId, uid, question) {
   return result;
 }
 
+// I got it / Not quite on a question made only of self-marked parts. Pressing the other button swaps the mark and pressing
+// the same one takes it back, with the counters following: the previous counted result is undone before the new one is
+// counted, so a question is never counted twice. Returns the new overall result ('right', 'wrong', or 'incomplete' when nothing
+// is counted). Inside a practice session (`runId`) the marks belong to that session: in the next session the buttons start
+// unpressed and the first press counts afresh, leaving the earlier session's count alone.
+export function setSelfMark(setId, uid, question, label, value, runId = null) {
+  const rec = ensure(setId, uid);
+  const stale = !!runId && rec.markRun !== runId;
+  const answers = stale ? {} : { ...rec.answers };
+  if (answers[label] === value) delete answers[label]; else answers[label] = value;
+  rec.markRun = runId;
+  const counted = !stale && (rec.lastOverall === 'right' || rec.lastOverall === 'wrong');
+  if (counted) { rec.attempts = Math.max(0, rec.attempts - 1); if (rec.lastOverall === 'right') rec.right = Math.max(0, rec.right - 1); else rec.wrong = Math.max(0, rec.wrong - 1); }
+  rec.answers = answers;
+  const result = checkQuestion(question, answers);
+  if (result.overall === 'right' || result.overall === 'wrong') {
+    rec.attempts++;
+    if (result.overall === 'right') rec.right++; else rec.wrong++;
+    rec.lastAt = now();
+    rec.lastOverall = result.overall;
+    rec.checked = result.parts;
+  } else if (!stale || counted) {
+    delete rec.lastOverall;
+    rec.checked = null;
+    if (rec.attempts === 0) rec.lastAt = null;
+  }
+  touch(rec, 0);
+  return result.overall;
+}
+
 // Marks questions as done without checking them, for work finished before the app was used. Ones whose last check was
 // already right are left alone so their counters stay true. Returns how many were marked.
 export function markCorrect(setId, uids) {

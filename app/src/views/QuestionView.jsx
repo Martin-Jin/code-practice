@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, setSelfMark, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
@@ -86,10 +86,10 @@ export default function QuestionView({ setId, uid, run, theme }) {
 
   const runCheck = () => setResult(check(setId, uid, question).overall);
   const onAnswer = (part, value) => {
+    // A question with only self-marked parts is finished as soon as it is marked; pressing a mark again takes it back.
+    if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) { setResult(setSelfMark(setId, uid, question, part.label, value, run ? run.id : null)); return; }
     setAnswer(setId, uid, part.label, value);
     setResult(null);
-    // A question with only self-marked parts is finished as soon as it is marked.
-    if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) setResult(check(setId, uid, question).overall);
   };
   const reset = () => { resetAnswers(setId, uid); setResult(null); };
   const resetStats = async () => {
@@ -118,6 +118,10 @@ export default function QuestionView({ setId, uid, run, theme }) {
 
   const live = (progress && progress.checked) || {};
   const checkable = question.parts.some((p) => p.type !== 'self');
+  // Reset clears typed or chosen answers, so it is only offered when there is one (an I got it / Not quite mark is not).
+  const typed = question.parts.some((p) => { const v = answers[p.label]; return p.type !== 'self' && v != null && v !== '' && !(Array.isArray(v) && v.length === 0); });
+  // In a session the I got it / Not quite buttons start unpressed, whatever an earlier session marked.
+  const markedHere = !run || (progress && progress.markRun === run.id);
   // Self-marked parts keep their wording under the question but put their buttons in the side panel, beside Next.
   const selfParts = question.parts.filter((p) => p.type === 'self');
   const inline = question.parts.filter((p) => p.type !== 'self' || p.prompt);
@@ -179,10 +183,10 @@ export default function QuestionView({ setId, uid, run, theme }) {
             </ol>
           )}
           {banner && <div className={`notice ${banner[0]}`} role="status" style={{ marginTop: 12 }}>{banner[1]}</div>}
-          {(checkable || Object.keys(answers).length > 0) && (
+          {(checkable || typed) && (
             <div className="row" style={{ marginTop: 16 }}>
               {checkable && <button type="button" className="btn primary" onClick={runCheck}>Check answer</button>}
-              {Object.keys(answers).length > 0 && <button type="button" className="btn" onClick={reset}>Reset</button>}
+              {typed && <button type="button" className="btn" onClick={reset}>Reset</button>}
             </div>
           )}
         </article>
@@ -200,7 +204,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
               <b>Notes</b>
               <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(setId, uid, e.target.value)} />
             </label>
-            {selfParts.map((p) => <SelfMark key={p.label} part={p} value={answers[p.label]} onChange={(v) => onAnswer(p, v)}>{selfParts.length === 1 && nav}</SelfMark>)}
+            {selfParts.map((p) => <SelfMark key={p.label} part={p} value={markedHere ? answers[p.label] : undefined} onChange={(v) => onAnswer(p, v)}>{selfParts.length === 1 && nav}</SelfMark>)}
             {selfParts.length !== 1 && nav && <div className="row">{nav}</div>}
             {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
             {run && pending > 0 && index === questions.length - 1 && (
