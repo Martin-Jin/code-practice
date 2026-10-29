@@ -3,9 +3,17 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.81';
+export const VERSION = '1.82';
 
 export const CHANGELOG = [
+  {
+    version: '1.82', date: '2026-10-30', title: 'Question page: controls in the side panel, bigger question',
+    items: [
+      'On an imported question, Previous and Next and the I got it / Not quite buttons moved to the side panel under Notes, with the shortcut hints beneath them, so the question card no longer needs extra height.',
+      'The question column is wider, so the question image shows larger.',
+      'The question title is smaller and kept to one line; a longer title slides along to show the rest when you hover or focus it, and can be scrolled by hand.',
+    ],
+  },
   {
     version: '1.81', date: '2026-10-30', title: 'The formula sheet sits flush under the top bar',
     items: [
@@ -34,12 +42,6 @@ export const CHANGELOG = [
       'A History tab in the top bar (and Go to history in the command palette, Alt+K) lists the last 5 question sets you ran, with how many runs each has and a link to open it.',
       'Figures and formula sheets can now zoom out to 50% as well as in: the full-window viewer has a 50% and a 75% step below Fit, and Ctrl + scroll on a figure in place shrinks it too (double-click or Reset puts it back).',
       'Alt+T no longer reloads the formula sheet each time: once opened it stays loaded while hidden, so showing it again is instant and keeps its scroll and zoom.',
-    ],
-  },
-  {
-    version: '1.76', date: '2026-10-29', title: 'Delete or select all from the Select menu',
-    items: [
-      'After you tick sets and folders on the Question sets page, the Move button is now an Actions menu: Move to a folder, Delete, Select all and Clear selection. Deleting several sets at once asks once; deleted folders keep their sets.',
     ],
   },
 ];

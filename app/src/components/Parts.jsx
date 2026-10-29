@@ -16,6 +16,17 @@ const NOTE = {
 };
 
 // The answer box for one part, and the feedback after a check.
+// The I got it / Not quite buttons of a self-marked part. QuestionView shows them in the side panel, beside Next.
+export function SelfMark({ part, value, onChange }) {
+  return (
+    <div className="row" style={{ gap: 8 }}>
+      {part.label && <b>{part.label})</b>}
+      <button type="button" className="btn sm" aria-pressed={value === 'right'} onClick={() => onChange('right')}>I got it</button>
+      <button type="button" className="btn sm" aria-pressed={value === 'wrong'} onClick={() => onChange('wrong')}>Not quite</button>
+    </div>
+  );
+}
+
 export function PartAnswer({ uid, part, value, status, onChange, onEnter }) {
   const feedback = status && (
     status === 'right' ? <span className="fb ok"><Icon name="check" /> Correct</span>
@@ -57,12 +68,6 @@ export function PartAnswer({ uid, part, value, status, onChange, onEnter }) {
           {part.multi && <span className="muted">Select one or more.</span>}
           {feedback}
         </>
-      )}
-      {part.type === 'self' && (
-        <div className="row" style={{ gap: 8 }}>
-          <button type="button" className="btn sm" aria-pressed={value === 'right'} onClick={() => onChange('right')}>I got it</button>
-          <button type="button" className="btn sm" aria-pressed={value === 'wrong'} onClick={() => onChange('wrong')}>Not quite</button>
-        </div>
       )}
       </div>
     </li>

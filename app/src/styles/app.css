@@ -475,7 +475,7 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .shortcuts .rebind.recording { border-color: var(--strong); background: var(--surface-3); color: var(--text); font-size: 12px; }
 
 /* ---------- library questions ---------- */
-.qview { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.qview { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 1000px) { .qview { grid-template-columns: 1fr; } }
 .qside { position: sticky; top: 16px; display: grid; gap: 12px; }
 @media (max-width: 1000px) { .qside { position: static; } }
@@ -652,6 +652,9 @@ dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center
 .btn.ghost.edit-toggle.on { color: var(--accent); border-color: var(--accent); }
 .title-with-icon { display: flex; align-items: center; gap: 10px; }
 .title-with-icon .btn { flex: none; }
+.qtitle { flex: 1; min-width: 0; font-size: 19px; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+.qtitle::-webkit-scrollbar { display: none; }
+.qtitle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
 .title-with-icon { align-items: flex-start; }
 .title-with-icon .btn { margin-top: 2px; }

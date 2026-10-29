@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
-import { PartAnswer, AnswerKeyEditor } from '../components/Parts.jsx';
+import { PartAnswer, SelfMark, AnswerKeyEditor } from '../components/Parts.jsx';
 import { knownTags } from '../components/TagInput.jsx';
 import FormulaSidebar from '../components/FormulaSidebar.jsx';
 import EditContent from '../components/EditContent.jsx';
@@ -16,7 +16,32 @@ import { folderCrumbs } from '../lib/folders.js';
 const loadFlag = (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true'; } catch { return fallback; } };
 const saveFlag = (key, value) => { try { localStorage.setItem(key, String(value)); } catch { /* storage blocked */ } };
 
-const typing = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+// A title kept to one line. When it is longer than the space, hovering or focusing it slides it along to the end and back
+// (a trackpad, wheel or touch can scroll it by hand too).
+function ScrollTitle({ text }) {
+  const el = useRef(null);
+  const frame = useRef(0);
+  const slide = (toEnd) => {
+    const box = el.current;
+    cancelAnimationFrame(frame.current);
+    if (!box || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const from = box.scrollLeft;
+    const to = toEnd ? box.scrollWidth - box.clientWidth : 0;
+    if (from === to) return;
+    const ms = Math.max(400, Math.abs(to - from) * 12);
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / ms);
+      box.scrollLeft = from + (to - from) * (t < .5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t));
+      if (t < 1) frame.current = requestAnimationFrame(step);
+    };
+    frame.current = requestAnimationFrame(step);
+  };
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+  return <span ref={el} className="qtitle" tabIndex={0} title={text} onMouseEnter={() => slide(true)} onMouseLeave={() => slide(false)} onFocus={() => slide(true)} onBlur={() => slide(false)}>{text}</span>;
+}
+
+const typing =(t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 
 const BANNER = {
   right: ['ok', 'All correct.'],
@@ -93,6 +118,9 @@ export default function QuestionView({ setId, uid, run, theme }) {
 
   const live = (progress && progress.checked) || {};
   const checkable = question.parts.some((p) => p.type !== 'self');
+  // Self-marked parts keep their wording under the question but put their buttons in the side panel, beside Next.
+  const selfParts = question.parts.filter((p) => p.type === 'self');
+  const inline = question.parts.filter((p) => p.type !== 'self' || p.prompt);
   const difficult = !!(progress && progress.difficult);
   const banner = result && BANNER[result];
   const edited = hasCorrections(setId, uid);
@@ -120,7 +148,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
             {difficult && <span className="chip warn">Difficult</span>}
             {question.source && <span className="muted">{question.source}</span>}
           </div>
-          <h1 className="title-with-icon" style={{ margin: '8px 0 14px' }}>{question.title}
+          <h1 className="title-with-icon" style={{ margin: '6px 0 12px' }}><ScrollTitle text={question.title} />
             <button type="button" className={`btn ghost sm icon-only edit-toggle${editMode ? ' on' : ''}`} aria-pressed={editMode} onClick={toggleEdit}
               title={editMode ? 'Leave edit mode' : 'Edit this question'} aria-label={editMode ? 'Leave edit mode' : 'Edit this question'}><Icon name="pencil" /></button>
           </h1>
@@ -133,24 +161,20 @@ export default function QuestionView({ setId, uid, run, theme }) {
           {editMode && <div className="edit-row">Question {pencil('Edit the question: title, wording, image', () => openEdit('stem'))}</div>}
           <Stem set={set} question={question} />
           {editMode && <div className="edit-row before-answers">Answers {pencil(`Edit the answer key${edited ? ' (changed)' : ''}`, () => setPanel('key'))}</div>}
-          <ol className="parts">
-            {question.parts.map((p) => (
-              <PartAnswer key={p.label} uid={uid} part={p} value={answers[p.label]} status={live[p.label]}
-                onChange={(v) => onAnswer(p, v)} onEnter={runCheck} />
-            ))}
-          </ol>
+          {inline.length > 0 && (
+            <ol className="parts">
+              {inline.map((p) => (
+                <PartAnswer key={p.label} uid={uid} part={p} value={answers[p.label]} status={live[p.label]}
+                  onChange={(v) => onAnswer(p, v)} onEnter={runCheck} />
+              ))}
+            </ol>
+          )}
           {banner && <div className={`notice ${banner[0]}`} role="status" style={{ marginTop: 12 }}>{banner[1]}</div>}
-          <div className="row" style={{ marginTop: 16 }}>
-            {checkable && <button type="button" className="btn primary" onClick={runCheck}>Check answer</button>}
-            {Object.keys(answers).length > 0 && <button type="button" className="btn" onClick={reset}>Reset</button>}
-            <span className="spacer" />
-            {index > 0 && <a className="btn" href={go(index - 1)}><Icon name="back" /> Previous</a>}
-            {index < questions.length - 1 && <a className="btn primary" href={go(index + 1)}>Next</a>}
-            {run && !run.completedAt && pending === 0 && <button type="button" className="btn primary" onClick={finish}>Finish</button>}
-            {run && run.completedAt && <a className="btn primary" href={`#/practice/${run.id}/summary`}>Results</a>}
-          </div>
-          {run && pending > 0 && index === questions.length - 1 && (
-            <p className="muted" style={{ marginTop: 10 }}>{plural(pending, 'question')} still to check before this session can finish: check each numbered question above that is not yet green or red (a question with no answer key cannot be checked, so it does not count).</p>
+          {(checkable || Object.keys(answers).length > 0) && (
+            <div className="row" style={{ marginTop: 16 }}>
+              {checkable && <button type="button" className="btn primary" onClick={runCheck}>Check answer</button>}
+              {Object.keys(answers).length > 0 && <button type="button" className="btn" onClick={reset}>Reset</button>}
+            </div>
           )}
         </article>
 
@@ -167,6 +191,18 @@ export default function QuestionView({ setId, uid, run, theme }) {
               <b>Notes</b>
               <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(setId, uid, e.target.value)} />
             </label>
+            {selfParts.map((p) => <SelfMark key={p.label} part={p} value={answers[p.label]} onChange={(v) => onAnswer(p, v)} />)}
+            <div className="row">
+              {index > 0 && <a className="btn" href={go(index - 1)}><Icon name="back" /> Previous</a>}
+              <span className="spacer" />
+              {index < questions.length - 1 && <a className="btn primary" href={go(index + 1)}>Next</a>}
+              {run && !run.completedAt && pending === 0 && <button type="button" className="btn primary" onClick={finish}>Finish</button>}
+              {run && run.completedAt && <a className="btn primary" href={`#/practice/${run.id}/summary`}>Results</a>}
+            </div>
+            {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
+            {run && pending > 0 && index === questions.length - 1 && (
+              <p className="muted">{plural(pending, 'question')} still to check before this session can finish: check each numbered question that is not yet green or red (a question with no answer key cannot be checked, so it does not count).</p>
+            )}
             {panel === 'solution' && (
               <>
                 {editMode && <div className="edit-row">Solution {pencil('Edit the solution: wording, image', () => openEdit('solution'))}</div>}
@@ -178,7 +214,6 @@ export default function QuestionView({ setId, uid, run, theme }) {
                 onSave={(edit) => { saveEdit(setId, uid, edit); setResult(null); }}
                 onRevert={() => { clearEdit(setId, uid); resetChecks(setId, uid); setResult(null); }} />
             )}
-            {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
           </div>
         </aside>
       </div>
