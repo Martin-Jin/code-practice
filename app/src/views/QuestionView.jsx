@@ -121,6 +121,15 @@ export default function QuestionView({ setId, uid, run, theme }) {
   // Self-marked parts keep their wording under the question but put their buttons in the side panel, beside Next.
   const selfParts = question.parts.filter((p) => p.type === 'self');
   const inline = question.parts.filter((p) => p.type !== 'self' || p.prompt);
+  // Moving between questions is by the arrow keys and the strip of numbers; only the session's end buttons are shown.
+  const showEnd = run && (run.completedAt || pending === 0);
+  const nav = showEnd && (
+    <>
+      <span className="spacer" />
+      {!run.completedAt && <button type="button" className="btn sm primary" onClick={finish}>Finish</button>}
+      {run.completedAt && <a className="btn sm primary" href={`#/practice/${run.id}/summary`}>Results</a>}
+    </>
+  );
   const difficult = !!(progress && progress.difficult);
   const banner = result && BANNER[result];
   const edited = hasCorrections(setId, uid);
@@ -191,14 +200,8 @@ export default function QuestionView({ setId, uid, run, theme }) {
               <b>Notes</b>
               <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(setId, uid, e.target.value)} />
             </label>
-            {selfParts.map((p) => <SelfMark key={p.label} part={p} value={answers[p.label]} onChange={(v) => onAnswer(p, v)} />)}
-            <div className="row">
-              {index > 0 && <a className="btn" href={go(index - 1)}><Icon name="back" /> Previous</a>}
-              <span className="spacer" />
-              {index < questions.length - 1 && <a className="btn primary" href={go(index + 1)}>Next</a>}
-              {run && !run.completedAt && pending === 0 && <button type="button" className="btn primary" onClick={finish}>Finish</button>}
-              {run && run.completedAt && <a className="btn primary" href={`#/practice/${run.id}/summary`}>Results</a>}
-            </div>
+            {selfParts.map((p) => <SelfMark key={p.label} part={p} value={answers[p.label]} onChange={(v) => onAnswer(p, v)}>{selfParts.length === 1 && nav}</SelfMark>)}
+            {selfParts.length !== 1 && nav && <div className="row">{nav}</div>}
             {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
             {run && pending > 0 && index === questions.length - 1 && (
               <p className="muted">{plural(pending, 'question')} still to check before this session can finish: check each numbered question that is not yet green or red (a question with no answer key cannot be checked, so it does not count).</p>

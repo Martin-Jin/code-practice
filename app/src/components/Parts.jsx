@@ -17,12 +17,14 @@ const NOTE = {
 
 // The answer box for one part, and the feedback after a check.
 // The I got it / Not quite buttons of a self-marked part. QuestionView shows them in the side panel, beside Next.
-export function SelfMark({ part, value, onChange }) {
+// `children` go at the end of the same row (Previous and Next).
+export function SelfMark({ part, value, onChange, children }) {
   return (
     <div className="row" style={{ gap: 8 }}>
       {part.label && <b>{part.label})</b>}
       <button type="button" className="btn sm" aria-pressed={value === 'right'} onClick={() => onChange('right')}>I got it</button>
       <button type="button" className="btn sm" aria-pressed={value === 'wrong'} onClick={() => onChange('wrong')}>Not quite</button>
+      {children}
     </div>
   );
 }
@@ -35,9 +37,13 @@ export function PartAnswer({ uid, part, value, status, onChange, onEnter }) {
   );
   return (
     <li className="part">
-      {part.label && <span className="plabel">{part.label})</span>}
+      {(part.label || part.prompt) && (
+        <div className="phead">
+          {part.label && <span className="plabel">{part.label})</span>}
+          {part.prompt && <Markup text={part.prompt} />}
+        </div>
+      )}
       <div className="pbody">
-      {part.prompt && <Markup text={part.prompt} />}
       {part.type === 'numeric' && (
         <div className="row" style={{ gap: 8 }}>
           <input
@@ -193,13 +199,12 @@ export function PartsEditor({ drafts, onChange }) {
   );
 }
 
-// Edit a question's parts, marks, tags and (for a PDF question) crop. `onSave(edit)` receives only
+// Edit a question's parts, marks and tags (the crop of a PDF question is in the Edit the question window). `onSave(edit)` receives only
 // what the user can change; `onRevert` puts the imported version back.
 export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices = [] }) {
   const [parts, setParts] = useState(() => question.parts.map(toDraft));
   const [marks, setMarks] = useState(question.marks === null ? '' : String(question.marks));
   const [tags, setTags] = useState(question.tags.join(', '));
-  const [box, setBox] = useState(question.stem.pdf ? question.stem.pdf.box : null);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
@@ -208,9 +213,7 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices
     let list;
     try { list = parts.map(fromDraft); } catch (e) { setError(e.message); return; }
     const edit = { parts: list, marks: marks.trim() === '' ? null : Number(marks), tags: tags.split(',').map((t) => t.trim()).filter(Boolean) };
-    if (box) edit.stemBox = box;
-    const stem = box ? { ...question.stem, pdf: { ...question.stem.pdf, box } } : question.stem;
-    const problems = questionProblems({ ...question, ...edit, stem });
+    const problems = questionProblems({ ...question, ...edit });
     if (problems.length) { setError(`${problems[0][0].toUpperCase()}${problems[0].slice(1)}.`); return; }
     setError('');
     onSave(edit);
@@ -225,12 +228,6 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices
         <label className="field">Marks <input type="number" className="line" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => change(() => setMarks(e.target.value))} /></label>
         <label className="field grow">Tags <TagInput className="line" value={tags} tags={tagChoices} placeholder="comma separated" style={{ width: '100%' }} onChange={(v) => change(() => setTags(v))} /></label>
       </div>
-      {box && (
-        <div className="fields" title="Moves the edges of the part of the PDF page that is shown, in points (72 to an inch)">
-          <label className="field">Top <input type="number" className="line" step="5" value={box[1]} style={{ width: 80 }} onChange={(e) => change(() => setBox([box[0], Number(e.target.value), box[2], box[3]]))} /></label>
-          <label className="field">Bottom <input type="number" className="line" step="5" value={box[3]} style={{ width: 80 }} onChange={(e) => change(() => setBox([box[0], box[1], box[2], Number(e.target.value)]))} /></label>
-        </div>
-      )}
       {error && <div className="notice" role="alert">{error}</div>}
       <div className="row">
         <button type="button" className="btn primary" onClick={save}>Save</button>
