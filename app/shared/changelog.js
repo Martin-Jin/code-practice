@@ -3,13 +3,13 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.80';
+export const VERSION = '1.81';
 
 export const CHANGELOG = [
   {
-    version: '1.80', date: '2026-10-30', title: 'The formula sheet is part of the page',
+    version: '1.81', date: '2026-10-30', title: 'The formula sheet sits flush under the top bar',
     items: [
-      'On a wide window the formula sheet now sits flush under the top bar as its own column, and the question page makes room for it instead of being covered. On a narrow window it still opens over the page.',
+      'The formula sheet now starts exactly under the top bar (no gap, even when the bar wraps on a narrow or zoomed window) and fills the page down to the bottom, still opening over the question.',
     ],
   },
   {

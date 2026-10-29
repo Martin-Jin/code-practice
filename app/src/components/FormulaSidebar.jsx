@@ -42,13 +42,17 @@ export default function FormulaSidebar({ setId, onClose, hidden = false }) {
   const [drag, setDrag] = useState(false);
   const current = sheets.find((s) => s.path === path) || sheets[0];
 
-  // While shown, the page makes room for the panel (styles: body.formula-open) instead of sitting under it.
+  // The panel starts exactly where the top bar ends; the bar's height changes when it wraps on a narrow or zoomed window.
+  const [top, setTop] = useState(52);
   useEffect(() => {
-    if (hidden) return undefined;
-    document.body.classList.add('formula-open');
-    document.body.style.setProperty('--formula-w', `${width}px`);
-    return () => { document.body.classList.remove('formula-open'); document.body.style.removeProperty('--formula-w'); };
-  }, [hidden, width]);
+    const nav = document.querySelector('.shell-nav');
+    if (!nav) return undefined;
+    const measure = () => setTop(Math.round(nav.getBoundingClientRect().height));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, []);
 
   const onChoose = async (e) => {
     const files = e.target.files;
@@ -73,7 +77,7 @@ export default function FormulaSidebar({ setId, onClose, hidden = false }) {
 
   return (
     <aside className="formula-side" aria-label="Formula sheets" aria-hidden={hidden || undefined} inert={hidden || undefined}
-      style={{ width, ...(hidden ? { visibility: 'hidden', pointerEvents: 'none' } : {}) }}>
+      style={{ width, top, ...(hidden ? { visibility: 'hidden', pointerEvents: 'none' } : {}) }}>
       <div className={`splitter v formula-handle${drag ? ' drag' : ''}`} role="separator" aria-orientation="vertical" title="Drag to resize. Double-click to reset."
         onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); document.body.classList.add('resizing', 'resizing-x'); setDrag(true); }}
         onPointerMove={(e) => { if (drag) move(e); }} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}
