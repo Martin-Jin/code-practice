@@ -99,6 +99,25 @@ export function check(setId, uid, question) {
   return result;
 }
 
+// Marks questions as done without checking them, for work finished before the app was used. Ones whose last check was
+// already right are left alone so their counters stay true. Returns how many were marked.
+export function markCorrect(setId, uids) {
+  let n = 0;
+  for (const uid of uids) {
+    const rec = ensure(setId, uid);
+    if (rec.lastOverall === 'right') continue;
+    rec.attempts++; rec.right++;
+    rec.lastOverall = 'right';
+    rec.lastAt = now();
+    rec.firstAt = rec.firstAt || rec.lastAt;
+    rec.updatedAt = rec.lastAt;
+    persist('libProgress', rec, 0);
+    n++;
+  }
+  notify();
+  return n;
+}
+
 // Clears the counters and last results of every question in a set (the Stats page's Reset). Answers, difficult
 // flags and answer keys are kept, since they are the user's own work rather than statistics.
 export function resetLibStats(setId) {

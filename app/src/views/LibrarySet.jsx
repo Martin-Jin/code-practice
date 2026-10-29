@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { fuzzyFilter } from '../lib/fuzzy.js';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { removeSet, deleteOwnQuestion } from '../lib/library.js';
@@ -13,7 +14,7 @@ import { toast } from '../components/Toasts.jsx';
 import { Modal } from '../components/Dialogs.jsx';
 import { canLink, canSync, getLink, linkPdf, unlinkPdf, checkForUpdate, deleteQuestionFromPdf, moveQuestionInPdf } from '../lib/pdfsync.js';
 import KebabMenu from '../components/KebabMenu.jsx';
-import { saveEdit, clearEditField } from '../lib/practice.js';
+import { saveEdit, clearEditField, markCorrect } from '../lib/practice.js';
 import { Fab } from '../components/Library.jsx';
 import { FormulaSheetsDialog } from '../components/SetTools.jsx';
 import { MoveDialog } from './SetsPage.jsx';
@@ -110,6 +111,41 @@ function progressChips(p) {
   );
 }
 
+// The section drop-down: reads as underlined text; clicking it turns it into a search box with the matching sections listed below.
+function SectionPicker({ sections, current, onPick }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [active, setActive] = useState(0);
+  const items = useMemo(() => sections.map((s) => ({ label: s.name, section: s })), [sections]);
+  const shown = useMemo(() => fuzzyFilter(items, query, items.length).map((r) => r.item.section), [items, query]);
+  const close = () => { setOpen(false); setQuery(''); };
+  const choose = (s) => { onPick(s.name); close(); };
+  const onKey = (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive((i) => Math.min(i + 1, shown.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((i) => Math.max(i - 1, 0)); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (shown[active]) choose(shown[active]); }
+    else if (e.key === 'Escape') close();
+  };
+  if (!open) {
+    return <button type="button" className="section-select" aria-haspopup="listbox" onClick={() => { setOpen(true); setActive(Math.max(0, sections.indexOf(current))); }}>{current.name} <span aria-hidden="true">▾</span></button>;
+  }
+  return (
+    <span className="section-combo">
+      <input className="section-select" autoFocus value={query} placeholder={current.name} role="combobox" aria-expanded="true" aria-controls="section-options" aria-label="Search sections"
+        onChange={(e) => { setQuery(e.target.value); setActive(0); }} onKeyDown={onKey} onBlur={close} />
+      <ul id="section-options" className="section-options" role="listbox">
+        {shown.length === 0 && <li className="muted empty-opt">No section matches</li>}
+        {shown.map((s, i) => (
+          <li key={s.name} role="option" aria-selected={i === active} className={i === active ? 'active' : ''}
+            onMouseDown={(e) => { e.preventDefault(); choose(s); }} onMouseEnter={() => setActive(i)}>
+            {s.name} <span className="muted">{s.questions.length}</span>
+          </li>
+        ))}
+      </ul>
+    </span>
+  );
+}
+
 const PER_SECTION = 5;
 const PART_LABEL ={ numeric: 'number', mcq: 'choice', self: 'self-mark' };
 
@@ -119,6 +155,7 @@ export default function LibrarySet({ setId, theme }) {
   const { confirm, open, prompt } = useDialogs();
   const record = st.library.sets[setId];
   const [expanded, setExpanded] = useState([]);
+  const [picked, setPicked] = useState(null);
 
   if (!record) {
     return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">There is no imported set called "{setId}". <a href="#/">Back to the dashboard</a></div></Shell>;
@@ -131,6 +168,9 @@ export default function LibrarySet({ setId, theme }) {
     if (!s) sections.push(s = { name: q.section, questions: [] });
     s.questions.push(q);
   }
+
+  // The section shown: the one chosen, or the first when none is chosen or it no longer exists.
+  const current = sections.find((s) => s.name === picked) || sections[0];
 
   // The search palette (the same one as the quick search) over this set's questions; choosing one opens it.
   const search = () => open(({ close }) => (
@@ -173,6 +213,18 @@ export default function LibrarySet({ setId, theme }) {
     try { await (record.userOwned ? deleteMineQuestion(setId, q.uid) : deleteOwnQuestion(setId, q.uid)); } catch (e) { toast(`Could not delete it: ${e.message}`, 'bad'); }
   };
 
+  const markSectionCorrect = async (s) => {
+    const todo = s.questions.filter((q) => getProgress(setId, q.uid)?.lastOverall !== 'right');
+    if (todo.length === 0) { toast(`Every question in ${s.name} is already marked correct.`); return; }
+    const ok = await confirm({
+      title: `Mark ${plural(todo.length, 'question')} as correct?`,
+      body: `${s.name}: ${todo.length === s.questions.length ? 'every question' : `the ${todo.length} not yet correct`} will count as answered correctly, without being checked. Use this for work you finished before using the app.`,
+      confirmText: 'Mark correct',
+    });
+    if (!ok) return;
+    toast(`Marked ${plural(markCorrect(setId, todo.map((q) => q.uid)), 'question')} as correct.`);
+  };
+
   const moveToFolder = async () => {
     const dest = await open(({ close }) => <MoveDialog picked={new Set([`s:${setId}`])} initial={(folderOf(setId) || { id: '' }).id} close={close} />);
     if (dest === null) return;
@@ -197,11 +249,18 @@ export default function LibrarySet({ setId, theme }) {
         </section>
       )}
 
-      {sections.map((s) => {
+      {sections.length > 0 && (
+        <div className="section-title"><h2>Questions in this set</h2><span className="muted">{questions.length}</span></div>
+      )}
+      {sections.filter((s) => s === current).map((s) => {
         const visible = expanded.includes(s.name) ? s.questions : s.questions.slice(0, PER_SECTION);
         return (
         <section key={s.name}>
-          <div className="section-title"><h2>{s.name}</h2><span className="muted">{s.questions.length}</span></div>
+          <div className="section-pick">
+            <span>Questions in</span>
+            <SectionPicker sections={sections} current={s} onPick={setPicked} />
+            <button type="button" className="btn ghost icon-only reveal" onClick={() => markSectionCorrect(s)} title="Mark every question in this section as correct" aria-label={`Mark all of ${s.name} as correct`}><Icon name="check" /><span className="label">Mark all correct</span></button>
+          </div>
           <div className="run-list">
             {visible.map((q) => (
               <div key={q.uid} className="card run-row" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto auto' }}>

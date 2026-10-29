@@ -133,6 +133,14 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .page-head { display: grid; gap: 6px; }
 .section-title { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
 .section-title.with-action { align-items: center; }
+.section-pick { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; color: var(--muted); }
+.section-select { font: inherit; font-weight: 600; color: var(--text); background: transparent; border: 0; border-bottom: 2px solid currentColor; border-radius: 0; padding: 0 2px; cursor: pointer; max-width: 60vw; }
+.section-combo { position: relative; display: inline-block; }
+.section-options { position: absolute; left: 0; top: 100%; z-index: 20; min-width: 100%; width: max-content; max-width: 70vw; max-height: 280px; overflow-y: auto; margin: 4px 0 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px rgba(0, 0, 0, .15); color: var(--text); font-weight: 400; }
+.section-options li { padding: 6px 10px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; gap: 16px; }
+.section-options li.active { background: var(--accent-soft); }
+.section-options li.empty-opt { cursor: default; }
+.section-select:focus-visible { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
 .section-title h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 .card.pad { padding: 18px 20px; }

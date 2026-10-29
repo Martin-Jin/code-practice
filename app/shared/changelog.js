@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.77';
+export const VERSION = '1.78';
 
 export const CHANGELOG = [
+  {
+    version: '1.78', date: '2026-10-30', title: 'Pick a section, and mark a whole section correct',
+    items: [
+      'An imported set\'s page now shows one section at a time. Under Questions in this set, click the underlined section name to turn it into a search box and pick a section from the matching list (arrow keys and Enter work).',
+      'A tick beside it, Mark all correct, counts every question in the shown section as answered correctly, for work you finished before using the app. Questions already right are left alone, and it asks first.',
+    ],
+  },
   {
     version: '1.77', date: '2026-10-29', title: 'Random split and hide completed on imported sets, History tab, zoom out, faster formulas',
     items: [
@@ -28,13 +35,6 @@ export const CHANGELOG = [
     items: [
       'Random runs have a Split evenly across topics option: the number of questions is shared equally between the topics, chosen at random inside each. The number must be at least the number of topics and a multiple of it; asking for every question runs as All questions.',
       'A Leave out completed questions box under the run modes drops every question you have got right at least once from the pool, for all modes.',
-    ],
-  },
-  {
-    version: '1.73', date: '2026-10-29', title: 'The add-questions help opens the tutorial',
-    items: [
-      'The How to add questions button under Your library now opens the tutorial at its Add your own questions section, instead of a second, separate guide that repeated it.',
-      'The tutorial now says that adding coding questions needs a copy of the project on your computer (clone it from GitHub), and how.',
     ],
   },
 ];
