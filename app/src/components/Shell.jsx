@@ -18,6 +18,7 @@ export const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light',
 
 export function SettingsDialog({ close }) {
   const st = useStore();
+  const { open } = useDialogs();
   const options = ['local', 'online'];
   return (
     <Modal title="Settings" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
@@ -53,6 +54,8 @@ export function SettingsDialog({ close }) {
         Applies to random picks: the practice test, Random mode, and random sessions in your library. C++ questions you fail often come up more; library questions you marked difficult or got wrong come up more. Every question can still appear.
       </p>
       {!persistent && <div className="notice">This browser is not letting the page save data, so progress will be lost when you close the tab.</div>}
+      <h3>Help</h3>
+      <div><button type="button" className="btn" onClick={() => { close(); openWelcome(open); }}>Open the tutorial and what's new</button></div>
       <BackupSection />
     </Modal>
   );

@@ -7,6 +7,8 @@ import { useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
 import { ImportDialog } from './Library.jsx';
 import { SettingsDialog, HelpDialog as ShortcutsDialog } from './Shell.jsx';
+import { openWelcome } from './Welcome.jsx';
+import { FormulaToSetsDialog, ExportSetsDialog } from './SetTools.jsx';
 import { toast } from './Toasts.jsx';
 import Icon from './Icon.jsx';
 
@@ -69,8 +71,11 @@ function commands(st, ctx) {
     { id: 'sets', label: 'Go to question sets', keywords: 'library folders', run: go('#/sets') },
     { id: 'theme', label: 'Switch theme', hint: 'auto, light, dark', keywords: 'dark light mode', run: () => ctx.theme.toggle() },
     { id: 'settings', label: 'Open settings', keywords: 'preferences runner backup', run: () => ctx.open(({ close }) => <SettingsDialog close={close} />) },
+    { id: 'tutorial', label: 'Open the tutorial', hint: 'how to use the app, and what is new', keywords: 'help guide how to import changelog whats new version', run: () => openWelcome(ctx.open) },
     { id: 'shortcuts', label: 'Keyboard shortcuts', keywords: 'help keys', run: () => ctx.open(({ close }) => <ShortcutsDialog close={close} />) },
-    { id: 'backup', label: 'Back up now', hint: 'download a backup file', keywords: 'save export', run: async () => toast(`Saved ${await downloadBackup()}.`) },
+    { id: 'export-sets', label: 'Export chosen sets', hint: 'pick sets, with their PDFs and formula sheets', keywords: 'download share zip select search', run: () => ctx.open(({ close }) => <ExportSetsDialog close={close} />) },
+    { id: 'formula-sheet', label: 'Add a formula sheet to several sets', hint: 'choose the file, then tick the sets', keywords: 'upload formulas apply copy', run: () => ctx.open(({ close }) => <FormulaToSetsDialog close={close} />) },
+    { id: 'backup', label: 'Back up now', hint: 'everything, as one backup file', keywords: 'save export all', run: async () => toast(`Saved ${await downloadBackup()}.`) },
   ];
 }
 

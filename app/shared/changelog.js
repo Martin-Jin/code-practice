@@ -1,11 +1,18 @@
 // The app's version and its change log (the five latest changes), shown in the welcome window (src/components/Welcome.jsx).
 // Version numbers count pushes to main: 1.00 was the first, so a push that lands after N commits on main is
-// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 65th push is 1.64). Every change a user can see adds an entry at the top,
+// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 66th push is 1.65). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.64';
+export const VERSION = '1.65';
 
 export const CHANGELOG = [
+  {
+    version: '1.65', date: '2026-10-29', title: 'Tutorial and export in the command palette',
+    items: [
+      'The command palette (Alt+K) has Export chosen sets, which opens the screen for picking sets, and Add a formula sheet to several sets.',
+      'Open the tutorial from Settings (Help) or from the command palette (Alt+K, then "Open the tutorial"), as well as the three-dot menu.',
+    ],
+  },
   {
     version: '1.64', date: '2026-10-29', title: 'Tutorial and change log',
     items: [
@@ -33,12 +40,6 @@ export const CHANGELOG = [
     version: '1.61', date: '2026-10-28', title: 'Tidier imported-set page',
     items: [
       'A mode dropdown and a search over the set\'s questions, and a name prompt when you start a session.',
-    ],
-  },
-  {
-    version: '1.60', date: '2026-10-28', title: 'Answer keys from the PDF agent prompt',
-    items: [
-      'The agent prompt that formats a practice PDF now also records each question\'s answer key and units, so typed answers are checked once you import it.',
     ],
   },
 ];
