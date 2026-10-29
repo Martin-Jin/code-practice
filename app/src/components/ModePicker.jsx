@@ -1,9 +1,10 @@
-import { eligibleCategories, practiceSize, MODE_LABELS } from '../../shared/modes.js';
+import { eligibleCategories, practiceSize, splitProblem, MODE_LABELS } from '../../shared/modes.js';
 import { plural } from '../lib/format.js';
+import { statsFor } from '../lib/service.js';
 
 export const defaultChoice = () => ({
   mode: 'practice',
-  options: { count: 5, includeRevision: false, includeExtra: false, categories: [] },
+  options: { count: 5, includeRevision: false, includeExtra: false, categories: [], split: false, hideCompleted: false },
 });
 
 const sum = (cats) => cats.reduce((n, c) => n + c.questions.length, 0);
@@ -17,7 +18,13 @@ export default function ModePicker({ set, value, onChange }) {
   const bp = set.practice;
   const catName = (id) => set.categories.find((c) => c.id === id).name;
   const fixed = bp.fixed.map((f) => `${f.count} from ${catName(f.category)}`).join(' and ');
-  const pool = eligibleCategories(set, options);
+  const counters = statsFor(set.id).questions;
+  const isDone = (n) => options.hideCompleted && counters[n] && counters[n].correct > 0;
+  const openCats = (cats) => cats.map((c) => ({ ...c, questions: c.questions.filter((n) => !isDone(n)) })).filter((c) => c.questions.length);
+  const pool = openCats(eligibleCategories(set, options));
+  const total = sum(pool);
+  const count = Math.floor(Number(options.count) || 0);
+  const splitError = options.split && count >= 1 && count < total ? splitProblem(pool.length, total, count) : null;
   const hasRevision = set.categories.some((c) => c.group === 'revision');
   const hasExtra = set.categories.some((c) => c.group === 'extra');
 
@@ -69,10 +76,20 @@ export default function ModePicker({ set, value, onChange }) {
         <>
           <div className="row">
             <label htmlFor="rand-count">Number of questions</label>
-            <input id="rand-count" type="number" min="1" max={sum(pool)} value={options.count}
-              onChange={(e) => setOpt({ count: e.target.value })} />
-            <span className="muted">of {plural(sum(pool), 'available question')}</span>
+            <input id="rand-count" type="number" min="1" max={total} value={options.count}
+              aria-invalid={!!splitError} onChange={(e) => setOpt({ count: e.target.value })} />
+            <span className="muted">of {plural(total, 'available question')}</span>
           </div>
+          <label className="check">
+            <input type="checkbox" checked={options.split} onChange={(e) => setOpt({ split: e.target.checked })} />
+            Split evenly across topics ({plural(pool.length, 'topic')} in the pool)
+          </label>
+          {options.split && splitError && <span className="muted" role="alert" style={{ color: 'var(--bad, #c0392b)' }}>{splitError}</span>}
+          {options.split && !splitError && count >= 1 && (
+            <span className="muted">
+              {count >= total ? `That is every question, so this runs as All questions.` : `${count / pool.length} from each topic, chosen at random.`}
+            </span>
+          )}
           {extraToggles}
         </>
       ))}
@@ -105,7 +122,11 @@ export default function ModePicker({ set, value, onChange }) {
         </>
       ))}
 
-      {card('all', `Work through the whole set (${plural(sum(pool), 'question')} with the options below).`, extraToggles)}
+      {card('all', `Work through the whole set (${plural(total, 'question')} with the options below).`, extraToggles)}
+      <label className="check">
+        <input type="checkbox" checked={options.hideCompleted} onChange={(e) => setOpt({ hideCompleted: e.target.checked })} />
+        Leave out completed questions (ones you have got right at least once)
+      </label>
     </div>
   );
 }

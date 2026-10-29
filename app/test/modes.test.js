@@ -67,3 +67,29 @@ test('custom mode picks exactly the listed questions', () => {
   assert.throws(() => pickQuestions(set, 'custom', { questions: [99999] }), /No such question/);
   assert.throws(() => pickQuestions(set, 'custom', {}), /No such question/);
 });
+
+test('random split evenly: count / topics from each topic, with validation', () => {
+  const mk = (id, qs) => ({ id, group: 'core', questions: qs });
+  const fake = { categories: [mk('a', [1, 2, 3, 4]), mk('b', [5, 6, 7]), mk('c', [8, 9])] };
+  for (let seed = 1; seed <= 20; seed++) {
+    const picked = pickQuestions(fake, 'random', { count: 6, split: true }, seeded(seed));
+    assert.equal(picked.length, 6);
+    for (const c of fake.categories) assert.equal(picked.filter((n) => c.questions.includes(n)).length, 2);
+  }
+  assert.throws(() => pickQuestions(fake, 'random', { count: 2, split: true }), /at least 3/);
+  assert.throws(() => pickQuestions(fake, 'random', { count: 4, split: true }), /multiple of 3/);
+  assert.equal(pickQuestions(fake, 'random', { count: 9, split: true }).length, 9, 'every question');
+  assert.equal(pickQuestions(fake, 'random', { count: 50, split: true }).length, 9);
+});
+
+test('hide completed leaves finished questions out of every pool', () => {
+  const all = pickQuestions(set, 'all', {});
+  const completed = all.slice(0, 3);
+  const opts = { hideCompleted: true, completed };
+  assert.deepEqual(pickQuestions(set, 'all', opts), all.slice(3));
+  assert.equal(pickQuestions(set, 'all', { completed }).length, all.length, 'ignored when off');
+  for (let seed = 1; seed <= 20; seed++) {
+    assert.ok(!pickQuestions(set, 'random', { ...opts, count: 4 }, seeded(seed)).some((n) => completed.includes(n)));
+    assert.ok(!pickQuestions(set, 'practice', opts, seeded(seed)).some((n) => completed.includes(n)));
+  }
+});

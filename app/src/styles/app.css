@@ -151,8 +151,8 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .run-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(120px, 1fr) auto; gap: 16px; align-items: center; padding: 14px 18px; }
 .run-row .title { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .run-row .sub { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; align-items: center; }
-.run-row .prog { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-.run-row .btns { display: flex; gap: 6px; }
+.run-row .prog { display: grid; gap: 6px; align-self: center; font-size: 12px; line-height: 1.2; color: var(--muted); }
+.run-row .btns { display: flex; gap: 6px; align-items: center; align-self: center; }
 @media (max-width: 760px) { .run-row { grid-template-columns: 1fr; } }
 
 /* mode picker */

@@ -129,7 +129,9 @@ function fillRun(run, mode, options) {
   // With "draw questions I struggle with more often" on, random picks lean towards questions failed often.
   const counters = state.prioritise ? statsFor(run.setId).questions : null;
   const weight = counters ? (n) => weightOf(codingTrouble(counters[n])) : undefined;
-  const questions = pickQuestions(set, mode, { ...options, weight });
+  const stats = statsFor(run.setId).questions;
+  const completed = Object.keys(stats).filter((n) => stats[n].correct > 0).map(Number);
+  const questions = pickQuestions(set, mode, { ...options, weight, completed });
   if (!questions.length) throw new Error('No questions match those options');
   run.mode = mode;
   run.options = options || {};

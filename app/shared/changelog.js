@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.73';
+export const VERSION = '1.75';
 
 export const CHANGELOG = [
+  {
+    version: '1.75', date: '2026-10-29', title: 'Split random runs by topic, and leave out completed questions',
+    items: [
+      'Random runs have a Split evenly across topics option: the number of questions is shared equally between the topics, chosen at random inside each. The number must be at least the number of topics and a multiple of it; asking for every question runs as All questions.',
+      'A Leave out completed questions box under the run modes drops every question you have got right at least once from the pool, for all modes.',
+    ],
+  },
   {
     version: '1.73', date: '2026-10-29', title: 'The add-questions help opens the tutorial',
     items: [
@@ -32,15 +39,6 @@ export const CHANGELOG = [
     items: [
       'The tutorial has a full copy-paste prompt for an AI agent. The agent asks what material you have, builds the practice PDF in the exact layout the app reads, records the answer keys and walks you through importing it.',
       'The buttons in the animations work: Copy the prompt really copies it, and clicking any other button jumps to that step.',
-    ],
-  },
-  {
-    version: '1.69', date: '2026-10-29', title: 'Sample content, a new logo and Delete question set',
-    items: [
-      'New visitors start with a sample practice quiz (answer keys, diagrams, a formula sheet) and a small sample coding quiz, instead of course material.',
-      'Delete question set is in the command palette (Alt+K): type the set and it asks before deleting.',
-      'A new logo and tab icon, and the How to add questions button now sits under the storage note.',
-      'The tutorial has a welcome title and a clearer first section, its search moved to the bottom bar, and there is more room for the scroll bar.',
     ],
   },
 ];
