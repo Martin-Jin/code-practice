@@ -650,8 +650,8 @@ dialog.modal.compact { width: min(380px, calc(100vw - 32px)); text-align: center
 
 /* Choosing library sets in a dialog: a search box over a scrollable list of ticks. */
 .set-picker { display: grid; gap: 8px; }
-.set-picker .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.set-picker .bar input[type=text] { flex: 1 1 200px; }
+.set-picker .pick-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.set-picker .pick-bar input[type=text] { flex: 1 1 200px; }
 .set-picker .list { display: grid; max-height: 280px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
 .set-picker .list label { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; cursor: pointer; }
 .set-picker .list label + label { border-top: 1px solid var(--border); }
@@ -761,11 +761,17 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 .tut-title p { margin: 0; }
 
 /* The tutorial's copyable agent prompt, and the clickable mock buttons in the animations. */
-.prompt-box { display: grid; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface-2); }
-.prompt-box .row { display: flex; gap: 12px; align-items: center; }
+.prompt-box { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 0 0 22px; background: var(--surface-2); }
 .prompt-box summary { cursor: pointer; color: var(--muted); }
 .prompt-box pre { margin: 8px 0 0; max-height: 260px; overflow: auto; white-space: pre-wrap; font-size: 12.5px; line-height: 1.45; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
 .demo [data-t] { cursor: pointer; }
 .dm-prompt { font-size: 13px; line-height: 1.45; max-height: 150px; overflow: hidden; }
 .dm-bubble.agent { background: var(--surface); border: 1px solid var(--border); }
 .dm-bubble.me { background: var(--accent); color: var(--accent-ink); justify-self: end; }
+
+/* Dragging across rows to tick them: no text selection while doing it, and the chosen sets shown as removable chips. */
+.set-picker .list, .explorer-grid.selecting .tile { user-select: none; }
+.set-picker .list label { touch-action: none; }
+.set-picker .chosen { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip-x { border: 0; background: none; padding: 0 0 0 4px; cursor: pointer; color: inherit; display: inline-flex; align-items: center; }
+.chip-x .icon { width: 12px; height: 12px; }

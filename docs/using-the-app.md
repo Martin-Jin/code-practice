@@ -105,6 +105,7 @@ Press **How to add questions** under **Your library** for a short guide to every
 3. Tick the sets and press **Import**. They are copied into this browser, so the folder is not needed again until it changes. Your folder is never modified.
 4. Click a set's tile to open it and **Browse** its questions by section; click a title to open one. **Remove from this browser** deletes the copy in this browser (not your folder).
 5. After you change files in the folder, choose it again: only changed sets and files are copied.
+5b. **Choosing several sets.** On **Question sets**, press **Select**, then press and drag over tiles to tick them all, or click one and shift-click another to tick the whole range; **Move** then moves them together. The formula-sheet and export dialogs work the same way on their lists, which stay empty until you type in the search box (the sets you choose stay visible below as chips you can remove).
 6. The **+** button also has **Add a formula sheet to several sets** (choose the file, search and tick the sets; each gets its own copy) and **Export chosen sets** (search and tick sets, then download one zip with their PDFs, images and formula sheets, and no progress). On a set's page, **Edit this set > Formula sheets** lists its sheets so you can remove any. Details: [question-set-format.md](question-set-format.md#formula-sheets).
 
 ### Making your own questions

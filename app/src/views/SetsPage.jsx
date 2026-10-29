@@ -8,14 +8,12 @@ import KebabMenu from '../components/KebabMenu.jsx';
 import { AddFab, LibraryNotes } from '../components/Library.jsx';
 import { useDialogs, Modal } from '../components/Dialogs.jsx';
 import { toast } from '../components/Toasts.jsx';
+import useRangePick from '../lib/rangepick.js';
 
 const questionCount = (set) => set.categories.reduce((n, c) => n + c.questions.length, 0);
 
 // While selecting, a click on a tile ticks it instead of opening it.
-const selectable = (selecting, key, picked, toggle) => (selecting ? {
-  className: picked.has(key) ? ' selected' : '',
-  onClick: (e) => { e.preventDefault(); toggle(key); },
-} : { className: '' });
+const selectable = (selecting, key, picked, bind) => (selecting ? { className: picked.has(key) ? ' selected' : '', ...bind(key) } : { className: '' });
 const Tick = ({ on }) => <input type="checkbox" className="tile-tick" checked={on} readOnly tabIndex={-1} aria-hidden="true" />;
 
 // Where the selected sets and folders can go: the library itself, or any folder that is not one of them or inside one.
@@ -39,7 +37,7 @@ export function MoveDialog({ picked, close, initial = '' }) {
 // A set is just a tile: click it to open it, where Browse, Stats and the rest are. `drag` makes a library set movable.
 function Tile({ href, title, sub, chips, drag, onDragStart, pick }) {
   return (
-    <a className={`card tile${pick ? pick.className : ''}`} href={href} draggable={drag && !pick ? 'true' : undefined} onDragStart={onDragStart} onClick={pick && pick.onClick}>
+    <a className={`card tile${pick ? pick.className : ''}`} href={href} draggable={drag && !pick ? 'true' : undefined} onDragStart={onDragStart} {...(pick ? { onClick: pick.onClick, onPointerDown: pick.onPointerDown, onPointerEnter: pick.onPointerEnter } : {})}>
       <h2>{pick && <Tick on={pick.className !== ''} />}{title}</h2>
       {sub && <span className="muted">{sub}</span>}
       <div className="meta">{chips.map((c, i) => <span key={i} className={`chip${c[1] ? ` ${c[1]}` : ''}`}>{c[0]}</span>)}</div>
@@ -56,11 +54,12 @@ export default function SetsPage({ folderId, theme }) {
   const [selecting, setSelecting] = useState(false);
   const [picked, setPicked] = useState(new Set());
   useEffect(() => { setSelecting(false); setPicked(new Set()); }, [folderId]);
-  const toggle = (key) => setPicked((p) => { const n = new Set(p); if (n.has(key)) n.delete(key); else n.add(key); return n; });
   const folder = folderId ? st.libFolders[folderId] || null : null;
   const folders = foldersIn(folderId || null);
   const sets = Object.values(st.library.sets).sort((a, b) => a.title.localeCompare(b.title));
   const here =folder ? sets.filter((x) => folder.items.some((i) => i.setId === x.id)) : sets.filter((x) => !folderOf(x.id));
+  // Selecting: press and drag over tiles to tick several, or shift-click a range, in the order the tiles are shown.
+  const bind = useRangePick([...folders.map((f) => `f:${f.id}`), ...here.map((x) => `s:${x.id}`)], picked, setPicked);
 
   const guard = (fn) => async (...args) => { try { await fn(...args); } catch (e) { toast(e.message, 'bad'); } };
   const make = guard(async () => {
@@ -139,15 +138,15 @@ export default function SetsPage({ folderId, theme }) {
               {folder ? 'This folder is empty.' : 'Question sets from folders on this computer (practice PDFs, quiz screenshots) show up here. Nothing is uploaded: the app keeps a copy in this browser. Use the + button at the bottom right to get started.'}
             </div>
           ) : (
-            <div className="explorer-grid" style={folder ? { marginTop: 12 } : undefined}>
+            <div className={`explorer-grid${selecting ? ' selecting' : ''}`} style={folder ? { marginTop: 12 } : undefined}>
               {folders.map((f) => {
                 const inside = sets.filter((x) => f.items.some((i) => i.setId === x.id));
                 const subs = foldersIn(f.id).length;
-                const pick = selectable(selecting, `f:${f.id}`, picked, toggle);
+                const pick = selectable(selecting, `f:${f.id}`, picked, bind);
                 const info = [subs ? plural(subs, 'folder') : '', inside.length ? `${plural(inside.length, 'set')}: ${inside.slice(0, 3).map((x) => x.title).join(', ')}${inside.length > 3 ? ', …' : ''}` : ''].filter(Boolean).join(', ');
                 return (
                   <div key={f.id} className="folder-wrap">
-                    <a href={`#/sets/${f.id}`} className={`card tile folder${over === f.id ? ' over' : ''}${pick.className}`} onClick={pick.onClick} {...(selecting ? {} : target(f.id, f.id))}>
+                    <a href={`#/sets/${f.id}`} className={`card tile folder${over === f.id ? ' over' : ''}${pick.className}`} {...(selecting ? { onClick: pick.onClick, onPointerDown: pick.onPointerDown, onPointerEnter: pick.onPointerEnter } : target(f.id, f.id))}>
                       <h2>{selecting && <Tick on={pick.className !== ''} />}<Icon name="folder" /> {f.name}</h2>
                       <span className="muted folder-info">{info || 'Empty'}</span>
                     </a>
@@ -156,7 +155,7 @@ export default function SetsPage({ folderId, theme }) {
                 );
               })}
               {here.map((set) => (
-                <Tile key={set.id} href={`#/lib/${encodeURIComponent(set.id)}`} title={set.title} sub={set.course} drag onDragStart={(e) => startDrag(e, set.id)} pick={selecting ? selectable(true, `s:${set.id}`, picked, toggle) : null}
+                <Tile key={set.id} href={`#/lib/${encodeURIComponent(set.id)}`} title={set.title} sub={set.course} drag onDragStart={(e) => startDrag(e, set.id)} pick={selecting ? selectable(true, `s:${set.id}`, picked, bind) : null}
                   chips={[[plural(set.manifest.questions.length, 'question')], [plural(new Set(set.manifest.questions.map((q) => q.section)).size, 'section')], ...(set.missing.length ? [[`${plural(set.missing.length, 'file')} missing`, 'warn']] : [])]} />
               ))}
             </div>

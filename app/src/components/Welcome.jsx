@@ -4,8 +4,7 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import Icon from './Icon.jsx';
 import Logo from './Logo.jsx';
 import Demo from './Demo.jsx';
-import agentPrompt, { copyText } from '../lib/agentprompt.js';
-import { toast } from './Toasts.jsx';
+import agentPrompt from '../lib/agentprompt.js';
 import { VERSION, CHANGELOG, startTab } from '../../shared/changelog.js';
 import { APP_NAME } from '../../shared/brand.js';
 
@@ -15,16 +14,8 @@ const SEEN = 'seenVersion';   // the version whose welcome window was last shown
 const Ext = ({ href, children }) => <a href={href} target="_blank" rel="noreferrer">{children}</a>;
 const Shot = ({ file, alt }) => <figure className="shot"><img src={`${import.meta.env.BASE_URL}tutorial/${file}`} alt={alt} loading="lazy" /></figure>;
 
-// The whole agent prompt, ready to copy, with a way to read it first.
-function PromptBox() {
-  const copy = async () => toast((await copyText(agentPrompt)) ? 'Prompt copied. Paste it into your agent.' : 'Could not copy. Open the prompt, select it all and copy it.', 'info');
-  return (
-    <div className="prompt-box">
-      <div className="row"><button type="button" className="btn primary" onClick={copy}><Icon name="plus" /> Copy the prompt</button><span className="muted">{agentPrompt.split('\n').length} lines, ready to paste</span></div>
-      <details><summary>Read the prompt</summary><pre>{agentPrompt}</pre></details>
-    </div>
-  );
-}
+// The whole agent prompt, to read before using it (the Copy button is in the animation below).
+const PromptBox = () => <details className="prompt-box"><summary>Read the prompt</summary><pre>{agentPrompt}</pre></details>;
 
 // The tutorial. One entry per section: the index, the progress dots and the search are all built from this list, so a new
 // feature is one more entry (or a few lines in one). Keep it short.
@@ -78,7 +69,7 @@ const SECTIONS = [
       <>
         <p>The app finds questions in a PDF from its layout: a cover listing the questions, then each question page followed by its worked solution. An AI agent can build that PDF from your tutorial sheets.</p>
         <ol>
-          <li><b>Copy the prompt</b> below (or press Copy in the animation).</li>
+          <li><b>Copy the prompt</b> with the Copy button in the animation below (you can read it first).</li>
           <li>Paste it into an AI agent. One that can read your files and write PDFs works best (Claude Code, for example), but any chat agent can start.</li>
           <li>Answer its questions: what course, which material, where the files are, whether you want answer keys. It builds the PDF in the layout the app reads, checks it and walks you through importing it, step by step.</li>
         </ol>
@@ -221,7 +212,7 @@ function Tutorial({ findRef, slot }) {
       <div className="tut-scroll" ref={scroller} onScroll={onScroll} onClick={(e) => {
         const link = e.target.closest && e.target.closest('[data-jump]');
         const at = link && SECTIONS.findIndex((s) => s.id === link.dataset.jump);
-        if (at >= 0) { e.preventDefault(); goTo(at); }
+        if (link && at >= 0) { e.preventDefault(); goTo(at); }
       }}>
         <header className="tut-title">
           <h2>Welcome to {APP_NAME}</h2>
