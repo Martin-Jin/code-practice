@@ -81,3 +81,9 @@ cmake --build build_all
 - **CMake picks the wrong generator.** Delete the `build` folder and configure again with `-G Ninja` (or `-G "MinGW Makefiles"`).
 - **A new question file is not picked up.** Re-run the configure step; CMake finds files when it configures.
 - **The app says Local g++ is unavailable.** Open the page from `app/start.ps1`, not from a file or the published site.
+
+## Licence
+
+Released under the [MIT licence](LICENSE): anyone may use, copy and change it.
+
+This is an independent student project. It is not affiliated with or endorsed by Canvas (Instructure) or any university, and it ships only original sample questions. Please don't sue me, Canvas. Course PDFs and other material you add are yours to keep private, and may not be yours to share.
