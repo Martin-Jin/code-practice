@@ -2,6 +2,8 @@
 // settings (localStorage) as one JSON file. Pure functions, so the browser app and the unit
 // tests share them. Adding a store to the app means adding it to STORES; older backup files
 // then still load, with that store empty.
+import { APP_NAME } from './brand.js';
+
 export const FORMAT = 'code-practice-backup';
 // Version 1 files hold the saved records and settings. Version 2 files also carry the user's imported sets (their manifests,
 // listed under `library`, and the formula sheet lists under `formulas`); the PDFs and images themselves sit beside the
@@ -94,7 +96,7 @@ export const shareFileName = (date = new Date()) => backupFileName(date).replace
 export function parseBackup(text) {
   let raw;
   try { raw = JSON.parse(text); } catch { throw new Error('That file is not valid JSON, so it is not a backup.'); }
-  if (!isObject(raw) || raw.format !== FORMAT) throw new Error('That file is not a Practice Questions backup.');
+  if (!isObject(raw) || raw.format !== FORMAT) throw new Error(`That file is not a ${APP_NAME} backup.`);
   if (!Number.isInteger(raw.version) || raw.version < 1) throw new Error('That backup has no usable version number.');
   if (raw.version > VERSION) throw new Error('That backup was made by a newer version of the app. Open the newest version of the page to restore it.');
   if (!time(raw.createdAt)) throw new Error('That backup has no creation date.');

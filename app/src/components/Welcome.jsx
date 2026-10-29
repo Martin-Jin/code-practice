@@ -4,6 +4,7 @@ import Icon from './Icon.jsx';
 import Logo from './Logo.jsx';
 import Demo from './Demo.jsx';
 import { VERSION, CHANGELOG, startTab } from '../../shared/changelog.js';
+import { APP_NAME } from '../../shared/brand.js';
 
 const DOCS = 'https://github.com/martin-jin/practice-questions/blob/main/docs';
 const SEEN = 'seenVersion';   // the version whose welcome window was last shown (not part of a backup: it is not a setting)
@@ -255,7 +256,7 @@ export function Welcome({ tab: first, close }) {
     }
   };
   return (
-    <Modal className="welcome" closeButton title={<span className="welcome-title"><Logo size={30} /><span>Practice Questions</span><span className="chip">V{VERSION}</span></span>} onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Got it</button>}>
+    <Modal className="welcome" closeButton title={<span className="welcome-title"><Logo size={30} /><span>{APP_NAME}</span><span className="chip">V{VERSION}</span></span>} onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Got it</button>}>
       <div className="welcome-body" onKeyDown={onKeyDown}>
         <div className="tabs" role="tablist">
           <button type="button" role="tab" className="tab" aria-selected={tab === 'tutorial'} onClick={() => setTab('tutorial')}>Tutorial</button>

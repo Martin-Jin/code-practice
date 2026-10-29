@@ -18,7 +18,7 @@ An agent can add or change questions in a `.questions.json` file beside your PDF
 
 Copy the file first, give the agent **only** this, and check the result yourself:
 
-> Edit the copy of the Practice Questions backup at `<path to a copy>`. Change only `stores.libMine` (own questions) and `stores.libEdits` (answer keys); never read, print or change `settings`, and do not touch other stores.
+> Edit the copy of the Can'tviz quizzes backup at `<path to a copy>`. Change only `stores.libMine` (own questions) and `stores.libEdits` (answer keys); never read, print or change `settings`, and do not touch other stores.
 >
 > - A record in `libMine` is `{ "id", "updatedAt", "images": { "<path>": "data:image/...;base64,..." }, "manifest": { format: "practice-question-set", version: 1, id, title, course, pdf: null, questions: [...] } }`. A question needs `uid`, `title`, `section`, `stem` (`text` and/or `image`, the image being a key of `images`), and at least one part with distinct labels: `numeric` (`unit`, `answer`, optional `dp`, `relTol`), `mcq` (`options`, `correct` as 0-based indexes, `multi`) or `self`. Optional: `source`, `marks`, `tags`, `notes`, `solution` (`text`, `images`).
 > - Give a new question a unique `uid` like `q-` plus 8 hex digits. Set the record's `updatedAt` to the current time as an ISO date.

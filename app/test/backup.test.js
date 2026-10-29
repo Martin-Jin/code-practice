@@ -39,8 +39,8 @@ test('files that are not valid backups are refused with a reason', () => {
   const good = JSON.parse(JSON.stringify(sample()));
   const bad = (mutate) => { const b = JSON.parse(JSON.stringify(good)); mutate(b); return JSON.stringify(b); };
   assert.throws(() => parseBackup('not json'), /not valid JSON/);
-  assert.throws(() => parseBackup('[]'), /not a Practice Questions backup/);
-  assert.throws(() => parseBackup(bad((b) => { b.format = 'other'; })), /not a Practice Questions backup/);
+  assert.throws(() => parseBackup('[]'), /not a Can'tviz quizzes backup/);
+  assert.throws(() => parseBackup(bad((b) => { b.format = 'other'; })), /not a Can'tviz quizzes backup/);
   assert.throws(() => parseBackup(bad((b) => { b.version = VERSION + 1; })), /newer version/);
   assert.throws(() => parseBackup(bad((b) => { b.version = 'x'; })), /version/);
   assert.throws(() => parseBackup(bad((b) => { delete b.createdAt; })), /creation date/);

@@ -1,11 +1,17 @@
 // The app's version and its change log (the five latest changes), shown in the welcome window (src/components/Welcome.jsx).
 // Version numbers count pushes to main: 1.00 was the first, so a push that lands after N commits on main is
-// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 67th push is 1.66). Every change a user can see adds an entry at the top,
+// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 69th push is 1.68). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.66';
+export const VERSION = '1.68';
 
 export const CHANGELOG = [
+  {
+    version: '1.68', date: '2026-10-29', title: "Renamed to Can'tviz quizzes",
+    items: [
+      "The app is now called Can'tviz quizzes: in the browser tab, the top bar, the welcome window and the backup messages. Your saved progress and backups are unaffected.",
+    ],
+  },
   {
     version: '1.66', date: '2026-10-29', title: 'Animated tutorial, and a bigger window',
     items: [
@@ -34,13 +40,6 @@ export const CHANGELOG = [
       'On a set\'s page, Edit this set > Formula sheets lists its sheets so you can remove any.',
       'Export chosen sets downloads only the sets you tick, with their PDFs, images and formula sheets, and no progress.',
       'Restoring a zip now brings the formula sheet files back, not just their names.',
-    ],
-  },
-  {
-    version: '1.62', date: '2026-10-28', title: 'Easier set management',
-    items: [
-      'Select several sets and folders and move them together, with folders inside folders.',
-      'Search your sets from the command palette (Alt+K).',
     ],
   },
 ];

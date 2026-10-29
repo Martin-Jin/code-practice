@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MODE_LABELS } from '../../../shared/modes.js';
+import { APP_NAME } from '../../../shared/brand.js';
 import { useStore, state } from '../../lib/store.js';
 import { eventCombo, actionFor, comboFor } from '../../lib/shortcuts.js';
 import { getSet, getQuestion } from '../../lib/catalog.js';
@@ -166,7 +167,7 @@ export default function RunView({ runId, param, theme }) {
     return () => { window.removeEventListener('beforeunload', flush); document.removeEventListener('visibilitychange', hidden); flush(); };
   }, []);
 
-  useEffect(() => { if (run) document.title = `${run.name} · Practice Questions`; return () => { document.title = 'Practice Questions'; }; }, [run && run.name]);
+  useEffect(() => { if (run) document.title = `${run.name} · ${APP_NAME}`; return () => { document.title = APP_NAME; }; }, [run && run.name]);
 
   const currentN = useRef(n);
   currentN.current = n;
@@ -327,7 +328,7 @@ export default function RunView({ runId, param, theme }) {
   return (
     <div className={`run${mobile ? ' mobile' : ''}`} data-mtab={mtab}>
       <header className="run-top">
-        <a className="brand hide-mobile" href="#/" title="Practice Questions: back to the dashboard" aria-label="Back to the dashboard"><span className="logo"><Logo /></span></a>
+        <a className="brand hide-mobile" href="#/" title={`${APP_NAME}: back to the dashboard`} aria-label="Back to the dashboard"><span className="logo"><Logo /></span></a>
         <a className="btn ghost icon-only show-mobile" href="#/" title="Back to the dashboard. Your progress is kept." aria-label="Back to the dashboard"><Icon name="back" /></a>
         <span className="qt" title={`${q.title} (${run.name}, ${MODE_LABELS[run.mode]})`}>Q{n} · {q.title}</span>
         {stq.attempts > 0 && <span className="muted small hide-mobile">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}

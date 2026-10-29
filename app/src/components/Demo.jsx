@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
+import { APP_NAME } from '../../shared/brand.js';
 
 // Animated walkthroughs for the tutorial. Each scene is a short script: a caption and a cursor target per step, and a
 // `render(shown)` that draws the mock screen once the step's click has landed. The mock uses the app's own classes, so it
@@ -25,7 +26,7 @@ function Type({ text }) {
 }
 
 const Bar = () => (
-  <div className="dm-bar"><b>Practice Questions</b><span>Dashboard</span><span className="on">Question sets</span></div>
+  <div className="dm-bar"><b>{APP_NAME}</b><span>Dashboard</span><span className="on">Question sets</span></div>
 );
 
 const OPTIONS = [['question', 'Add a question from a screenshot', 'task'], ['folder', 'Add or update a folder of sets or PDFs', 'folder'], ['formula', 'Add a formula sheet to several sets', 'sidebar'], ['export', 'Export chosen sets', 'exit']];

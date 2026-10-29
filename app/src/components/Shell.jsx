@@ -11,6 +11,7 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
 import { BackupSection } from './Backup.jsx';
 import KebabMenu from './KebabMenu.jsx';
+import { APP_NAME } from '../../shared/brand.js';
 import { openWelcome } from './Welcome.jsx';
 
 export const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
@@ -169,7 +170,7 @@ export default function Shell({ crumbs = [], theme, hero = null, children }) {
   return (
     <>
       <nav className="shell-nav">
-        <a className="brand" href="#/"><span className="logo"><Logo /></span><span className="brand-name">Practice Questions</span></a>
+        <a className="brand" href="#/"><span className="logo"><Logo /></span><span className="brand-name">{APP_NAME}</span></a>
         <div className="top-tabs" role="navigation" aria-label="Pages">
           {TABS.map(([id, label, href, icon]) => (
             <a key={id} href={href} title={label} aria-label={label} aria-current={tabOfHash() === id ? 'page' : undefined}>
