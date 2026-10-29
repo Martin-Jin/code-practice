@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.78';
+export const VERSION = '1.79';
 
 export const CHANGELOG = [
+  {
+    version: '1.79', date: '2026-10-30', title: 'A tidier section heading',
+    items: [
+      'The Questions in this set heading on an imported set\'s page is slightly larger and sits closer to the section picker below it.',
+    ],
+  },
   {
     version: '1.78', date: '2026-10-30', title: 'Pick a section, and mark a whole section correct',
     items: [
@@ -28,13 +34,6 @@ export const CHANGELOG = [
     version: '1.76', date: '2026-10-29', title: 'Delete or select all from the Select menu',
     items: [
       'After you tick sets and folders on the Question sets page, the Move button is now an Actions menu: Move to a folder, Delete, Select all and Clear selection. Deleting several sets at once asks once; deleted folders keep their sets.',
-    ],
-  },
-  {
-    version: '1.75', date: '2026-10-29', title: 'Split random runs by topic, and leave out completed questions',
-    items: [
-      'Random runs have a Split evenly across topics option: the number of questions is shared equally between the topics, chosen at random inside each. The number must be at least the number of topics and a multiple of it; asking for every question runs as All questions.',
-      'A Leave out completed questions box under the run modes drops every question you have got right at least once from the pool, for all modes.',
     ],
   },
 ];

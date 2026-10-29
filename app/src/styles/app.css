@@ -133,6 +133,8 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .page-head { display: grid; gap: 6px; }
 .section-title { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
 .section-title.with-action { align-items: center; }
+.section-title.set-heading { margin-bottom: 0; }
+.set-heading h2 { font-size: 14px; }   /* 13px -> 14px (x1.08); the page uses the same px sizes on phones, so the scale carries over */
 .section-pick { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; color: var(--muted); }
 .section-select { font: inherit; font-weight: 600; color: var(--text); background: transparent; border: 0; border-bottom: 2px solid currentColor; border-radius: 0; padding: 0 2px; cursor: pointer; max-width: 60vw; }
 .section-combo { position: relative; display: inline-block; }

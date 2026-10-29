@@ -250,7 +250,7 @@ export default function LibrarySet({ setId, theme }) {
       )}
 
       {sections.length > 0 && (
-        <div className="section-title"><h2>Questions in this set</h2><span className="muted">{questions.length}</span></div>
+        <div className="section-title set-heading"><h2>Questions in this set</h2><span className="muted">{questions.length}</span></div>
       )}
       {sections.filter((s) => s === current).map((s) => {
         const visible = expanded.includes(s.name) ? s.questions : s.questions.slice(0, PER_SECTION);
