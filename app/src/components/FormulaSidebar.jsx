@@ -42,6 +42,14 @@ export default function FormulaSidebar({ setId, onClose, hidden = false }) {
   const [drag, setDrag] = useState(false);
   const current = sheets.find((s) => s.path === path) || sheets[0];
 
+  // While shown, the page makes room for the panel (styles: body.formula-open) instead of sitting under it.
+  useEffect(() => {
+    if (hidden) return undefined;
+    document.body.classList.add('formula-open');
+    document.body.style.setProperty('--formula-w', `${width}px`);
+    return () => { document.body.classList.remove('formula-open'); document.body.style.removeProperty('--formula-w'); };
+  }, [hidden, width]);
+
   const onChoose = async (e) => {
     const files = e.target.files;
     try {
