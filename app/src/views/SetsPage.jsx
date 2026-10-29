@@ -121,7 +121,7 @@ export default function SetsPage({ folderId, theme }) {
 
   const ongoing = Object.values(st.runs).filter((r) => !r.completedAt);
   return (
-    <Shell theme={theme} crumbs={[{ label: 'Question sets', href: folder ? '#/sets' : undefined }, ...(folder ? folderPath(folder.id).map((f, i, all) => (i < all.length - 1 ? { label: f.name, href: `#/sets/${f.id}` } : { label: f.name })) : [])]}>
+    <Shell theme={theme} crumbs={folder ? folderPath(folder.id).map((f, i, all) => (i < all.length - 1 ? { label: f.name, href: `#/sets/${f.id}` } : { label: f.name })) : []}>
       {!folder && (
         <section>
           <div className="section-title"><h2>Coding question sets</h2></div>

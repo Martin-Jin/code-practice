@@ -161,9 +161,9 @@ function NavMenu({ theme }) {
   );
 }
 
-// The app's pages: the dashboard (what you are in the middle of) and the question sets (everything you can start).
-const TABS = [['dashboard', 'Dashboard', '#/', 'home'], ['sets', 'Question sets', '#/sets', 'questions']];
-const tabOfHash = () => (/^#\/(sets|set|lib|q)(\/|$)/.test(window.location.hash) ? 'sets' : /^#\/?$/.test(window.location.hash) ? 'dashboard' : null);
+// The app's pages: the dashboard (what you are in the middle of), the question sets (everything you can start) and the history (the last sets you ran).
+const TABS = [['dashboard', 'Dashboard', '#/', 'home'], ['sets', 'Question sets', '#/sets', 'questions'], ['history', 'History', '#/history', 'history']];
+const tabOfHash = () => (/^#\/(sets|set|lib|q)(\/|$)/.test(window.location.hash) ? 'sets' : /^#\/history(\/|$)/.test(window.location.hash) ? 'history' : /^#\/?$/.test(window.location.hash) ? 'dashboard' : null);
 
 // Top bar for the dashboard, set and stats pages. `hero` is a banner between the bar and the page (the landing page's).
 export default function Shell({ crumbs = [], theme, hero = null, children }) {

@@ -11,6 +11,12 @@ const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) =>
 export const foldersSorted = () => Object.values(state.libFolders).sort((a, b) => a.name.localeCompare(b.name));
 export const folderOf = (setId) => foldersSorted().find((f) => f.items.some((i) => i.setId === setId)) || null;
 
+// Breadcrumb links from the top folder down to the one holding this set, so a set page can lead back out.
+export const folderCrumbs = (setId) => {
+  const f = folderOf(setId);
+  return f ? folderPath(f.id).map((p) => ({ label: p.name, href: `#/sets/${p.id}` })) : [];
+};
+
 async function save(folder) {
   folder.updatedAt = now();
   await db.transact(['libFolders'], (t) => t.objectStore('libFolders').put(folder));   // throws if the browser will not save

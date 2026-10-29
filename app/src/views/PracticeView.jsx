@@ -5,6 +5,7 @@ import { effectiveQuestions, getProgress, runStatus, createLibRun } from '../lib
 import Shell from '../components/Shell.jsx';
 import QuestionView from './QuestionView.jsx';
 import { toast } from '../components/Toasts.jsx';
+import { folderCrumbs } from '../lib/folders.js';
 
 const STATUS_TEXT = { right: 'Right', wrong: 'Not right', null: 'Not checked' };
 
@@ -38,7 +39,7 @@ function Summary({ run, set, theme }) {
   };
 
   return (
-    <Shell theme={theme} crumbs={[{ label: set.title, href: `#/lib/${encodeURIComponent(set.id)}` }, { label: run.name }]}>
+    <Shell theme={theme} crumbs={[...folderCrumbs(set.id), { label: set.title, href: `#/lib/${encodeURIComponent(set.id)}` }, { label: run.name }]}>
       <div className="page-head">
         <h1>{run.name}</h1>
         <p className="muted">{LIB_MODE_LABELS[run.mode]} · {plural(rows.length, 'question')}</p>

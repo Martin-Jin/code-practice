@@ -89,6 +89,7 @@ function commands(st, ctx) {
       },
     },
     { id: 'dashboard', label: 'Go to the dashboard', keywords: 'home runs', run: go('#/') },
+    { id: 'history', label: 'Go to history', hint: 'the last 5 question sets you ran', keywords: 'recent runs sessions last', run: go('#/history') },
     { id: 'sets', label: 'Go to question sets', keywords: 'library folders', run: go('#/sets') },
     { id: 'theme', label: 'Switch theme', hint: 'auto, light, dark', keywords: 'dark light mode', run: () => ctx.theme.toggle() },
     { id: 'settings', label: 'Open settings', keywords: 'preferences runner backup', run: () => ctx.open(({ close }) => <SettingsDialog close={close} />) },

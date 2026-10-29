@@ -1,6 +1,7 @@
 // How each practice mode picks questions from an imported set (docs/question-set-format.md).
 // Works on the set's questions and the user's progress. Pure, so it is tested without a browser.
 import { weightedSample } from './weights.js';
+import { splitProblem } from './modes.js';
 
 export const LIB_MODES = ['all', 'random', 'sections', 'difficult', 'unseen', 'wrong', 'custom'];
 export const LIB_MODE_LABELS = {
@@ -16,13 +17,14 @@ function shuffle(list, rng) {
   return a;
 }
 
-// Returns the uids for a session. options: { count, sections }. progressOf(uid) gives the
+// Returns the uids for a session. options: { count, sections, split, hideCompleted }. progressOf(uid) gives the
 // progress record or null. weight(question) is optional: when given, Random draws the questions
 // with more trouble more often (see weights.js).
 export function pickLibraryQuestions(questions, progressOf, mode, options = {}, rng = Math.random, weight) {
   if (!LIB_MODES.includes(mode)) throw new Error(`Unknown mode "${mode}"`);
   const sections = Array.isArray(options.sections) ? options.sections : [];
-  const inSections = sections.length ? questions.filter((q) => sections.includes(q.section)) : questions;
+  const wanted = sections.length ? questions.filter((q) => sections.includes(q.section)) : questions;
+  const inSections = options.hideCompleted ? wanted.filter((q) => !((progressOf(q.uid) || {}).right > 0)) : wanted;
   let picked;
   if (mode === 'all') picked = inSections;
   else if (mode === 'sections') {
@@ -31,7 +33,13 @@ export function pickLibraryQuestions(questions, progressOf, mode, options = {}, 
   } else if (mode === 'random') {
     const count = Math.floor(Number(options.count) || 0);
     if (count < 1) throw new Error('Choose how many questions you want');
-    picked = weight ? weightedSample(inSections, weight, count, rng) : shuffle(inSections, rng).slice(0, count);
+    const draw = (list, n) => (weight ? weightedSample(list, weight, n, rng) : shuffle(list, rng).slice(0, n));
+    const groups = [...new Set(inSections.map((q) => q.section))].map((sec) => inSections.filter((q) => q.section === sec));
+    if (options.split && count < inSections.length) {
+      const problem = splitProblem(groups.length, inSections.length, count, 'section');
+      if (problem) throw new Error(problem);
+      picked = groups.flatMap((g) => draw(g, count / groups.length));
+    } else picked = draw(inSections, count);
   } else if (mode === 'difficult') picked = inSections.filter((q) => (progressOf(q.uid) || {}).difficult);
   else if (mode === 'unseen') {
     picked = inSections.filter((q) => { const p = progressOf(q.uid); return !p || (!p.views && !p.attempts); });

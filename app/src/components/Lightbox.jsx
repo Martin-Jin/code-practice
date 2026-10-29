@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 
-const LEVELS = [1, 1.5, 2, 3, 4];
+const LEVELS = [0.5, 0.75, 1, 1.5, 2, 3, 4];
+const FIT = 2;   // index of 1x, where the viewer opens
 
 // A full-window viewer for a figure. `render(width)` draws the figure `width` CSS pixels wide, so a PDF crop can be
-// drawn sharply at each zoom level. 1x fits the window's width; the page scrolls, or drag to move around when zoomed.
+// drawn sharply at each zoom level. 1x fits the window's width, and it can zoom out to half of that; the page scrolls, or drag to move around when zoomed.
 export function Lightbox({ title, render, onClose }) {
   const dialog = useRef(null);
   const stage = useRef(null);
   const drag = useRef(null);
   const [fit, setFit] = useState(0);
-  const [level, setLevel] = useState(0);
+  const [level, setLevel] = useState(FIT);
 
   const zoom = (delta) => setLevel((l) => Math.max(0, Math.min(LEVELS.length - 1, l + delta)));
 
@@ -31,7 +32,7 @@ export function Lightbox({ title, render, onClose }) {
   const onKeyDown = (e) => {
     if (e.key === '+' || e.key === '=') { e.preventDefault(); zoom(1); }
     else if (e.key === '-') { e.preventDefault(); zoom(-1); }
-    else if (e.key === '0') { e.preventDefault(); setLevel(0); }
+    else if (e.key === '0') { e.preventDefault(); setLevel(FIT); }
   };
   const onPointerDown = (e) => {
     if (e.button !== 0) return;
@@ -51,7 +52,7 @@ export function Lightbox({ title, render, onClose }) {
     drag.current = null;
     if (moved) return;
     if (e.target === stage.current) onClose();
-    else setLevel((l) => (l === 0 ? 2 : 0));
+    else setLevel((l) => (l === FIT ? FIT + 2 : FIT));
   };
 
   return (
@@ -59,12 +60,12 @@ export function Lightbox({ title, render, onClose }) {
       <div className="lb-bar">
         <span className="lb-title">{title}</span>
         <button type="button" className="btn ghost sm" onClick={() => zoom(-1)} disabled={level === 0} aria-label="Zoom out" title="Zoom out (-)">−</button>
-        <button type="button" className="btn ghost sm lb-level" onClick={() => setLevel(0)} title="Fit to window (0)">{Math.round(LEVELS[level] * 100)}%</button>
+        <button type="button" className="btn ghost sm lb-level" onClick={() => setLevel(FIT)} title="Fit to window (0)">{Math.round(LEVELS[level] * 100)}%</button>
         <button type="button" className="btn ghost sm" onClick={() => zoom(1)} disabled={level === LEVELS.length - 1} aria-label="Zoom in" title="Zoom in (+)">+</button>
         <button type="button" className="btn sm" onClick={onClose} autoFocus><Icon name="x" /> Close</button>
       </div>
       <div ref={stage} className="lb-stage" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onClick={onClick}>
-        <div className="lb-figure" style={{ cursor: level === 0 ? 'zoom-in' : 'zoom-out' }}>
+        <div className="lb-figure" style={{ cursor: level === FIT ? 'zoom-in' : 'zoom-out' }}>
           {fit > 0 && render(Math.round(fit * LEVELS[level]))}
         </div>
       </div>
@@ -73,8 +74,11 @@ export function Lightbox({ title, render, onClose }) {
   );
 }
 
+const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 8;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+// Where the figure's corner may sit: it can slide until its far edge meets the frame's (zoomed in), or stay inside the frame (zoomed out).
+const bound = (v, size, k) => clamp(v, Math.min(0, size * (1 - k)), Math.max(0, size * (1 - k)));
 
 // Lets a figure be zoomed in place: Ctrl + scroll zooms around the pointer, and with the left button held, dragging
 // moves the figure around inside its frame. Double-click puts it back. Plain scrolling is left to the page.
@@ -92,9 +96,9 @@ export function ZoomPan({ children }) {
       const px = e.clientX - r.left;
       const py = e.clientY - r.top;
       setView((v) => {
-        const k = clamp(v.k * Math.exp(-e.deltaY * 0.002), 1, MAX_ZOOM);
+        const k = clamp(v.k * Math.exp(-e.deltaY * 0.002), MIN_ZOOM, MAX_ZOOM);
         const grow = k / v.k;
-        return { k, x: clamp(px - (px - v.x) * grow, r.width * (1 - k), 0), y: clamp(py - (py - v.y) * grow, r.height * (1 - k), 0) };
+        return { k, x: bound(px - (px - v.x) * grow, r.width, k), y: bound(py - (py - v.y) * grow, r.height, k) };
       });
     };
     el.addEventListener('wheel', onWheel, { passive: false });   // a passive listener cannot stop the browser zooming the page
@@ -111,18 +115,18 @@ export function ZoomPan({ children }) {
     const d = drag.current;
     if (!d) return;
     const r = box.current.getBoundingClientRect();
-    setView((v) => ({ k: v.k, x: clamp(e.clientX - d.x, r.width * (1 - v.k), 0), y: clamp(e.clientY - d.y, r.height * (1 - v.k), 0) }));
+    setView((v) => ({ k: v.k, x: bound(e.clientX - d.x, r.width, v.k), y: bound(e.clientY - d.y, r.height, v.k) }));
   };
   const reset = () => setView({ k: 1, x: 0, y: 0 });
 
   return (
     <div
-      ref={box} className={`zoompan${view.k > 1 ? ' zoomed' : ''}`} title="Ctrl + scroll to zoom, drag to move, double-click to reset"
+      ref={box} className={`zoompan${view.k !== 1 ? ' zoomed' : ''}`} title="Ctrl + scroll to zoom, drag to move, double-click to reset"
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
       onDoubleClick={reset}
     >
       <div className="zoompan-inner" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})` }}>{children}</div>
-      {view.k > 1 && <button type="button" className="btn sm zoompan-reset" onClick={reset} onDoubleClick={(e) => e.stopPropagation()}>{Math.round(view.k * 100)}% · Reset</button>}
+      {view.k !== 1 && <button type="button" className="btn sm zoompan-reset" onClick={reset} onDoubleClick={(e) => e.stopPropagation()}>{Math.round(view.k * 100)}% · Reset</button>}
     </div>
   );
 }

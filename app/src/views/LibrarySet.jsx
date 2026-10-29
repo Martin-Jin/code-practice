@@ -18,7 +18,7 @@ import { Fab } from '../components/Library.jsx';
 import { FormulaSheetsDialog } from '../components/SetTools.jsx';
 import { MoveDialog } from './SetsPage.jsx';
 import QuickSearch from '../components/QuickSearch.jsx';
-import { foldersSorted, folderOf, moveSet } from '../lib/folders.js';
+import { foldersSorted, folderOf, folderCrumbs, moveSet } from '../lib/folders.js';
 
 const reportText = (r) => (r ? `${r.kept} questions kept their progress, ${r.added} new${r.droppedTitles.length ? `, ${r.droppedTitles.length} no longer in the PDF` : ''}.` : 'The PDF has not changed.');
 
@@ -180,7 +180,7 @@ export default function LibrarySet({ setId, theme }) {
   };
 
   return (
-    <Shell theme={theme} crumbs={[{ label: record.title }]}>
+    <Shell theme={theme} crumbs={[...folderCrumbs(setId), { label: record.title }]}>
       <div className="page-head">
         <h1 className="title-with-icon">{record.title} <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">

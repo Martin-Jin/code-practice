@@ -25,11 +25,11 @@ export function eligibleCategories(set, opts) {
 
 // A "split evenly" random run takes count / (topics) questions from each topic. The count must
 // reach every topic and divide evenly, unless it is every question (which just becomes "all").
-export function splitProblem(topics, total, count) {
-  if (!topics) return 'No topics to draw from';
+export function splitProblem(groups, total, count, noun = 'topic') {
+  if (!groups) return `No ${noun}s to draw from`;
   if (count === total) return null;
-  if (count < topics) return `Use at least ${topics} so every topic gets a question`;
-  if (count % topics) return `Use a multiple of ${topics}, or all ${total}`;
+  if (count < groups) return `Use at least ${groups} so every ${noun} gets a question`;
+  if (count % groups) return `Use a multiple of ${groups}, or all ${total}`;
   return null;
 }
 

@@ -30,8 +30,9 @@ const MIN_WIDTH = 280;
 const DEFAULT_WIDTH = 520;
 const loadWidth = () => { try { const w = Number(localStorage.getItem('formulaWidth')); return w >= MIN_WIDTH ? w : DEFAULT_WIDTH; } catch { return DEFAULT_WIDTH; } };
 
-// A side panel of the set's formula sheets, one tab each. With none, it offers the upload.
-export default function FormulaSidebar({ setId, onClose }) {
+// A side panel of the set's formula sheets, one tab each. With none, it offers the upload. `hidden` keeps it mounted
+// but invisible, so showing it again is instant instead of reloading the sheet.
+export default function FormulaSidebar({ setId, onClose, hidden = false }) {
   const st = useStore();
   const { confirm } = useDialogs();
   const sheets = sheetsOf(setId);
@@ -63,7 +64,8 @@ export default function FormulaSidebar({ setId, onClose }) {
   };
 
   return (
-    <aside className="formula-side" aria-label="Formula sheets" style={{ width }}>
+    <aside className="formula-side" aria-label="Formula sheets" aria-hidden={hidden || undefined} inert={hidden || undefined}
+      style={{ width, ...(hidden ? { visibility: 'hidden', pointerEvents: 'none' } : {}) }}>
       <div className={`splitter v formula-handle${drag ? ' drag' : ''}`} role="separator" aria-orientation="vertical" title="Drag to resize. Double-click to reset."
         onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); document.body.classList.add('resizing', 'resizing-x'); setDrag(true); }}
         onPointerMove={(e) => { if (drag) move(e); }} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop}

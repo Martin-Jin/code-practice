@@ -11,6 +11,7 @@ import FormulaSidebar from '../components/FormulaSidebar.jsx';
 import EditContent from '../components/EditContent.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 import { sheetsOf } from '../lib/formulas.js';
+import { folderCrumbs } from '../lib/folders.js';
 
 const loadFlag = (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true'; } catch { return fallback; } };
 const saveFlag = (key, value) => { try { localStorage.setItem(key, String(value)); } catch { /* storage blocked */ } };
@@ -44,7 +45,8 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const openEdit = (what) => open(({ close }) => <EditContent set={set} question={question} what={what} close={close} />);
   // In edit mode a small pencil sits beside each thing that can be changed.
   const pencil = (label, onClick) => <button type="button" className="btn ghost sm icon-only edit-pencil" onClick={onClick} title={label} aria-label={label}><Icon name="pencil" /></button>;
-  const toggleFormula = () => setFormulaOpen((on) => { saveFlag('formulaOpen', !on); return !on; });
+  const [formulaSeen, setFormulaSeen] = useState(formulaOpen);   // once opened, the panel stays mounted (hidden) so Alt+T does not reload the sheet
+  const toggleFormula = () => { setFormulaSeen(true); setFormulaOpen((on) => { saveFlag('formulaOpen', !on); return !on; }); };
 
   useEffect(() => {
     setPanel(null); setResult(null); window.scrollTo(0, 0);
@@ -97,7 +99,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const notes = (st.libEdits[keyOf(setId, uid)] || {}).notes ?? question.notes ?? '';
 
   return (
-    <Shell theme={theme} crumbs={[{ label: set.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: run ? run.name : question.section }]}>
+    <Shell theme={theme} crumbs={[...folderCrumbs(setId), { label: set.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: run ? run.name : question.section }]}>
       {run && (
         <nav className="qstrip" aria-label="Questions in this session">
           {questions.map((q, i) => {
@@ -180,7 +182,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
           </div>
         </aside>
       </div>
-      {formulaOpen && <FormulaSidebar setId={setId} onClose={toggleFormula} />}
+      {(formulaOpen || formulaSeen) && <FormulaSidebar setId={setId} onClose={toggleFormula} hidden={!formulaOpen} />}
     </Shell>
   );
 }

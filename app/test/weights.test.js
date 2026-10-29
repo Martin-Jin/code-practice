@@ -107,3 +107,23 @@ test('library random: count, sections and weights', () => {
   for (let seed = 1; seed <= 300; seed++) if (pickLibraryQuestions(qs, of, 'random', { count: 1 }, seeded(seed), (q) => (q.uid === 'a' ? 30 : 1)).includes('a')) withA++;
   assert.ok(withA > 200, `the weighted question came up ${withA} of 300 times`);
 });
+
+test('library random: split evenly across sections, and hide completed', () => {
+  const q = (uid, section) => ({ uid, section });
+  const list = [q('a', 'S1'), q('b', 'S1'), q('c', 'S1'), q('d', 'S2'), q('e', 'S2'), q('f', 'S3')];
+  const none = () => null;
+  for (let seed = 1; seed <= 20; seed++) {
+    const p = pickLibraryQuestions(list, none, 'random', { count: 3, split: true }, seeded(seed));
+    assert.deepEqual(p.map((u) => list.find((x) => x.uid === u).section).sort(), ['S1', 'S2', 'S3']);
+  }
+  assert.throws(() => pickLibraryQuestions(list, none, 'random', { count: 2, split: true }), /at least 3 so every section/);
+  assert.throws(() => pickLibraryQuestions(list, none, 'random', { count: 4, split: true }), /multiple of 3/);
+  assert.equal(pickLibraryQuestions(list, none, 'random', { count: 6, split: true }).length, 6);
+  const done = (uid) => (uid === 'a' || uid === 'f' ? { right: 1 } : null);
+  assert.deepEqual(pickLibraryQuestions(list, done, 'all', { hideCompleted: true }), ['b', 'c', 'd', 'e']);
+  assert.equal(pickLibraryQuestions(list, done, 'all', {}).length, 6);
+  for (let seed = 1; seed <= 20; seed++) {
+    const p = pickLibraryQuestions(list, done, 'random', { count: 2, split: true, hideCompleted: true }, seeded(seed));
+    assert.equal(p.length, 2); assert.ok(!p.includes('a') && !p.includes('f'));
+  }
+});

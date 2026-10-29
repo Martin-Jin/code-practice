@@ -15,9 +15,10 @@ import LibrarySet from './views/LibrarySet.jsx';
 import LibraryStats from './views/LibraryStats.jsx';
 import QuestionView from './views/QuestionView.jsx';
 import PracticeView from './views/PracticeView.jsx';
+import History from './views/History.jsx';
 import RunView from './views/run/RunView.jsx';
 
-// #/  #/sets  #/sets/<folder id>  #/set/<id>  #/set/<id>/stats  #/lib/<id>  #/lib/<id>/stats  #/q/<set id>/<uid>  #/practice/<id>  #/practice/<id>/<uid|summary>  #/run/<id>  #/run/<id>/<question>  #/run/<id>/summary
+// #/  #/history  #/sets  #/sets/<folder id>  #/set/<id>  #/set/<id>/stats  #/lib/<id>  #/lib/<id>/stats  #/q/<set id>/<uid>  #/practice/<id>  #/practice/<id>/<uid|summary>  #/run/<id>  #/run/<id>/<question>  #/run/<id>/summary
 function useRoute() {
   const read = () => window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   const [parts, setParts] = useState(read);
@@ -32,6 +33,7 @@ function useRoute() {
 function Screen({ theme }) {
   const [view, id, extra] = useRoute();
   if (view === 'run' && id) return <RunView key={id} runId={id} param={extra} theme={theme} />;
+  if (view === 'history') return <History theme={theme} />;
   if (view === 'sets') return <SetsPage folderId={id} theme={theme} />;
   if (view === 'set' && id && extra === 'stats') return <Stats setId={id} theme={theme} />;
   if (view === 'set' && id) return <SetPage setId={id} theme={theme} />;

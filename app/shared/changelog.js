@@ -3,9 +3,20 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.76';
+export const VERSION = '1.77';
 
 export const CHANGELOG = [
+  {
+    version: '1.77', date: '2026-10-29', title: 'Random split and hide completed on imported sets, History tab, zoom out, faster formulas',
+    items: [
+      'Random on an imported set has a Split evenly across sections option (the number must be at least the number of sections and a multiple of it, or every question), and every practice mode has a Leave out completed questions box for questions you have got right at least once.',
+      'Ctrl+P (and the search box) now lists question sets only on the dashboard and the list of sets; inside a set it searches only the questions of that set.',
+      'The top bar no longer repeats the page name: the Dashboard and Question sets pages show no trail, and inside a folder or a set it shows the folders leading to it (click one to go back).',
+      'A History tab in the top bar (and Go to history in the command palette, Alt+K) lists the last 5 question sets you ran, with how many runs each has and a link to open it.',
+      'Figures and formula sheets can now zoom out to 50% as well as in: the full-window viewer has a 50% and a 75% step below Fit, and Ctrl + scroll on a figure in place shrinks it too (double-click or Reset puts it back).',
+      'Alt+T no longer reloads the formula sheet each time: once opened it stays loaded while hidden, so showing it again is instant and keeps its scroll and zoom.',
+    ],
+  },
   {
     version: '1.76', date: '2026-10-29', title: 'Delete or select all from the Select menu',
     items: [
@@ -24,20 +35,6 @@ export const CHANGELOG = [
     items: [
       'The How to add questions button under Your library now opens the tutorial at its Add your own questions section, instead of a second, separate guide that repeated it.',
       'The tutorial now says that adding coding questions needs a copy of the project on your computer (clone it from GitHub), and how.',
-    ],
-  },
-  {
-    version: '1.72', date: '2026-10-29', title: 'Drag and shift-click to choose sets, and fixes',
-    items: [
-      'Choosing sets: press and drag over several to tick them all, or shift-click a range, on the Question sets page (Select) and in the formula-sheet and export dialogs. Those dialogs list nothing until you type in their search, and keep your chosen sets as removable chips.',
-      'The Read the prompt arrow in the tutorial opens again, and so do the links in the tutorial (a click handler was cancelling them). The prompt box is now just the readable text, with the Copy button in the animation below it, and has more space above the animation.',
-      'The search box in Add a formula sheet and Export chosen sets was drawn as a thin grey strip (it shared a style name with the progress bars); it is a normal box again.',
-    ],
-  },
-  {
-    version: '1.71', date: '2026-10-29', title: 'Tutorial: how to add your own coding questions',
-    items: [
-      'The tutorial now explains that coding sets are C++ files in the project, how to add or share one, and where the guides are. Importing and exporting them inside the app is not available yet.',
     ],
   },
 ];

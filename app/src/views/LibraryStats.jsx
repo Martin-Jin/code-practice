@@ -7,6 +7,7 @@ import { backupNote } from '../lib/backup.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
+import { folderCrumbs } from '../lib/folders.js';
 
 const percent = (rate) => (rate === null ? '–' : `${Math.round(rate * 100)}%`);
 
@@ -66,7 +67,7 @@ export default function LibraryStats({ setId, theme }) {
   };
 
   return (
-    <Shell theme={theme} crumbs={[{ label: record.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: 'Stats' }]}>
+    <Shell theme={theme} crumbs={[...folderCrumbs(setId), { label: record.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: 'Stats' }]}>
       <div className="page-head">
         <h1>{record.title}: stats</h1>
         <p className="muted">Counted over every check you have made, in sessions or on a single question. A check counts when every part has an answer and a key to check it against; last check {timeAgo(total.lastAt)}.</p>

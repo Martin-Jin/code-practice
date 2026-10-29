@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
 import { LIB_MODE_LABELS } from '../../shared/librarymodes.js';
-import { createLibRun, deleteLibRun, runStatus } from '../lib/practice.js';
+import { splitProblem } from '../../shared/modes.js';
+import { createLibRun, deleteLibRun, runStatus, getProgress } from '../lib/practice.js';
 import { useDialogs } from './Dialogs.jsx';
 import { toast } from './Toasts.jsx';
 import { backupNote } from '../lib/backup.js';
@@ -23,15 +24,23 @@ export function LibraryPracticePicker({ set }) {
   const [mode, setMode] = useState('random');
   const [count, setCount] = useState(10);
   const [sections, setSections] = useState([]);
+  const [split, setSplit] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(false);
   const { prompt } = useDialogs();
   const names = [...new Set(set.manifest.questions.map((q) => q.section))];
+  // The pool a Random run draws from, as the picker shows it: the ticked sections, minus completed questions if asked.
+  const pool = set.manifest.questions.filter((q) => (!sections.length || sections.includes(q.section))
+    && !(hideCompleted && ((getProgress(set.id, q.uid) || {}).right > 0)));
+  const groups = new Set(pool.map((q) => q.section)).size;
+  const n = Math.floor(Number(count) || 0);
+  const splitError = split && n >= 1 && n < pool.length ? splitProblem(groups, pool.length, n, 'section') : null;
   const toggle = (s) => setSections((list) => (list.includes(s) ? list.filter((x) => x !== s) : [...list, s]));
 
   const start = async () => {
     const name = await prompt({ title: 'Start session', label: 'Session name (optional)', placeholder: 'Leave blank for an automatic name', confirmText: 'Start' });
     if (name === null) return;
     try {
-      const run = createLibRun({ setId: set.id, mode, options: { count: Number(count), sections }, name });
+      const run = createLibRun({ setId: set.id, mode, options: { count: Number(count), sections, split, hideCompleted }, name });
       window.location.hash = `#/practice/${run.id}`;
     } catch (e) {
       toast(e.message, 'bad');
@@ -49,8 +58,16 @@ export function LibraryPracticePicker({ set }) {
           <div className="row">
             <label htmlFor="lib-count">Number of questions</label>
             <input id="lib-count" type="number" min="1" value={count} onChange={(e) => setCount(e.target.value)} style={{ width: 80 }} />
-            <span className="muted">of {plural(set.manifest.questions.length, 'question')}</span>
+            <span className="muted">of {plural(pool.length, 'available question')}</span>
           </div>
+          <label className="check">
+            <input type="checkbox" checked={split} onChange={(e) => setSplit(e.target.checked)} />
+            Split evenly across sections ({plural(groups, 'section')} in the pool)
+          </label>
+          {split && splitError && <span className="muted" role="alert" style={{ color: 'var(--bad, #c0392b)' }}>{splitError}</span>}
+          {split && !splitError && n >= 1 && (
+            <span className="muted">{n >= pool.length ? 'That is every question, so this runs as All questions.' : `${n / groups} from each section, chosen at random.`}</span>
+          )}
         </div>
       )}
       {mode === id && (id === 'random' || id === 'sections' || id === 'all') && names.length > 1 && (
@@ -77,6 +94,10 @@ export function LibraryPracticePicker({ set }) {
         <button type="button" className="btn primary" onClick={start}>Start</button>
       </div>
       <div className="modes">{picker(mode)}</div>
+      <label className="check" style={{ marginTop: 10 }}>
+        <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
+        Leave out completed questions (ones you have got right at least once)
+      </label>
     </section>
   );
 }

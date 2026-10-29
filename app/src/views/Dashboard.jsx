@@ -19,7 +19,7 @@ export default function Dashboard({ theme }) {
   const row = ({ kind, r }) => (kind === 'lib' ? <LibRunRow key={r.id} run={r} /> : <RunRow key={r.id} run={r} />);
 
   return (
-    <Shell theme={theme} crumbs={[{ label: 'Dashboard' }]} hero={<Hero action={resume} />}>
+    <Shell theme={theme} hero={<Hero action={resume} />}>
 
       <BackupReminder />
 
