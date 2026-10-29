@@ -50,6 +50,7 @@ const SECTIONS = [
           <li>Write your answer in the editor and press <b>Run</b> (Ctrl+Shift+Enter). Each test shows pass or fail, with what it expected and what it got.</li>
         </ol>
         <Shot file="set.jpg" alt="A coding set page with its test modes" />
+        <p><b>Adding your own coding questions.</b> Coding sets are not imported through the app yet: they are C++ files in the project, in <code>sets/&lt;set-id&gt;/</code> (a <code>set.json</code>, one file per question with its task, starter code and tests, and the reference solutions). To add one, copy <code>templates/example-set</code> (or <code>sets/sample</code>), edit it, then refresh the page if the local server is running (<code>app/start.ps1</code>), or run <code>npm run build</code> in the <code>app</code> folder. To share a set, send its folder. See the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext> (sections 2 and 3) and the <Ext href={`${DOCS}/question-format.md`}>question format</Ext>. An agent can write the questions for you from that format.</p>
         <p className="muted">Alt+T hides the task, Alt+O the output, Ctrl+P searches, Alt+K opens the command palette. The <b>?</b> or the three-dot menu lists every shortcut.</p>
       </>
     ),

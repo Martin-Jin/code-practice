@@ -13,7 +13,7 @@ Both versions look and behave the same. The only difference is the **runner** (w
 
 ## Tutorial and what's new
 
-A welcome window (about two-thirds of the screen, in the middle) has two tabs: **Tutorial** (how to use the app, how to import sets and how to have an agent format a practice PDF) and **What's new** (the five latest changes, each with its version number).
+A welcome window (about two-thirds of the screen, in the middle) has two tabs: **Tutorial** (how to use the app, how to import sets, how to have an agent format a practice PDF and how coding sets are added, which is by file in the project for now) and **What's new** (the five latest changes, each with its version number).
 
 - It opens by itself the first time you visit, on the tutorial, and again after each update, on **What's new**. It is shown once per version, so closing it keeps it away until the next update.
 - Reopen it any time from the three-dot menu at the top right (**Tutorial and what's new**), from **Settings > Help**, or from the command palette (Alt+K, then **Open the tutorial**).
