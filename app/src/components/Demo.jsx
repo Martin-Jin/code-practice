@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import { APP_NAME } from '../../shared/brand.js';
+import agentPrompt, { copyText } from '../lib/agentprompt.js';
+import { toast } from './Toasts.jsx';
 
 // Animated walkthroughs for the tutorial. Each scene is a short script: a caption and a cursor target per step, and a
 // `render(shown)` that draws the mock screen once the step's click has landed. The mock uses the app's own classes, so it
@@ -63,6 +65,9 @@ const Tile = ({ title, i }) => (
   </div>
 );
 
+// The first lines of the real prompt, shown greyed in the animation.
+const PROMPT_PREVIEW = agentPrompt.split('\n').filter(Boolean).slice(0, 3).join(' ').slice(0, 330) + '…';
+
 const SETS = ['Thermodynamics (sample)', 'Fluid Mechanics (sample)', 'Heat Transfer (sample)'];
 
 // The search-and-tick list the formula-sheet and export dialogs share.
@@ -108,29 +113,28 @@ const SCENES = {
   },
   agent: {
     title: 'Formatting a practice PDF with an agent',
-    steps: [['Copy the prompt template', 'copy'], ['Fill in the four blanks', 'fields'], ['Paste it into your agent', 'chat-input'], ['It builds the PDF and answer keys', 'progress'], ['Import the folder it writes', 'files']],
+    steps: [['Copy the prompt', 'copy'], ['Paste it into your agent', 'chat-input'], ['Answer its questions', 'chat-input'], ['It builds the PDF and answer keys', 'progress'], ['Then it walks you through importing', 'files']],
     render: (s) => (
       <div className="dm-split">
         <div className="card pad dm-pane">
-          <b>Agent prompt</b>
-          <div className="dm-fields" data-t="fields">
-            {[['Course', 'Thermodynamics'], ['Target PDF', 'none, make a new one'], ['Sources to merge', 'tutorials/*.pdf'], ['Answer keys', 'yes']].map(([k, v]) => (
-              <div key={k}><span className="muted">{k}:</span> <span className="dm-fill">{s >= 1 ? <Type key={v} text={v} /> : ''}</span></div>
-            ))}
-          </div>
-          <span className="btn" data-t="copy"><Icon name="plus" /> Copy the template</span>
+          <b>The prompt</b>
+          <div className="dm-prompt muted">{PROMPT_PREVIEW}</div>
+          <button type="button" className="btn primary" data-t="copy"><Icon name="plus" /> Copy the prompt</button>
+          <span className="muted">Try it: this button really copies the whole prompt.</span>
         </div>
         <div className="card pad dm-pane">
           <b>AI agent</b>
           <div className="dm-chat">
-            {s >= 2 && <div className="dm-bubble">Merge my tutorial sheets into a practice PDF, with answer keys.</div>}
+            {s >= 1 && <div className="dm-bubble">(the prompt, pasted)</div>}
+            {s >= 2 && <div className="dm-bubble agent">What course is this for, and what material do you want turned into questions?</div>}
+            {s >= 2 && <div className="dm-bubble me">Thermodynamics: my three tutorial sheets.</div>}
             <div className="dm-progress" data-t="progress">
-              {s >= 3 && ['Merging 3 sources…', 'Checking the layout…', 'Writing answer keys…'].map((l, i) => <div key={l} className="dm-line" style={{ animationDelay: `${i * 0.5}s` }}><Icon name="check" /> {l}</div>)}
+              {s >= 3 && ['Merging 3 sources…', 'Checking the layout…', 'Writing the answer keys…'].map((l, i) => <div key={l} className="dm-line" style={{ animationDelay: `${i * 0.5}s` }}><Icon name="check" /> {l}</div>)}
             </div>
           </div>
-          <div className="dm-input" data-t="chat-input"><span className="muted">{s >= 2 ? '' : 'Paste the prompt here'}</span></div>
+          <div className="dm-input" data-t="chat-input"><span className="muted">{s >= 1 ? 'Reply…' : 'Paste the prompt here'}</span></div>
           <div className="dm-files" data-t="files">
-            {s >= 4 && <><span className="chip ok">Thermodynamics - Practice Questions.pdf</span><span className="chip ok">….questions.json</span></>}
+            {s >= 4 && <><span className="chip ok">Thermodynamics - Practice Questions.pdf</span><span className="muted">Next: + &gt; Add or update a folder</span></>}
           </div>
         </div>
       </div>
@@ -185,6 +189,7 @@ export default function Demo({ scene }) {
   const [scale, setScale] = useState(0.6);
   const [i, setI] = useState(still ? steps.length - 1 : 0);          // the step the cursor is heading for
   const [shown, setShown] = useState(still ? steps.length - 1 : -1);  // the last step whose click has landed
+  const [kick, setKick] = useState(0);                            // bumped when the user clicks a button, to restart the step timers
   const [seen, setSeen] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [cursor, setCursor] = useState([W / 2, H / 2]);
@@ -214,13 +219,22 @@ export default function Demo({ scene }) {
     const land = setTimeout(() => setShown(i), MOVE + 80);
     const next = setTimeout(() => setI((k) => (k + 1) % steps.length), HOLD);
     return () => { clearTimeout(aim); clearTimeout(land); clearTimeout(next); };
-  }, [run, i]);
+  }, [run, i, kick]);
 
+  // The buttons in the mock screens work: a click jumps to the step that presses that button, and "Copy the prompt" really copies it.
+  const onStageClick = async (e) => {
+    const el = e.target.closest && e.target.closest('[data-t]');
+    if (!el) return;
+    const t = el.dataset.t;
+    if (scene === 'agent' && t === 'copy') toast((await copyText(agentPrompt)) ? 'Prompt copied. Paste it into your agent.' : 'Could not copy the prompt.', 'info');
+    const at = steps.findIndex((x) => x[1] === t);
+    if (at >= 0 && !still) { setPlaying(true); setShown(at - 1); setI(at); setKick((k) => k + 1); }
+  };
   const replay = () => { setShown(-1); setI(0); setPlaying(true); };
   return (
     <figure className="demo">
       <div className="dm-box" ref={box} role="img" aria-label={`Animation: ${title}. ${steps.map((s) => s[0]).join('; ')}.`}>
-        <div className="dm-stage" ref={stage} style={{ transform: `scale(${scale})` }}>
+        <div className="dm-stage" ref={stage} style={{ transform: `scale(${scale})` }} onClick={onStageClick}>
           {render(shown)}
           {!still && <span className="dm-cursor" style={{ transform: `translate(${cursor[0]}px, ${cursor[1]}px)` }} key="cursor"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M4 2l16 9-7 2-3 7z" fill="#111" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" /></svg>{shown === i && <span className="dm-ripple" key={`${i}-${shown}`} />}</span>}
           <div className="dm-caption"><span>{i + 1}/{steps.length}</span> {steps[i][0]}</div>

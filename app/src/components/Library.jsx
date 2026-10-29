@@ -194,7 +194,7 @@ export function HelpDialog({ close }) {
         <li>The app reads the PDF by itself (about half a minute each) and lists what it found, checked against the PDF's cover.</li>
         <li>Tick it and press <b>Import</b>. Click its tile in <b>Your library</b> to open it and <b>Browse</b>.</li>
       </ol>
-      <p>The PDF has to be laid out a certain way (a cover that lists the questions, then each question page followed by its worked solution), because the app finds the questions from the layout. Build it with the <a href={`${DOCS}/practice-pdf-prompt.md`} target="_blank" rel="noreferrer">agent prompt</a> that does it for you, or format it by hand to the same rules.</p>
+      <p>The PDF has to be laid out a certain way (a cover that lists the questions, then each question page followed by its worked solution), because the app finds the questions from the layout. Build it with the <a href={`${DOCS}/practice-pdf-agent-prompt.md`} target="_blank" rel="noreferrer">agent prompt</a> that does it for you, or format it by hand to the same rules.</p>
       <p className="muted">To keep the result beside the PDF, run <code>node tools/index-pdf.js "file.pdf"</code> in the repo's <code>app</code> folder, then import the folder. Nothing is uploaded; your folder is not changed.</p>
 
       <h3>A screenshot, or a question you write</h3>
@@ -217,7 +217,7 @@ export function HelpDialog({ close }) {
       </ul>
 
       <h3>Let an agent do it</h3>
-      <p>An AI agent can build the practice PDF from your tutorial sheets (<a href={`${DOCS}/practice-pdf-prompt.md`} target="_blank" rel="noreferrer">prompt and layout</a>), or add one question to a <code>.questions.json</code> file from a screenshot, following <a href={FORMAT_DOC} target="_blank" rel="noreferrer">the question set format</a>.</p>
+      <p>An AI agent can build the practice PDF from your tutorial sheets (<a href={`${DOCS}/practice-pdf-agent-prompt.md`} target="_blank" rel="noreferrer">prompt and layout</a>), or add one question to a <code>.questions.json</code> file from a screenshot, following <a href={FORMAT_DOC} target="_blank" rel="noreferrer">the question set format</a>.</p>
 
       <h3>After importing</h3>
       <ul>

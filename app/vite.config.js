@@ -6,6 +6,7 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   server: {
+    fs: { allow: ['..'] },   // the tutorial bundles docs/practice-pdf-agent-prompt.md as text
     proxy: {
       // `npm run dev` forwards compile requests to `npm run serve` (the local g++ server).
       '/api': {

@@ -1,11 +1,18 @@
 // The app's version and its change log (the five latest changes), shown in the welcome window (src/components/Welcome.jsx).
 // Version numbers count pushes to main: 1.00 was the first, so a push that lands after N commits on main is
-// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 70th push is 1.69). Every change a user can see adds an entry at the top,
+// `${1 + floor(N / 100)}.${N % 100, two digits}` (the 71st push is 1.70). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.69';
+export const VERSION = '1.70';
 
 export const CHANGELOG = [
+  {
+    version: '1.70', date: '2026-10-29', title: 'One prompt that walks you through adding a question set',
+    items: [
+      'The tutorial has a full copy-paste prompt for an AI agent. The agent asks what material you have, builds the practice PDF in the exact layout the app reads, records the answer keys and walks you through importing it.',
+      'The buttons in the animations work: Copy the prompt really copies it, and clicking any other button jumps to that step.',
+    ],
+  },
   {
     version: '1.69', date: '2026-10-29', title: 'Sample content, a new logo and Delete question set',
     items: [

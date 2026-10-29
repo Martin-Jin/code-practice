@@ -4,6 +4,8 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import Icon from './Icon.jsx';
 import Logo from './Logo.jsx';
 import Demo from './Demo.jsx';
+import agentPrompt, { copyText } from '../lib/agentprompt.js';
+import { toast } from './Toasts.jsx';
 import { VERSION, CHANGELOG, startTab } from '../../shared/changelog.js';
 import { APP_NAME } from '../../shared/brand.js';
 
@@ -12,6 +14,17 @@ const SEEN = 'seenVersion';   // the version whose welcome window was last shown
 
 const Ext = ({ href, children }) => <a href={href} target="_blank" rel="noreferrer">{children}</a>;
 const Shot = ({ file, alt }) => <figure className="shot"><img src={`${import.meta.env.BASE_URL}tutorial/${file}`} alt={alt} loading="lazy" /></figure>;
+
+// The whole agent prompt, ready to copy, with a way to read it first.
+function PromptBox() {
+  const copy = async () => toast((await copyText(agentPrompt)) ? 'Prompt copied. Paste it into your agent.' : 'Could not copy. Open the prompt, select it all and copy it.', 'info');
+  return (
+    <div className="prompt-box">
+      <div className="row"><button type="button" className="btn primary" onClick={copy}><Icon name="plus" /> Copy the prompt</button><span className="muted">{agentPrompt.split('\n').length} lines, ready to paste</span></div>
+      <details><summary>Read the prompt</summary><pre>{agentPrompt}</pre></details>
+    </div>
+  );
+}
 
 // The tutorial. One entry per section: the index, the progress dots and the search are all built from this list, so a new
 // feature is one more entry (or a few lines in one). Keep it short.
@@ -64,13 +77,13 @@ const SECTIONS = [
       <>
         <p>The app finds questions in a PDF from its layout: a cover listing the questions, then each question page followed by its worked solution. An AI agent can build that PDF from your tutorial sheets.</p>
         <ol>
-          <li>Open the <Ext href={`${DOCS}/practice-pdf-prompt.md`}>agent prompt</Ext> and copy the template under <b>The prompt</b>.</li>
-          <li>Fill in the four blanks: <b>Course</b>, <b>Target PDF</b> (or "none, make a new one"), <b>Sources to merge</b> and <b>Answer keys</b> (blank means yes).</li>
-          <li>Paste it into an agent that can read your files and run commands (Claude Code, for example), opened in this repo so it can finish the answer keys.</li>
-          <li>It writes the PDF, and a <code>.questions.json</code> beside it holding the answer keys and units. Import that folder with <b>+ &gt; Add or update a folder</b>.</li>
+          <li><b>Copy the prompt</b> below (or press Copy in the animation).</li>
+          <li>Paste it into an AI agent. One that can read your files and write PDFs works best (Claude Code, for example), but any chat agent can start.</li>
+          <li>Answer its questions: what course, which material, where the files are, whether you want answer keys. It builds the PDF in the layout the app reads, checks it and walks you through importing it, step by step.</li>
         </ol>
+        <PromptBox />
         <Demo scene="agent" />
-        <p className="muted">Without the repo the agent still builds the PDF, and the app reads it by itself, but every part is self-marked until you add answers. A single question from a screenshot can also come from an agent: see <Ext href={`${DOCS}/question-set-format.md`}>the set format</Ext> and the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext>.</p>
+        <p className="muted">The layout it follows is described in <Ext href={`${DOCS}/practice-pdf-prompt.md`}>practice-pdf-prompt.md</Ext>. A single question can instead come from an agent adding it to a <code>.questions.json</code> file: see <Ext href={`${DOCS}/question-set-format.md`}>the set format</Ext> and the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext>.</p>
       </>
     ),
   },

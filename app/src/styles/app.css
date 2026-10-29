@@ -759,3 +759,13 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 .tut-title { margin: 10px 0 4px; }
 .tut-title h2 { margin: 0 0 2px; font-size: 26px; letter-spacing: -0.01em; }
 .tut-title p { margin: 0; }
+
+/* The tutorial's copyable agent prompt, and the clickable mock buttons in the animations. */
+.prompt-box { display: grid; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface-2); }
+.prompt-box .row { display: flex; gap: 12px; align-items: center; }
+.prompt-box summary { cursor: pointer; color: var(--muted); }
+.prompt-box pre { margin: 8px 0 0; max-height: 260px; overflow: auto; white-space: pre-wrap; font-size: 12.5px; line-height: 1.45; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.demo [data-t] { cursor: pointer; }
+.dm-prompt { font-size: 13px; line-height: 1.45; max-height: 150px; overflow: hidden; }
+.dm-bubble.agent { background: var(--surface); border: 1px solid var(--border); }
+.dm-bubble.me { background: var(--accent); color: var(--accent-ink); justify-self: end; }

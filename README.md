@@ -38,6 +38,7 @@ The repo ships one small sample set, [`sample`](sets/sample/INDEX.md): nine orig
 | [docs/using-the-app.md](docs/using-the-app.md) | Learn the app: modes, runs, editor shortcuts, output, stats, where data is stored, backup and restore. |
 | [docs/adding-questions.md](docs/adding-questions.md) | Set up after cloning, and add more coding questions, a whole coding set, or your own practice questions. Start here. |
 | [docs/question-format.md](docs/question-format.md) | Add a question or a whole set, and check it. Describes the file layout the app depends on. |
+| [docs/practice-pdf-agent-prompt.md](docs/practice-pdf-agent-prompt.md) | The one prompt to paste into an AI agent: it asks what you want, builds the practice PDF, records answer keys and walks you through importing. Also in the app's tutorial. |
 | [docs/practice-pdf-prompt.md](docs/practice-pdf-prompt.md) | The layout a practice PDF must have for the app to find its questions, and an agent prompt that builds one. |
 | [docs/editing-a-backup-with-an-agent.md](docs/editing-a-backup-with-an-agent.md) | Whether and how an agent can edit your questions, and the checker for a backup file. |
 | [docs/question-set-format.md](docs/question-set-format.md) | Add practice PDFs or quiz screenshots from your own folders: the `.questions.json` manifest and how sets are found. |
