@@ -7,6 +7,7 @@ import { Modal, useDialogs } from './Dialogs.jsx';
 import AddQuestionDialog from './AddQuestion.jsx';
 import { FormulaToSetsDialog, ExportSetsDialog } from './SetTools.jsx';
 import { toast } from './Toasts.jsx';
+import { openWelcome } from './Welcome.jsx';
 
 const DOCS = 'https://github.com/martin-jin/practice-questions/blob/main/docs';
 const FORMAT_DOC = `${DOCS}/question-set-format.md`;
@@ -63,6 +64,7 @@ function SetChoice({ item, picked, onToggle }) {
 
 // Scans the chosen folder, lets the user tick the sets to import, and copies them in.
 export function ImportDialog({ files, close }) {
+  const { open } = useDialogs();
   const [phase, setPhase] = useState('scanning');   // scanning | review | importing | failed
   const [scan, setScan] = useState(null);
   const [picked, setPicked] = useState({});         // manifest path -> ticked
@@ -159,7 +161,7 @@ export function ImportDialog({ files, close }) {
           {scan.pdfs.length > 0 && (
             <div className="card pad" style={{ display: 'grid', gap: 8 }}>
               <b>{plural(scan.pdfs.length, 'PDF')} without a question set file</b>
-              <span className="muted">The app reads each practice PDF itself and lists its questions, one after another (about half a minute each), provided the PDF is laid out the way the app expects (see How to add questions). To keep the result beside the PDF instead, run <code>node tools/index-pdf.js</code> from the repo.</span>
+              <span className="muted">The app reads each practice PDF itself and lists its questions, one after another (about half a minute each), provided the PDF is laid out the way the app expects (<a href="#" onClick={(e) => { e.preventDefault(); openWelcome(open, 'tutorial', 'pdf'); }}>see the tutorial</a>). To keep the result beside the PDF instead, run <code>node tools/index-pdf.js</code> from the repo.</span>
               {scan.pdfs.map((p) => (
                 <div key={p.path} style={{ display: 'grid', gap: 4 }}>
                   <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
@@ -180,55 +182,6 @@ export function ImportDialog({ files, close }) {
           {error && phase !== 'failed' && <div className="notice" role="alert">{error}</div>}
         </>
       )}
-    </Modal>
-  );
-}
-
-// A short guide to every way of getting questions in. The full version is docs/adding-questions.md.
-export function HelpDialog({ close }) {
-  return (
-    <Modal wide title="How to add questions" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
-      <h3>A practice PDF</h3>
-      <ol className="steps">
-        <li>Press the round <b>+</b> button at the bottom right, then <b>Add or update a folder</b>, and choose the folder that holds the PDF.</li>
-        <li>The app reads the PDF by itself (about half a minute each) and lists what it found, checked against the PDF's cover.</li>
-        <li>Tick it and press <b>Import</b>. Click its tile in <b>Your library</b> to open it and <b>Browse</b>.</li>
-      </ol>
-      <p>The PDF has to be laid out a certain way (a cover that lists the questions, then each question page followed by its worked solution), because the app finds the questions from the layout. Build it with the <a href={`${DOCS}/practice-pdf-agent-prompt.md`} target="_blank" rel="noreferrer">agent prompt</a> that does it for you, or format it by hand to the same rules.</p>
-      <p className="muted">To keep the result beside the PDF, run <code>node tools/index-pdf.js "file.pdf"</code> in the repo's <code>app</code> folder, then import the folder. Nothing is uploaded; your folder is not changed.</p>
-
-      <h3>A screenshot, or a question you write</h3>
-      <ol className="steps">
-        <li>Press the <b>+</b> button, then <b>Add a question</b> (or press Alt+K and choose <b>Add a question</b>). Say which set it is for, then press Ctrl+V to paste a screenshot (or drop or choose an image).</li>
-        <li>Drag a box over the question, give it a title, a section and the parts to answer (a number with its unit, multiple choice, or self-marked).</li>
-        <li>Press <b>Save question</b>. It goes in <b>My questions</b>, and is included in a backup.</li>
-      </ol>
-
-      <h3>Formula sheets and exporting</h3>
-      <ul>
-        <li><b>+</b> then <b>Add a formula sheet to several sets</b>: choose a PDF or image, search and tick the sets. Each set keeps its own copy. To remove one, open the set, press <b>Edit this set</b>, then <b>Formula sheets</b>.</li>
-        <li><b>+</b> then <b>Export chosen sets</b>: search and tick sets to download them as one zip (with their PDFs, images and formula sheets, without progress). Open it with <b>Restore from a backup…</b> in Settings.</li>
-      </ul>
-
-      <h3>Folders and shortcuts</h3>
-      <ul>
-        <li><b>New folder</b> in <b>Your library</b> makes a folder. Drag a set's tile onto it, or use the <b>Folder</b> menu on the set's page.</li>
-        <li><b>Alt+K</b> opens the command palette: add a question, upload, move a set to a folder (type the set, then the folder, then Enter), go to a set, and more.</li>
-      </ul>
-
-      <h3>Let an agent do it</h3>
-      <p>An AI agent can build the practice PDF from your tutorial sheets (<a href={`${DOCS}/practice-pdf-agent-prompt.md`} target="_blank" rel="noreferrer">prompt and layout</a>), or add one question to a <code>.questions.json</code> file from a screenshot, following <a href={FORMAT_DOC} target="_blank" rel="noreferrer">the question set format</a>.</p>
-
-      <h3>After importing</h3>
-      <ul>
-        <li>Open a question, click the pen beside its title to edit it, then the pen beside <b>Answers</b> to add the answer, so the app can check what you type.</li>
-        <li><b>Mark as difficult</b> (or press D) flags a question. Turn on <b>Settings &gt; Practice</b> to draw those more often.</li>
-        <li>Practise a set from its page, and press <b>Back up now</b> in Settings now and then: your progress is only in this browser. Tick <b>Include my imported sets</b> there to put the PDFs in the backup too (a zip), so another computer can restore the sets themselves.</li>
-      </ul>
-
-      <h3>More coding questions</h3>
-      <p>Coding questions are C++ files in the repo, not added here. Follow section 2 of <a href={`${DOCS}/adding-questions.md`} target="_blank" rel="noreferrer">the adding-questions guide</a>.</p>
-      <p className="muted"><a href={`${DOCS}/adding-questions.md`} target="_blank" rel="noreferrer">Full guide</a> · <a href={FORMAT_DOC} target="_blank" rel="noreferrer">How question sets are laid out</a></p>
     </Modal>
   );
 }
@@ -303,7 +256,7 @@ export function AddFab() {
   );
 }
 
-// Under the library: how storage is used, and a pointer to the guide for adding questions.
+// Under the library: how storage is used, and a link to the tutorial's section on adding questions.
 export function LibraryNotes() {
   const { open } = useDialogs();
   return (
@@ -313,7 +266,7 @@ export function LibraryNotes() {
       </p>
       <StorageNote />
       <p>
-        <button type="button" className="btn ghost sm" onClick={() => open(({ close }) => <HelpDialog close={close} />)}><Icon name="help" /> How to add questions</button>
+        <button type="button" className="btn ghost sm" onClick={() => openWelcome(open, 'tutorial', 'add')}><Icon name="help" /> How to add questions (tutorial)</button>
       </p>
     </section>
   );

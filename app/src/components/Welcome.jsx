@@ -41,7 +41,7 @@ const SECTIONS = [
           <li>Write your answer in the editor and press <b>Run</b> (Ctrl+Shift+Enter). Each test shows pass or fail, with what it expected and what it got.</li>
         </ol>
         <Shot file="set.jpg" alt="A coding set page with its test modes" />
-        <p><b>Adding your own coding questions.</b> Coding sets are not imported through the app yet: they are C++ files in the project, in <code>sets/&lt;set-id&gt;/</code> (a <code>set.json</code>, one file per question with its task, starter code and tests, and the reference solutions). To add one, copy <code>templates/example-set</code> (or <code>sets/sample</code>), edit it, then refresh the page if the local server is running (<code>app/start.ps1</code>), or run <code>npm run build</code> in the <code>app</code> folder. To share a set, send its folder. See the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext> (sections 2 and 3) and the <Ext href={`${DOCS}/question-format.md`}>question format</Ext>. An agent can write the questions for you from that format.</p>
+        <p><b>Adding your own coding questions.</b> Coding sets are not imported through the app yet: they are C++ files in the project, in <code>sets/&lt;set-id&gt;/</code> (a <code>set.json</code>, one file per question with its task, starter code and tests, and the reference solutions). Adding one needs a copy of the project on your computer, so if you are only using the published page, first <b>clone the repo</b> (<code>git clone https://github.com/martin-jin/practice-questions.git</code>, then <code>cd app</code> and <code>npm install</code>; Node and a C++ compiler are needed to run it locally). Then copy <code>templates/example-set</code> (or <code>sets/sample</code>), edit it, then refresh the page if the local server is running (<code>app/start.ps1</code>), or run <code>npm run build</code> in the <code>app</code> folder. To share a set, send its folder. See the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext> (sections 2 and 3) and the <Ext href={`${DOCS}/question-format.md`}>question format</Ext>. An agent can write the questions for you from that format.</p>
         <p className="muted">Alt+T hides the task, Alt+O the output, Ctrl+P searches, Alt+K opens the command palette. The <b>?</b> or the three-dot menu lists every shortcut.</p>
       </>
     ),
@@ -125,7 +125,7 @@ const highlights = typeof CSS !== 'undefined' && CSS.highlights && typeof Highli
 
 // The tutorial tab: the sections, with an index at the top of the page, a search in the window's footer (portalled there), and a column of dots at the right edge, one per
 // section, where the section being read shows its name beside its dot and the others shrink to a dot.
-function Tutorial({ findRef, slot }) {
+function Tutorial({ findRef, slot, section }) {
   const scroller = useRef(null);
   const content = useRef(null);
   const ranges = useRef([]);
@@ -139,6 +139,24 @@ function Tutorial({ findRef, slot }) {
     const id = setTimeout(() => setSay(false), 1500);
     return () => clearTimeout(id);
   }, [active]);
+
+  // Opened from a link elsewhere in the app: start at that section.
+  useEffect(() => {
+    const box = scroller.current;
+    const el = box && box.querySelector(`#tut-${section}`);
+    if (!el) return undefined;
+    // The screenshots above it load late and push it down, so stay on it until the reader scrolls.
+    let hold = true;
+    const align = () => { if (hold) box.scrollTop = el.offsetTop - 6; };
+    const release = () => { hold = false; };
+    align();
+    el.classList.add('flash');
+    box.addEventListener('load', align, true);
+    box.addEventListener('wheel', release, { once: true });
+    box.addEventListener('pointerdown', release, { once: true });
+    box.addEventListener('keydown', release, { once: true });
+    return () => box.removeEventListener('load', align, true);
+  }, []);
 
   const onScroll = () => {
     const box = scroller.current;
@@ -259,7 +277,7 @@ function Changelog() {
 }
 
 // The welcome window: a tutorial tab and a change log tab, about half the screen, in the middle.
-export function Welcome({ tab: first, close }) {
+export function Welcome({ tab: first, section, close }) {
   const [tab, setTab] = useState(first);
   const findRef = useRef(null);
   const [slot, setSlot] = useState(null);   // the footer's left side, where the tutorial puts its search
@@ -278,13 +296,13 @@ export function Welcome({ tab: first, close }) {
           <button type="button" role="tab" className="tab" aria-selected={tab === 'tutorial'} onClick={() => setTab('tutorial')}>Tutorial</button>
           <button type="button" role="tab" className="tab" aria-selected={tab === 'changelog'} onClick={() => setTab('changelog')}>What's new</button>
         </div>
-        {tab === 'tutorial' ? <Tutorial findRef={findRef} slot={slot} /> : <Changelog />}
+        {tab === 'tutorial' ? <Tutorial findRef={findRef} slot={slot} section={section} /> : <Changelog />}
       </div>
     </Modal>
   );
 }
 
-export const openWelcome = (open, tab = 'tutorial') => open(({ close }) => <Welcome tab={tab} close={close} />);
+export const openWelcome = (open, tab = 'tutorial', section) => open(({ close }) => <Welcome tab={tab} section={section} close={close} />);
 
 // Opens the window when this version has not been shown here yet: on the tutorial for a first visit, on the change log after
 // an update. Recorded as soon as it opens, so a reload does not show it again.

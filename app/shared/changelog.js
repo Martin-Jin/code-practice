@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.72';
+export const VERSION = '1.73';
 
 export const CHANGELOG = [
+  {
+    version: '1.73', date: '2026-10-29', title: 'The add-questions help opens the tutorial',
+    items: [
+      'The How to add questions button under Your library now opens the tutorial at its Add your own questions section, instead of a second, separate guide that repeated it.',
+      'The tutorial now says that adding coding questions needs a copy of the project on your computer (clone it from GitHub), and how.',
+    ],
+  },
   {
     version: '1.72', date: '2026-10-29', title: 'Drag and shift-click to choose sets, and fixes',
     items: [
@@ -34,12 +41,6 @@ export const CHANGELOG = [
       'Delete question set is in the command palette (Alt+K): type the set and it asks before deleting.',
       'A new logo and tab icon, and the How to add questions button now sits under the storage note.',
       'The tutorial has a welcome title and a clearer first section, its search moved to the bottom bar, and there is more room for the scroll bar.',
-    ],
-  },
-  {
-    version: '1.68', date: '2026-10-29', title: "Renamed to Can'tviz quizzes",
-    items: [
-      "The app is now called Can'tviz quizzes: in the browser tab, the top bar, the welcome window and the backup messages. Your saved progress and backups are unaffected.",
     ],
   },
 ];
