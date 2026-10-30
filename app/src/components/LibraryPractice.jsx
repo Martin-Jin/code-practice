@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
 import { LIB_MODE_LABELS } from '../../shared/librarymodes.js';
-import { splitProblem } from '../../shared/modes.js';
+import { capQuestionCount, splitProblem } from '../../shared/modes.js';
 import { createLibRun, deleteLibRun, runStatus, getProgress } from '../lib/practice.js';
 import { useDialogs } from './Dialogs.jsx';
-import { toast } from './Toasts.jsx';
+import { toast, validationError } from './Toasts.jsx';
 import { backupNote } from '../lib/backup.js';
 
 const MODES = ['all', 'random', 'sections', 'difficult', 'unseen', 'wrong'];
@@ -32,15 +32,17 @@ export function LibraryPracticePicker({ set }) {
   const pool = set.manifest.questions.filter((q) => (!sections.length || sections.includes(q.section))
     && !(hideCompleted && ((getProgress(set.id, q.uid) || {}).right > 0)));
   const groups = new Set(pool.map((q) => q.section)).size;
-  const n = Math.floor(Number(count) || 0);
+  const n = capQuestionCount(count, pool.length);
   const splitError = split && n >= 1 && n < pool.length ? splitProblem(groups, pool.length, n, 'section') : null;
   const toggle = (s) => setSections((list) => (list.includes(s) ? list.filter((x) => x !== s) : [...list, s]));
 
   const start = async () => {
+    if (mode === 'random' && n < 1) return validationError('Choose how many questions you want.');
+    if (mode === 'random' && splitError) return validationError(splitError);
     const name = await prompt({ title: 'Start session', label: 'Session name (optional)', placeholder: 'Leave blank for an automatic name', confirmText: 'Start' });
     if (name === null) return;
     try {
-      const run = createLibRun({ setId: set.id, mode, options: { count: Number(count), sections, split, hideCompleted }, name });
+      const run = createLibRun({ setId: set.id, mode, options: { count: n, sections, split, hideCompleted }, name });
       window.location.hash = `#/practice/${run.id}`;
     } catch (e) {
       toast(e.message, 'bad');
@@ -57,14 +59,13 @@ export function LibraryPracticePicker({ set }) {
         <div className="m-opts">
           <div className="row">
             <label htmlFor="lib-count">Number of questions</label>
-            <input id="lib-count" type="number" min="1" value={count} onChange={(e) => setCount(e.target.value)} style={{ width: 80 }} />
+            <input id="lib-count" type="number" min="1" max={pool.length} required value={n} onChange={(e) => setCount(e.target.value)} style={{ width: 80 }} />
             <span className="muted">of {plural(pool.length, 'available question')}</span>
           </div>
           <label className="check">
             <input type="checkbox" checked={split} onChange={(e) => setSplit(e.target.checked)} />
             Split evenly across sections ({plural(groups, 'section')} in the pool)
           </label>
-          {split && splitError && <span className="muted" role="alert" style={{ color: 'var(--bad, #c0392b)' }}>{splitError}</span>}
           {split && !splitError && n >= 1 && (
             <span className="muted">{n >= pool.length ? 'That is every question, so this runs as All questions.' : `${n / groups} from each section, chosen at random.`}</span>
           )}
@@ -143,4 +144,3 @@ export function LibRunRow({ run, showSet = true }) {
     </div>
   );
 }
-

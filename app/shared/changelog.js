@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.85';
+export const VERSION = '1.87';
 
 export const CHANGELOG = [
+  {
+    version: '1.87', date: '2026-10-30', title: 'Question counts and validation messages',
+    items: [
+      'Random mode now starts with no more questions than are available in the pool, for both coding and imported sets.',
+      'Invalid fields and form entries now use consistent error pop-ups that fade away.',
+    ],
+  },
   {
     version: '1.85', date: '2026-10-30', title: 'Fixes to the I got it / Not quite buttons',
     items: [
@@ -34,12 +41,6 @@ export const CHANGELOG = [
       'On an imported question, Previous and Next and the I got it / Not quite buttons moved to the side panel under Notes, with the shortcut hints beneath them, so the question card no longer needs extra height.',
       'The question column is wider, so the question image shows larger.',
       'The question title is smaller and kept to one line; a longer title slides along to show the rest when you hover or focus it, and can be scrolled by hand.',
-    ],
-  },
-  {
-    version: '1.81', date: '2026-10-30', title: 'The formula sheet sits flush under the top bar',
-    items: [
-      'The formula sheet now starts exactly under the top bar (no gap, even when the bar wraps on a narrow or zoomed window) and fills the page down to the bottom, still opening over the question.',
     ],
   },
 ];

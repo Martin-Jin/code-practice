@@ -363,7 +363,9 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 .modal .m-foot { padding: 12px 22px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
 #toasts { position: fixed; right: 16px; bottom: 16px; z-index: 100; display: grid; gap: 8px; }
 .toast { padding: 10px 14px; border-radius: 8px; background: var(--text); color: var(--bg); box-shadow: var(--shadow); max-width: 380px; }
-.toast.bad { background: var(--bad); color: var(--status-ink); }
+.toast.bad { background: var(--bad); color: var(--status-ink); animation: toast-dismiss 5.2s ease forwards; }
+@keyframes toast-dismiss { 0%, 84% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .toast.bad { animation: none; } }
 
 /* end screen */
 .finish { position: fixed; inset: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 20px; overflow: auto; }

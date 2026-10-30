@@ -3,7 +3,7 @@ import { saveEdit } from '../lib/practice.js';
 import { canSync, replaceInPdf } from '../lib/pdfsync.js';
 import { Modal } from './Dialogs.jsx';
 import { ImagePicker } from './AddQuestion.jsx';
-import { toast } from './Toasts.jsx';
+import { toast, validationError } from './Toasts.jsx';
 
 // Edit mode: change a question's title, wording or image, or its solution's text or image. The change is kept as
 // the user's own correction (and is part of a backup). For a question in a PDF the app indexed, it can also be
@@ -28,8 +28,16 @@ export default function EditContent({ set, question, what, close }) {
     try {
       const before = (stem ? question.stem.text : question.solution && question.solution.text) || '';
       const wordingChanged = text !== before;
-      if (!image && !wordingChanged && !boxChanged && !(stem && title.trim() !== question.title)) throw new Error('Nothing has changed.');
-      if (toPdf && !image && !wordingChanged) throw new Error('Nothing to write into the PDF: change the wording or choose an image.');
+      if (!image && !wordingChanged && !boxChanged && !(stem && title.trim() !== question.title)) {
+        validationError('Nothing has changed.');
+        setBusy(false);
+        return;
+      }
+      if (toPdf && !image && !wordingChanged) {
+        validationError('Nothing to write into the PDF: change the wording or choose an image.');
+        setBusy(false);
+        return;
+      }
       const edit = stem ? { ...(wordingChanged ? { stemText: text } : {}), ...(image ? { stemImage: image } : {}), ...(boxChanged ? { stemBox: box } : {}), ...(title.trim() && title.trim() !== question.title ? { title: title.trim() } : {}) } : { ...(wordingChanged ? { solutionText: text } : {}), ...(image ? { solutionImage: image } : {}) };
       if (toPdf) {
         const { written } = await replaceInPdf(set.id, question, what, image ? { image } : { text });

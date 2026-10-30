@@ -4,6 +4,9 @@ import { weightedSample } from './weights.js';
 export const MODES = ['practice', 'random', 'topic', 'all', 'custom'];
 export const MODE_LABELS = { practice: 'Practice test', random: 'Random', topic: 'By topic', all: 'All questions', custom: 'Single question' };
 
+export const capQuestionCount = (count, maximum) =>
+  Math.min(Math.max(0, Math.floor(Number(count) || 0)), Math.max(0, Math.floor(Number(maximum) || 0)));
+
 function shuffle(arr, rng) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {

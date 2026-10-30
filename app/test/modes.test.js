@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildCatalog } from '../server/catalog.js';
-import { pickQuestions, practiceSize } from '../shared/modes.js';
+import { capQuestionCount, pickQuestions, practiceSize } from '../shared/modes.js';
 
 const catalog = buildCatalog();
 const set = catalog.sets.find((s) => s.id === 'sample');   // a local, gitignored set may sit in sets/ too
@@ -9,6 +9,12 @@ const category = (n) => set.categories.find((c) => c.questions.includes(n));
 
 // Deterministic generator so failures are reproducible.
 const seeded = (seed) => () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+
+test('default question count never exceeds the available pool', () => {
+  assert.equal(capQuestionCount(10, 5), 5);
+  assert.equal(capQuestionCount(5, 12), 5);
+  assert.equal(capQuestionCount(5, 0), 0);
+});
 
 test('every question in the manifest exists in the catalog', () => {
   for (const c of set.categories) for (const n of c.questions) assert.ok(catalog.questions[set.id][n], `Q${n}`);

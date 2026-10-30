@@ -5,7 +5,7 @@ import { addToImportedSet } from '../lib/library.js';
 import { canSync, addQuestionToPdf } from '../lib/pdfsync.js';
 import { Modal } from './Dialogs.jsx';
 import { PartsEditor, blankDrafts, partsOf } from './Parts.jsx';
-import { toast } from './Toasts.jsx';
+import { toast, validationError } from './Toasts.jsx';
 import TagInput, { knownTags } from './TagInput.jsx';
 
 const MAX_WIDTH = 1400;   // stored images are scaled down to this width
@@ -172,12 +172,12 @@ export default function AddQuestionDialog({ close, setId }) {
 
   const save = async () => {
     setError('');
-    if (!named) return setError('Say which set the question belongs to. A name that is not in the list makes a new set.');
-    if (!title.trim()) return setError('Give the question a title, like "Rigid body kinetics - mass of a slender-rod assembly".');
-    if (!section.trim()) return setError('Choose or type a section.');
-    if (!wording.trim() && !stemImage) return setError('Add the question as an image or as typed wording.');
+    if (!named) return validationError('Say which set the question belongs to. A name that is not in the list makes a new set.');
+    if (!title.trim()) return validationError('Give the question a title, like "Rigid body kinetics - mass of a slender-rod assembly".');
+    if (!section.trim()) return validationError('Choose or type a section.');
+    if (!wording.trim() && !stemImage) return validationError('Add the question as an image or as typed wording.');
     let list;
-    try { list = partsOf(parts); } catch (e) { return setError(e.message); }
+    try { list = partsOf(parts); } catch (e) { return validationError(e.message); }
     const images = {};
     const stem = {};
     if (wording.trim()) stem.text = wording.trim();

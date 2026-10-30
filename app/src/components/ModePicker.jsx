@@ -1,4 +1,4 @@
-import { eligibleCategories, practiceSize, splitProblem, MODE_LABELS } from '../../shared/modes.js';
+import { capQuestionCount, eligibleCategories, practiceSize, splitProblem, MODE_LABELS } from '../../shared/modes.js';
 import { plural } from '../lib/format.js';
 import { statsFor } from '../lib/service.js';
 
@@ -23,8 +23,7 @@ export default function ModePicker({ set, value, onChange }) {
   const openCats = (cats) => cats.map((c) => ({ ...c, questions: c.questions.filter((n) => !isDone(n)) })).filter((c) => c.questions.length);
   const pool = openCats(eligibleCategories(set, options));
   const total = sum(pool);
-  const count = Math.floor(Number(options.count) || 0);
-  const splitError = options.split && count >= 1 && count < total ? splitProblem(pool.length, total, count) : null;
+  const count = capQuestionCount(options.count, total);
   const hasRevision = set.categories.some((c) => c.group === 'revision');
   const hasExtra = set.categories.some((c) => c.group === 'extra');
 
@@ -76,15 +75,14 @@ export default function ModePicker({ set, value, onChange }) {
         <>
           <div className="row">
             <label htmlFor="rand-count">Number of questions</label>
-            <input id="rand-count" type="number" min="1" max={total} value={options.count}
-              aria-invalid={!!splitError} onChange={(e) => setOpt({ count: e.target.value })} />
+            <input id="rand-count" type="number" min="1" max={total} required value={count}
+              onChange={(e) => setOpt({ count: e.target.value })} />
             <span className="muted">of {plural(total, 'available question')}</span>
           </div>
           <label className="check">
             <input type="checkbox" checked={options.split} onChange={(e) => setOpt({ split: e.target.checked })} />
             Split evenly across topics ({plural(pool.length, 'topic')} in the pool)
           </label>
-          {options.split && splitError && <span className="muted" role="alert" style={{ color: 'var(--bad, #c0392b)' }}>{splitError}</span>}
           {options.split && !splitError && count >= 1 && (
             <span className="muted">
               {count >= total ? `That is every question, so this runs as All questions.` : `${count / pool.length} from each topic, chosen at random.`}

@@ -4,6 +4,7 @@ import { questionProblems } from '../../shared/questionset.js';
 import { Markup } from './Question.jsx';
 import Icon from './Icon.jsx';
 import TagInput from './TagInput.jsx';
+import { validationError } from './Toasts.jsx';
 
 const SUPERSCRIPT = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
 // "m/s^2" is shown as "m/s²".
@@ -205,17 +206,15 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices
   const [parts, setParts] = useState(() => question.parts.map(toDraft));
   const [marks, setMarks] = useState(question.marks === null ? '' : String(question.marks));
   const [tags, setTags] = useState(question.tags.join(', '));
-  const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
   const change = (fn) => { setSaved(false); fn(); };
   const save = () => {
     let list;
-    try { list = parts.map(fromDraft); } catch (e) { setError(e.message); return; }
+    try { list = parts.map(fromDraft); } catch (e) { validationError(e.message); return; }
     const edit = { parts: list, marks: marks.trim() === '' ? null : Number(marks), tags: tags.split(',').map((t) => t.trim()).filter(Boolean) };
     const problems = questionProblems({ ...question, ...edit });
-    if (problems.length) { setError(`${problems[0][0].toUpperCase()}${problems[0].slice(1)}.`); return; }
-    setError('');
+    if (problems.length) { validationError(`${problems[0][0].toUpperCase()}${problems[0].slice(1)}.`); return; }
     onSave(edit);
     setSaved(true);
   };
@@ -228,7 +227,6 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices
         <label className="field">Marks <input type="number" className="line" min="0" step="any" value={marks} style={{ width: 70 }} onChange={(e) => change(() => setMarks(e.target.value))} /></label>
         <label className="field grow">Tags <TagInput className="line" value={tags} tags={tagChoices} placeholder="comma separated" style={{ width: '100%' }} onChange={(v) => change(() => setTags(v))} /></label>
       </div>
-      {error && <div className="notice" role="alert">{error}</div>}
       <div className="row">
         <button type="button" className="btn primary" onClick={save}>Save</button>
         {edited && <button type="button" className="btn ghost" onClick={onRevert}>Revert</button>}
@@ -237,4 +235,3 @@ export function AnswerKeyEditor({ question, edited, onSave, onRevert, tagChoices
     </div>
   );
 }
-

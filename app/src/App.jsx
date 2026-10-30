@@ -4,7 +4,8 @@ import { boot } from './lib/service.js';
 import { flushPracticeSaves } from './lib/practice.js';
 import useTheme from './components/useTheme.js';
 import { DialogProvider } from './components/Dialogs.jsx';
-import ToastHost from './components/Toasts.jsx';
+import ToastHost, { validationError } from './components/Toasts.jsx';
+import { inputValidationMessage } from '../shared/validation.js';
 import CommandPalette from './components/CommandPalette.jsx';
 import { WelcomeOnStart } from './components/Welcome.jsx';
 import Dashboard from './views/Dashboard.jsx';
@@ -48,6 +49,29 @@ export default function App() {
   const st = useStore();
   const theme = useTheme();
   useEffect(() => { boot(); }, []);
+  useEffect(() => {
+    const reported = new WeakMap();
+    const onFieldChange = (event) => {
+      const field = event.target;
+      if (!field || !field.validity) return;
+      if (field.validity.valid) {
+        reported.delete(field);
+        return;
+      }
+      const message = inputValidationMessage(field);
+      if (message && reported.get(field) !== message) {
+        reported.set(field, message);
+        validationError(message);
+      }
+    };
+    const onInvalid = (event) => onFieldChange(event);
+    document.addEventListener('input', onFieldChange, true);
+    document.addEventListener('invalid', onInvalid, true);
+    return () => {
+      document.removeEventListener('input', onFieldChange, true);
+      document.removeEventListener('invalid', onInvalid, true);
+    };
+  }, []);
   // Answers are saved a moment after typing; make sure none is lost when the tab closes.
   useEffect(() => {
     window.addEventListener('pagehide', flushPracticeSaves);
