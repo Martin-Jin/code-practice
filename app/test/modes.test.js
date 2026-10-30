@@ -116,3 +116,15 @@ test('ticked topics narrow random, all and the flagged modes', () => {
   assert.deepEqual(pickQuestions(set, 'difficult', { categories: [cat.id], difficult: cat.questions.concat(-1) }), [...cat.questions]);
   assert.equal(pickQuestions(set, 'random', { categories: [cat.id], count: 99 }).length, cat.questions.length);
 });
+
+test('random custom mix draws the chosen number from each ticked topic', () => {
+  const mk = (id, qs) => ({ id, group: 'core', questions: qs });
+  const fake = { categories: [mk('a', [1, 2, 3, 4]), mk('b', [5, 6, 7]), mk('c', [8, 9])] };
+  for (let seed = 1; seed <= 20; seed++) {
+    const picked = pickQuestions(fake, 'random', { categories: ['a', 'c'], perTopic: { a: 2, b: 3, c: 9 } }, seeded(seed));
+    assert.equal(picked.filter((n) => [1, 2, 3, 4].includes(n)).length, 2);
+    assert.equal(picked.filter((n) => [8, 9].includes(n)).length, 2, 'all it has');
+    assert.ok(!picked.some((n) => [5, 6, 7].includes(n)), 'an unticked topic is left out');
+  }
+  assert.throws(() => pickQuestions(fake, 'random', { perTopic: { a: 0 } }), /at least one topic/);
+});

@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.00';
+export const VERSION = '2.01';
 
 export const CHANGELOG = [
+  {
+    version: '2.01', date: '2026-10-31', title: 'Customise a run by topic',
+    items: [
+      'A button beside the Practice mode dropdown opens a window listing every topic (or section): choose which to include and, for Random, how many questions from each. It replaces the topic tick boxes, and coding sets and imported sets now share the same layout, with the topic list beside the picker.',
+      'The page location (for example / Question sets / Folder / This set) now sits above the page title instead of in the top bar. Run rows no longer wrap their progress text.',
+    ],
+  },
   {
     version: '2.00', date: '2026-10-31', title: 'Practice mode dropdown everywhere',
     items: [
@@ -28,12 +35,6 @@ export const CHANGELOG = [
     version: '1.97', date: '2026-10-31', title: 'Same practice modes for coding questions',
     items: [
       'Coding sets now offer the same modes as imported sets: Marked difficult, Not seen yet and Not right last time, alongside Practice test, Random, By topic and All. Tick topics to limit Random, All and those modes to them. Mark a question as difficult from its Task tab. Split evenly no longer fails when ticked.',
-    ],
-  },
-  {
-    version: '1.96', date: '2026-10-30', title: 'Practise folders as combined sets',
-    items: [
-      'Practise a whole library folder, or every set at the root, with the same mode cards and session controls as an individual set. Practice-mode selection now uses consistent cards throughout.',
     ],
   },
 ];

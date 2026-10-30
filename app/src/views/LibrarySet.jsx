@@ -241,13 +241,25 @@ export default function LibrarySet({ setId, theme }) {
       </div>
 
       {canSync(record) && <PdfBar record={record} />}
-      <LibraryPracticePicker set={record} />
-      {runs.length > 0 && (
+      <div className="two-col">
+        <LibraryPracticePicker set={record} />
         <section>
           <div className="section-title"><h2>Your sessions in this set</h2><span className="muted">{runs.length}</span></div>
-          <div className="run-list">{runs.map((r) => <LibRunRow key={r.id} run={r} showSet={false} />)}</div>
+          {runs.length === 0
+            ? <div className="empty">No sessions yet. Choose a mode and press Start.</div>
+            : <div className="run-list">{runs.map((r) => <LibRunRow key={r.id} run={r} showSet={false} />)}</div>}
+
+          <div className="section-title" style={{ marginTop: 28 }}><h2>Sections</h2></div>
+          <div className="card pad" style={{ display: 'grid', gap: 6 }}>
+            {sections.map((s) => (
+              <div key={s.name} className="row" style={{ justifyContent: 'space-between' }}>
+                <span>{s.name}</span>
+                <span className="muted">{plural(s.questions.length, 'question')}</span>
+              </div>
+            ))}
+          </div>
         </section>
-      )}
+      </div>
 
       {sections.length > 0 && (
         <div className="section-title set-heading"><h2>Questions in this set</h2><span className="muted">{questions.length}</span></div>

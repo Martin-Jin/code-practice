@@ -7,6 +7,8 @@ import { createLibRun, deleteLibRun, runStatus, getQuestionProgress, libraryRunS
 import { useDialogs } from './Dialogs.jsx';
 import { toast, validationError } from './Toasts.jsx';
 import { backupNote } from '../lib/backup.js';
+import Icon from './Icon.jsx';
+import TopicDialog from './TopicDialog.jsx';
 
 const MODES = ['random', 'sections', 'difficult', 'unseen', 'wrong', 'all'];
 const DESC = {
@@ -26,6 +28,8 @@ export function LibraryPracticePicker({ set }) {
   const [sections, setSections] = useState([]);
   const [split, setSplit] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
+  const [perSection, setPerSection] = useState(null);   // a custom mix: { section: how many }, Random only
+  const [customising, setCustomising] = useState(false);
   const { prompt } = useDialogs();
   const names = [...new Set(set.manifest.questions.map((q) => q.section))];
   // The pool a Random run draws from, as the picker shows it: the ticked sections, minus completed questions if asked.
@@ -34,18 +38,22 @@ export function LibraryPracticePicker({ set }) {
   const groups = new Set(pool.map((q) => q.section)).size;
   const n = capQuestionCount(count, pool.length);
   const splitError = split && n >= 1 && n < pool.length ? splitProblem(groups, pool.length, n, 'section') : null;
-  const toggle = (s) => setSections((list) => (list.includes(s) ? list.filter((x) => x !== s) : [...list, s]));
+  const done = (q) => hideCompleted && ((getQuestionProgress(set.id, q) || {}).right > 0);
+  const topics = names.map((s) => ({ id: s, name: s, available: set.manifest.questions.filter((q) => q.section === s && !done(q)).length }));
+  const mix = mode === 'random' && perSection ? pool.reduce((m, q) => ({ ...m, [q.section]: (m[q.section] || 0) + 1 }), {}) : null;
+  const mixCounts = mix ? Object.entries(mix).map(([s, avail]) => Math.min(Number(perSection[s]) || 0, avail)).filter((k) => k > 0) : [];
 
   const start = async () => {
-    if (mode === 'random' && n < 1) return validationError('Choose how many questions you want.');
-    if (mode === 'random' && splitError) return validationError(splitError);
+    const custom = mode === 'random' && perSection;
+    if (mode === 'random' && !custom && n < 1) return validationError('Choose how many questions you want.');
+    if (mode === 'random' && !custom && splitError) return validationError(splitError);
     const name = await prompt({ title: 'Start session', label: 'Session name (optional)', placeholder: 'Leave blank for an automatic name', confirmText: 'Start' });
     if (name === null) return;
     try {
       const run = createLibRun({
         setId: set.id,
         ...(set.folderRun ? { folderId: set.folderId, sourceSetIds: set.sourceSetIds } : {}),
-        mode, options: { count: n, sections, split, hideCompleted }, name,
+        mode, options: { count: n, sections, split, hideCompleted, ...(custom ? { perSection } : {}) }, name,
       });
       window.location.hash = `#/practice/${run.id}`;
     } catch (e) {
@@ -61,27 +69,35 @@ export function LibraryPracticePicker({ set }) {
       </div>
       {mode === id && id === 'random' && (
         <div className="m-opts">
-          <div className="row">
-            <label htmlFor="lib-count">Number of questions</label>
-            <input id="lib-count" type="number" min="1" max={pool.length} required value={n} onChange={(e) => setCount(e.target.value)} style={{ width: 80 }} />
-            <span className="muted">of {plural(pool.length, 'available question')}</span>
-          </div>
-          <label className="check">
-            <input type="checkbox" checked={split} onChange={(e) => setSplit(e.target.checked)} />
-            Split evenly across sections ({plural(groups, 'section')} in the pool)
-          </label>
-          {split && !splitError && n >= 1 && (
-            <span className="muted">{n >= pool.length ? 'That is every question, so this runs as All questions.' : `${n / groups} from each section, chosen at random.`}</span>
+          {mix ? (
+            <div className="row">
+              <span>Custom mix: {plural(mixCounts.reduce((t, k) => t + k, 0), 'question')} from {plural(mixCounts.length, 'section')}</span>
+              <button type="button" className="btn ghost sm" onClick={() => setPerSection(null)}>Back to a single count</button>
+            </div>
+          ) : (
+            <>
+              <div className="row">
+                <label htmlFor="lib-count">Number of questions</label>
+                <input id="lib-count" type="number" min="1" max={pool.length} required value={n} onChange={(e) => setCount(e.target.value)} style={{ width: 80 }} />
+                <span className="muted">of {plural(pool.length, 'available question')}</span>
+              </div>
+              <label className="check">
+                <input type="checkbox" checked={split} onChange={(e) => setSplit(e.target.checked)} />
+                Split evenly across sections ({plural(groups, 'section')} in the pool)
+              </label>
+              {split && !splitError && n >= 1 && (
+                <span className="muted">{n >= pool.length ? 'That is every question, so this runs as All questions.' : `${n / groups} from each section, chosen at random.`}</span>
+              )}
+            </>
           )}
         </div>
       )}
-      {mode === id && (id === 'random' || id === 'sections' || id === 'all') && names.length > 1 && (
+      {mode === id && names.length > 1 && (
         <div className="m-opts">
-          <span className="muted">{id === 'sections' ? 'Sections' : 'Only from these sections (none ticked means all)'}</span>
-          <div className="topic-list">
-            {names.map((s) => (
-              <label className="check" key={s}><input type="checkbox" checked={sections.includes(s)} onChange={() => toggle(s)} /> {s}</label>
-            ))}
+          <div className="row">
+            <span className="muted">{sections.length ? `${plural(sections.length, 'section')} chosen` : id === 'sections' ? 'No sections chosen yet' : 'All sections'}</span>
+            <button type="button" className="btn sm" onClick={() => setCustomising(true)}>Choose sections…</button>
+            {sections.length > 0 && <button type="button" className="btn ghost sm" onClick={() => { setSections([]); setPerSection(null); }}>Clear</button>}
           </div>
         </div>
       )}
@@ -92,6 +108,11 @@ export function LibraryPracticePicker({ set }) {
     <section>
       <div className="section-title"><h2>Practise</h2>{st.prioritise && <span className="chip accent">Drawing hard questions more often</span>}</div>
       <div className="row" style={{ marginBottom: 10 }}>
+        {names.length > 1 && (
+          <button type="button" className="btn icon-only" onClick={() => setCustomising(true)} title="Customise by section: choose the sections, and how many questions from each" aria-label="Customise by section">
+            <Icon name="tune" />
+          </button>
+        )}
         <label htmlFor="lib-mode">Practice mode</label>
         <select id="lib-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
           {MODES.map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
@@ -103,6 +124,17 @@ export function LibraryPracticePicker({ set }) {
         <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
         Leave out completed questions (ones you have got right at least once)
       </label>
+      {customising && (
+        <TopicDialog
+          title="Customise by section" topics={topics} selected={sections} counts={perSection} withCounts={mode === 'random'}
+          onClose={(result) => {
+            setCustomising(false);
+            if (!result) return;
+            setSections(result.selected);
+            if (mode === 'random') setPerSection(result.counts);
+          }}
+        />
+      )}
     </section>
   );
 }

@@ -58,6 +58,8 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
     categories: Array.isArray(options.categories) ? options.categories : [],
     questions: Array.isArray(options.questions) ? options.questions.map(Number) : [],
     split: !!options.split,
+    // A custom mix: { categoryId: how many } drawn from each ticked topic, in place of count and split.
+    perTopic: options.perTopic && typeof options.perTopic === 'object' ? options.perTopic : null,
   };
   // Questions already marked correct once; left out of every pool when "hide completed" is on.
   const done = new Set(options.hideCompleted && Array.isArray(options.completed) ? options.completed.map(Number) : []);
@@ -78,6 +80,12 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
     for (const cat of shuffle(pickable, rng).slice(0, bp.pick.count)) {
       picked.push(...draw(open(cat.questions), 1, rng, weight));
     }
+  } else if (mode === 'random' && opts.perTopic) {
+    for (const c of poolCategories(set, opts)) {
+      const n = Math.floor(Number(opts.perTopic[c.id]) || 0);
+      if (n > 0) picked.push(...draw(open(c.questions), n, rng, weight));
+    }
+    if (!picked.length) throw new Error('Choose how many questions you want from at least one topic');
   } else if (mode === 'random') {
     const cats = poolCategories(set, opts).map((c) => open(c.questions)).filter((l) => l.length);
     const all = cats.flat();

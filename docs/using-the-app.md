@@ -63,8 +63,8 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 
 - **Practice test:** a short mixed paper. For a set with a recipe it is a fixed few questions plus one from each of some topics chosen at random (the sample set's is one array question and one other). The recipe lives in `set.json` (`practice`), so each set defines its own.
 - **Random:** a random number of questions (you choose how many) from the assessed topics. Tick the boxes to also draw from quick revision or extra practice.
-- **By topic:** every question in the topics you tick.
-- **Marked difficult**, **Not seen yet** and **Not right last time:** the questions you flagged with **Mark as difficult** (on the Task tab), have not run yet, or whose last run did not pass. Random, All and these three take the same topic ticks to narrow the pool.
+- **By topic:** every question in the topics you choose. The **Customise by topic** button (the sliders icon left of the dropdown) opens a window to choose the topics and, for Random, how many questions from each. It is hidden for the Practice test, which has its own recipe.
+- **Marked difficult**, **Not seen yet** and **Not right last time:** the questions you flagged with **Mark as difficult** (on the Task tab), have not run yet, or whose last run did not pass. Random, All and these three take the same topic choice to narrow the pool.
 - **All questions:** the whole set. Quick revision and extra practice are off unless you tick them.
 
 ## Inside a run
@@ -94,7 +94,7 @@ Below 820 px wide the run screen shows one panel at a time, chosen from the bar 
 
 It works, but a phone is a cramped place to write C++: the on-screen keyboard covers most of the editor and brackets are awkward to reach. Expect to use it for reading tasks, checking results and light edits; use a laptop for real practice. Pane resizing and the keyboard shortcuts are desktop-only.
 
-On library-question pages, the top bar stays on one line. It scrolls long labels on hover or focus, hides parent-folder breadcrumbs when space is tight, and hides the whole path when there is not enough room to show even its first full word.
+The location of a page (for example `/ Question sets / Folder / This set`) is shown above its title, inside the page, rather than in the top bar. Parent folders are links.
 
 ## Your own question sets
 

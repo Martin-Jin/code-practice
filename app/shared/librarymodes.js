@@ -27,7 +27,7 @@ function shuffle(list, rng) {
   return a;
 }
 
-// Returns the uids for a session. options: { count, sections, split, hideCompleted }. progressOf(uid) gives the
+// Returns the uids for a session. options: { count, sections, split, hideCompleted, perSection }. progressOf(uid) gives the
 // progress record or null. weight(question) is optional: when given, Random draws the questions
 // with more trouble more often (see weights.js).
 export function pickLibraryQuestions(questions, progressOf, mode, options = {}, rng = Math.random, weight) {
@@ -42,10 +42,15 @@ export function pickLibraryQuestions(questions, progressOf, mode, options = {}, 
     picked = inSections;
   } else if (mode === 'random') {
     const count = Math.floor(Number(options.count) || 0);
-    if (count < 1) throw new Error('Choose how many questions you want');
     const draw = (list, n) => (weight ? weightedSample(list, weight, n, rng) : shuffle(list, rng).slice(0, n));
     const groups = [...new Set(inSections.map((q) => q.section))].map((sec) => inSections.filter((q) => q.section === sec));
-    if (options.split && count < inSections.length) {
+    const perSection = options.perSection && typeof options.perSection === 'object' ? options.perSection : null;
+    if (perSection) {
+      // A custom mix: { section: how many } from each ticked section, in place of count and split.
+      picked = groups.flatMap((g) => draw(g, Math.floor(Number(perSection[g[0].section]) || 0)));
+      if (!picked.length) throw new Error('Choose how many questions you want from at least one section');
+    } else if (count < 1) throw new Error('Choose how many questions you want');
+    else if (options.split && count < inSections.length) {
       const problem = splitProblem(groups.length, inSections.length, count, 'section');
       if (problem) throw new Error(problem);
       picked = groups.flatMap((g) => draw(g, count / groups.length));

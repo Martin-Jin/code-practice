@@ -121,6 +121,18 @@ test('library random: count, sections and weights', () => {
   assert.ok(withA > 200, `the weighted question came up ${withA} of 300 times`);
 });
 
+test('library random: a custom mix draws the chosen number from each section', () => {
+  const q = (uid, section) => ({ uid, section });
+  const list = [q('a', 'S1'), q('b', 'S1'), q('c', 'S1'), q('d', 'S2'), q('e', 'S2'), q('f', 'S3')];
+  const none = () => null;
+  for (let seed = 1; seed <= 20; seed++) {
+    const p = pickLibraryQuestions(list, none, 'random', { perSection: { S1: 2, S3: 5 } }, seeded(seed));
+    assert.deepEqual(p.map((u) => list.find((x) => x.uid === u).section).sort(), ['S1', 'S1', 'S3'], 'S2 has no count, S3 gives all it has');
+  }
+  assert.deepEqual(pickLibraryQuestions(list, none, 'random', { perSection: { S1: 3, S2: 1 }, sections: ['S2'] }).length, 1, 'ticked sections limit the mix');
+  assert.throws(() => pickLibraryQuestions(list, none, 'random', { perSection: { S1: 0 } }), /at least one section/);
+});
+
 test('library random: split evenly across sections, and hide completed', () => {
   const q = (uid, section) => ({ uid, section });
   const list = [q('a', 'S1'), q('b', 'S1'), q('c', 'S1'), q('d', 'S2'), q('e', 'S2'), q('f', 'S3')];
