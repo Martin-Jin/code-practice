@@ -101,7 +101,7 @@ export function SettingsDialog({ close }) {
       <label className="field">AI chat website
         <input type="text" value={agentUrl} placeholder={DEFAULT_AGENT_URL} autoComplete="url" onChange={(e) => { setAgentUrl(e.target.value); setAgentUrlError(''); }} />
       </label>
-      <p className="muted">Solve with agent opens this HTTPS address and copies the question, your saved answers and notes. Nothing is sent until you paste it into the chat. The question image is copied when the browser supports it; otherwise attach it manually.</p>
+      <p className="muted">Solve with agent opens this HTTPS address and copies the question, your saved answers and notes. Use Try Claude Desktop below a solution to try the app instead. Nothing is sent until you paste it into the chat. The question image is copied when the browser supports it; otherwise attach it manually.</p>
       {agentUrlError && <div className="notice bad" role="alert">{agentUrlError}</div>}
       <button type="button" className="btn" onClick={saveAgentWebsite}>Save AI chat website</button>
       {!persistent && <div className="notice">This browser is not letting the page save data, so progress will be lost when you close the tab.</div>}

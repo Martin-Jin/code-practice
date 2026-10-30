@@ -15,7 +15,7 @@ import { sheetsOf } from '../lib/formulas.js';
 import { folderCrumbs } from '../lib/folders.js';
 import { copyText } from '../lib/clipboard.js';
 import { copyPromptAndImage, questionImage, readAgentUrl } from '../lib/solve-agent.js';
-import { formatSolvePrompt } from '../../shared/solve-agent.js';
+import { CLAUDE_DESKTOP_URL, formatSolvePrompt } from '../../shared/solve-agent.js';
 
 const loadFlag = (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true'; } catch { return fallback; } };
 const saveFlag = (key, value) => { try { localStorage.setItem(key, String(value)); } catch { /* storage blocked */ } };
@@ -292,6 +292,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
                 <Solution set={set} question={question} />
                 <div style={{ marginTop: 12 }}>
                   <a className="btn primary" href={readAgentUrl()} target="_blank" rel="noopener noreferrer" onClick={solveWithAgent}><Icon name="robot" /> Solve with agent</a>
+                  <a className="btn" href={CLAUDE_DESKTOP_URL} target="_blank" rel="noopener noreferrer" onClick={solveWithAgent} title="Try to open Claude Desktop, then paste with Ctrl+V"><Icon name="robot" /> Try Claude Desktop</a>
                 </div>
               </>
             )}

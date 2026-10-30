@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.90';
+export const VERSION = '1.91';
 
 export const CHANGELOG = [
+  {
+    version: '1.91', date: '2026-10-30', title: 'Try Claude Desktop',
+    items: [
+      'A separate button attempts to open Claude Desktop via its claude:// link and copies the question prompt to the clipboard. Paste it into the app with Ctrl+V; the browser website button remains available as a fallback.',
+    ],
+  },
   {
     version: '1.90', date: '2026-10-30', title: 'Question images copy in Firefox',
     items: [
@@ -31,13 +37,6 @@ export const CHANGELOG = [
     items: [
       'Random mode now starts with no more questions than are available in the pool, for both coding and imported sets.',
       'Invalid fields and form entries now use consistent error pop-ups that fade away.',
-    ],
-  },
-  {
-    version: '1.85', date: '2026-10-30', title: 'Fixes to the I got it / Not quite buttons',
-    items: [
-      'Saving an empty answer key no longer makes I got it / Not quite disappear: with no key, the question keeps its self-marked part.',
-      'Taking a mark back no longer shows the "Answer every part to check them all" message.',
     ],
   },
 ];

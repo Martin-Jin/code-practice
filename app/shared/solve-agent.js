@@ -1,4 +1,5 @@
 export const DEFAULT_AGENT_URL = 'https://claude.ai/new';
+export const CLAUDE_DESKTOP_URL = 'claude://';
 
 export function normaliseAgentUrl(value) {
   try {

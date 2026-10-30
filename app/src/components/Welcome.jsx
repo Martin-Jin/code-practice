@@ -67,11 +67,12 @@ const SECTIONS = [
     id: 'agent-help', title: 'Get hints from an AI agent',
     body: (
       <>
-        <p>On a question in <b>Your library</b>, choose <b>Solve with agent</b> to open your chosen AI chat website and copy a tutoring prompt with the question, your saved answers and notes. Claude is the default; change it in Settings if you prefer another site.</p>
+        <p>On a question in <b>Your library</b>, choose <b>Solve with agent</b> to open your chosen AI chat website and copy a tutoring prompt with the question, your saved answers and notes. Claude is the default; change it in Settings if you prefer another site. You can also try <b>Try Claude Desktop</b> to open the desktop app instead.</p>
         <ul>
           <li>Set the chat website in <b>Settings &gt; AI agent</b>. It must be an HTTPS address.</li>
           <li>Paste the copied prompt into the new chat. The prompt asks the agent to guide you with one hint at a time, and to ask for your working first if you have not included any.</li>
           <li>The app copies the question image with the prompt when the browser supports it, including Firefox. If the chat does not receive the image, attach it yourself.</li>
+          <li>The desktop option tries the <code>claude://</code> app link. Paste from the clipboard with <b>Ctrl+V</b> after Claude opens; browsers cannot paste into another app automatically. If Claude Desktop is not installed, use the website button.</li>
           <li>Opening a solution (or pressing <b>S</b>) first asks whether you have tried the question. Confirm once to skip the reminder for that question for the rest of the run; starting a new run asks again.</li>
         </ul>
         <p className="muted">The app does not send anything to the AI website. You choose what to paste and share; check that service's privacy terms before sending your work.</p>

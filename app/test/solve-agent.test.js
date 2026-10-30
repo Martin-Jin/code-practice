@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULT_AGENT_URL, formatSolvePrompt, normaliseAgentUrl } from '../shared/solve-agent.js';
+import { CLAUDE_DESKTOP_URL, DEFAULT_AGENT_URL, formatSolvePrompt, normaliseAgentUrl } from '../shared/solve-agent.js';
 
 const question = {
   title: 'Find the acceleration',
@@ -21,6 +21,7 @@ test('agent URLs must be HTTPS and cannot contain credentials', () => {
   assert.equal(normaliseAgentUrl('javascript:alert(1)'), null);
   assert.equal(normaliseAgentUrl('https://user:pass@chat.example'), null);
   assert.equal(DEFAULT_AGENT_URL, 'https://claude.ai/new');
+  assert.equal(CLAUDE_DESKTOP_URL, 'claude://');
 });
 
 test('the prompt includes the question and saved work but not the reference solution', () => {
