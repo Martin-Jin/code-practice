@@ -127,7 +127,7 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .top-tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
 .crumbs { display: flex; align-items: center; min-width: 0; max-width: 42vw; flex: 0 1 auto; overflow: hidden; white-space: nowrap; color: var(--muted); }
 .crumbs.path-hidden { display: none; }
-.crumb-group { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
+.crumb-group { display: flex; align-items: center; gap: 0; min-width: 0; flex: 0 1 auto; }
 .crumb-group.current { flex: 1 1 0; }
 .crumb-sep { flex: none; }
 .crumb-item { display: block; min-width: 0; max-width: 21vw; overflow: hidden; color: var(--muted); white-space: nowrap; }

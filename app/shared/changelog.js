@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.93';
+export const VERSION = '1.94';
 
 export const CHANGELOG = [
+  {
+    version: '1.94', date: '2026-10-30', title: 'Tighter location breadcrumbs',
+    items: [
+      'Folder paths in the top bar now sit directly between their slash separators, with no uneven spacing.',
+    ],
+  },
   {
     version: '1.93', date: '2026-10-30', title: 'Sharper formula sheets',
     items: [
@@ -28,14 +34,6 @@ export const CHANGELOG = [
     version: '1.90', date: '2026-10-30', title: 'Question images copy in Firefox',
     items: [
       'Solve with agent now starts the image clipboard write with the button click, so Firefox keeps permission while it prepares the image. SVG question images are converted through an image element when Firefox cannot decode them as a bitmap.',
-    ],
-  },
-  {
-    version: '1.89', date: '2026-10-30', title: 'Hints and solution reminders',
-    items: [
-      'Library questions can open your chosen HTTPS AI chat website (Claude by default) and copy a prompt with the question, saved answers and notes. The prompt asks for your working first when none is provided; attach the question image manually if clipboard image copy is unavailable.',
-      'The first time you open a solution for a question in a run, a short reminder asks whether you have attempted it. Confirm once to skip the reminder for that question in the rest of the run; a new run asks again. The S shortcut follows the same rule.',
-      'Formula-sheet PDFs now render inside the app, keeping shortcuts such as Alt+T available after clicking the page. The top bar stays on one line, hides path breadcrumbs when less than a full word fits, and keeps History available as an icon on small screens.',
     ],
   },
 ];
