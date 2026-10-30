@@ -39,32 +39,59 @@ function canvasBlob(canvas) {
   });
 }
 
+function loadImage(blob) {
+  const url = URL.createObjectURL(blob);
+  const image = new Image();
+  const loaded = new Promise((resolve, reject) => {
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('This browser could not decode the question image.'));
+  });
+  image.src = url;
+  return loaded.then(
+    (decoded) => ({ image: decoded, url }),
+    (error) => { URL.revokeObjectURL(url); throw error; },
+  );
+}
+
 async function asPng(blob) {
   if (blob.type === 'image/png') return blob;
-  if (typeof createImageBitmap !== 'function') throw new Error('This browser cannot prepare the image for the clipboard.');
-  const bitmap = await createImageBitmap(blob);
+  let bitmap;
+  let fallback;
   try {
-    const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(bitmap.width, bitmap.height));
+    if (typeof createImageBitmap === 'function') {
+      try { bitmap = await createImageBitmap(blob); } catch { fallback = await loadImage(blob); }
+    } else {
+      fallback = await loadImage(blob);
+    }
+    const source = bitmap || fallback.image;
+    const width = bitmap ? bitmap.width : fallback.image.naturalWidth;
+    const height = bitmap ? bitmap.height : fallback.image.naturalHeight;
+    if (!width || !height) throw new Error('This browser could not determine the question image size.');
+    const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(width, height));
     const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
     const context = canvas.getContext('2d');
     if (!context) throw new Error('This browser could not prepare the image for the clipboard.');
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    context.drawImage(source, 0, 0, canvas.width, canvas.height);
     return await canvasBlob(canvas);
   } finally {
-    bitmap.close();
+    bitmap?.close();
+    if (fallback) URL.revokeObjectURL(fallback.url);
   }
 }
 
-// ClipboardItem keeps the prompt and image together when supported. The caller has already
-// copied the text, so an unsupported image write still leaves a useful prompt on the clipboard.
-export async function copyPromptAndImage(prompt, image) {
+// Pass the pending image to ClipboardItem so write() starts during the button click. Firefox
+// requires that user activation for clipboard writes and image preparation may take a while.
+export function copyPromptAndImage(prompt, image) {
   if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function' || typeof ClipboardItem === 'undefined') return false;
-  const png = await asPng(image);
-  await navigator.clipboard.write([new ClipboardItem({
-    'text/plain': new Blob([prompt], { type: 'text/plain' }),
-    'image/png': png,
-  })]);
-  return true;
+  const png = Promise.resolve(image).then(asPng);
+  try {
+    return navigator.clipboard.write([new ClipboardItem({
+      'text/plain': new Blob([prompt], { type: 'text/plain' }),
+      'image/png': png,
+    })]).then(() => true);
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }

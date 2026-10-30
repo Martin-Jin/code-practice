@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.89';
+export const VERSION = '1.90';
 
 export const CHANGELOG = [
+  {
+    version: '1.90', date: '2026-10-30', title: 'Question images copy in Firefox',
+    items: [
+      'Solve with agent now starts the image clipboard write with the button click, so Firefox keeps permission while it prepares the image. SVG question images are converted through an image element when Firefox cannot decode them as a bitmap.',
+    ],
+  },
   {
     version: '1.89', date: '2026-10-30', title: 'Hints and solution reminders',
     items: [
@@ -32,13 +38,6 @@ export const CHANGELOG = [
     items: [
       'Saving an empty answer key no longer makes I got it / Not quite disappear: with no key, the question keeps its self-marked part.',
       'Taking a mark back no longer shows the "Answer every part to check them all" message.',
-    ],
-  },
-  {
-    version: '1.84', date: '2026-10-30', title: 'I got it / Not quite toggle, and no needless Reset',
-    items: [
-      'I got it and Not quite are now a toggle: pressing the other one swaps the mark, and pressing the same one takes it back, with the right and not right counts following, so a question can no longer be counted twice in one session. A new session starts with both unpressed.',
-      'Reset only shows when there is a typed or chosen answer to clear, not for a question that is only marked I got it / Not quite.',
     ],
   },
 ];

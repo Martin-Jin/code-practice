@@ -145,31 +145,31 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const toggleDifficult = () => setDifficult(setId, uid, !(progress && progress.difficult));
   const solveWithAgent = () => {
     const prompt = formatSolvePrompt({ set, question, answers, notes });
-    const copied = copyText(prompt);
+    const hasImage = question.stem.imageData || question.stem.image || (question.stem.pdf && set.manifest.pdf);
+    const imageCopy = hasImage ? copyPromptAndImage(prompt, questionImage(set, question)) : null;
     void (async () => {
-      if (!(await copied)) {
-        toast('Could not copy the prompt. Check clipboard permissions and try again.', 'bad');
-        return;
-      }
-      let image;
-      try {
-        image = await questionImage(set, question);
-      } catch {
-        toast('Prompt copied. The question image could not be prepared; attach it to the chat manually.', 'info');
-        return;
-      }
-      if (!image) {
+      if (!imageCopy) {
+        if (!(await copyText(prompt))) {
+          toast('Could not copy the prompt. Check clipboard permissions and try again.', 'bad');
+          return;
+        }
         toast('Prompt copied. Paste it into the new chat.', 'info');
         return;
       }
       try {
-        if (await copyPromptAndImage(prompt, image)) {
+        if (await imageCopy) {
           toast('Prompt and question image copied. Paste them into the new chat.', 'info');
         } else {
-          toast('Prompt copied. This browser cannot copy the image with it; attach the image manually.', 'info');
+          const copied = await copyText(prompt);
+          toast(copied
+            ? 'Prompt copied. This browser cannot copy the image with it; attach the image manually.'
+            : 'Could not copy the prompt. Check clipboard permissions and attach the image manually.', copied ? 'info' : 'bad');
         }
       } catch {
-        toast('Prompt copied. The image could not be copied with it; attach the image manually.', 'info');
+        const copied = await copyText(prompt);
+        toast(copied
+          ? 'Prompt copied. The image could not be copied with it; attach the image manually.'
+          : 'Could not copy the prompt. Check clipboard permissions and attach the image manually.', copied ? 'info' : 'bad');
       }
     })();
   };

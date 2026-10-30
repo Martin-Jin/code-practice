@@ -71,7 +71,7 @@ const SECTIONS = [
         <ul>
           <li>Set the chat website in <b>Settings &gt; AI agent</b>. It must be an HTTPS address.</li>
           <li>Paste the copied prompt into the new chat. The prompt asks the agent to guide you with one hint at a time, and to ask for your working first if you have not included any.</li>
-          <li>The app tries to copy the question image with the prompt. If the chat does not receive it, attach the image yourself. This also applies in Firefox when image clipboard access is unavailable.</li>
+          <li>The app copies the question image with the prompt when the browser supports it, including Firefox. If the chat does not receive the image, attach it yourself.</li>
           <li>Opening a solution (or pressing <b>S</b>) first asks whether you have tried the question. Confirm once to skip the reminder for that question for the rest of the run; starting a new run asks again.</li>
         </ul>
         <p className="muted">The app does not send anything to the AI website. You choose what to paste and share; check that service's privacy terms before sending your work.</p>
