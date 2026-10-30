@@ -487,6 +487,8 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 .markup code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
 .pdf-crop { background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; line-height: 0; min-height: 60px; }
 .pdf-crop canvas { display: block; max-width: 100%; }
+.solution-pages { display: flex; gap: 12px; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding: 2px 2px 8px; }
+.solution-pages > .enlarge { flex: 0 0 min(100%, 720px); scroll-snap-align: start; }
 .pdf-wait { display: flex; justify-content: center; align-items: center; padding: 24px; color: var(--muted); }
 .lib-image { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); background: #fff; }
 ol.parts { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; }
@@ -561,6 +563,7 @@ dialog.lightbox::backdrop { background: rgb(8 12 18 / 94%); }
 .lb-bar .btn.ghost { color: #e6e9ef; }
 .lb-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 .lb-level { min-width: 56px; justify-content: center; }
+.lb-page { flex: none; font-size: 12px; color: #9aa3b2; }
 .lb-stage { flex: 1; min-height: 0; overflow: auto; padding: 16px; display: grid; align-items: start; justify-items: start; }
 .lb-figure { margin: 0 auto; width: max-content; }
 .lb-figure img, .lb-figure canvas { display: block; user-select: none; -webkit-user-drag: none; }

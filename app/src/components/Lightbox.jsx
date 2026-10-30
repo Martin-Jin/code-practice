@@ -6,14 +6,22 @@ const FIT = 2;   // index of 1x, where the viewer opens
 
 // A full-window viewer for a figure. `render(width)` draws the figure `width` CSS pixels wide, so a PDF crop can be
 // drawn sharply at each zoom level. 1x fits the window's width, and it can zoom out to half of that; the page scrolls, or drag to move around when zoomed.
-export function Lightbox({ title, render, onClose }) {
+export function Lightbox({ title, render, onClose, pages, initialPage = 0 }) {
   const dialog = useRef(null);
   const stage = useRef(null);
   const drag = useRef(null);
   const [fit, setFit] = useState(0);
   const [level, setLevel] = useState(FIT);
+  const [page, setPage] = useState(initialPage);
+  const currentPage = pages && pages[page];
+  const shownTitle = currentPage ? currentPage.title : title;
+  const shownRender = currentPage ? currentPage.render : render;
 
   const zoom = (delta) => setLevel((l) => Math.max(0, Math.min(LEVELS.length - 1, l + delta)));
+  const changePage = (delta) => {
+    setPage((i) => Math.max(0, Math.min(pages.length - 1, i + delta)));
+    stage.current.scrollTo(0, 0);
+  };
 
   useEffect(() => {
     const d = dialog.current;
@@ -33,6 +41,8 @@ export function Lightbox({ title, render, onClose }) {
     if (e.key === '+' || e.key === '=') { e.preventDefault(); zoom(1); }
     else if (e.key === '-') { e.preventDefault(); zoom(-1); }
     else if (e.key === '0') { e.preventDefault(); setLevel(FIT); }
+    else if (pages && pages.length > 1 && e.key === 'ArrowLeft' && page > 0) { e.preventDefault(); changePage(-1); }
+    else if (pages && pages.length > 1 && e.key === 'ArrowRight' && page < pages.length - 1) { e.preventDefault(); changePage(1); }
   };
   const onPointerDown = (e) => {
     if (e.button !== 0) return;
@@ -56,9 +66,16 @@ export function Lightbox({ title, render, onClose }) {
   };
 
   return (
-    <dialog ref={dialog} className="lightbox" aria-label={title} onCancel={(e) => { e.preventDefault(); onClose(); }} onKeyDown={onKeyDown}>
+    <dialog ref={dialog} className="lightbox" aria-label={shownTitle} onCancel={(e) => { e.preventDefault(); onClose(); }} onKeyDown={onKeyDown}>
       <div className="lb-bar">
-        <span className="lb-title">{title}</span>
+        <span className="lb-title">{shownTitle}</span>
+        {pages && pages.length > 1 && (
+          <>
+            <button type="button" className="btn ghost sm" onClick={() => changePage(-1)} disabled={page === 0} aria-label="Previous page" title="Previous page (←)">‹</button>
+            <span className="lb-page" aria-live="polite">{page + 1} / {pages.length}</span>
+            <button type="button" className="btn ghost sm" onClick={() => changePage(1)} disabled={page === pages.length - 1} aria-label="Next page" title="Next page (→)">›</button>
+          </>
+        )}
         <button type="button" className="btn ghost sm" onClick={() => zoom(-1)} disabled={level === 0} aria-label="Zoom out" title="Zoom out (-)">−</button>
         <button type="button" className="btn ghost sm lb-level" onClick={() => setLevel(FIT)} title="Fit to window (0)">{Math.round(LEVELS[level] * 100)}%</button>
         <button type="button" className="btn ghost sm" onClick={() => zoom(1)} disabled={level === LEVELS.length - 1} aria-label="Zoom in" title="Zoom in (+)">+</button>
@@ -66,10 +83,10 @@ export function Lightbox({ title, render, onClose }) {
       </div>
       <div ref={stage} className="lb-stage" onPointerDown={onPointerDown} onPointerMove={onPointerMove} onClick={onClick}>
         <div className="lb-figure" style={{ cursor: level === FIT ? 'zoom-in' : 'zoom-out' }}>
-          {fit > 0 && render(Math.round(fit * LEVELS[level]))}
+          {fit > 0 && shownRender(Math.round(fit * LEVELS[level]))}
         </div>
       </div>
-      <div className="lb-hint">Click the figure to zoom, drag to move around, Esc to close</div>
+      <div className="lb-hint">Click the figure to zoom, drag to move around{pages && pages.length > 1 ? ', ← → to change page,' : ''}, Esc to close</div>
     </dialog>
   );
 }
@@ -133,7 +150,7 @@ export function ZoomPan({ children }) {
 
 // Wraps a figure so it can be zoomed and moved in place, with a magnifying-glass button in its corner (shown on
 // hover, or when focused with the keyboard) that opens it in a Lightbox. Clicking the figure itself does nothing.
-export function Enlargeable({ title, render, children }) {
+export function Enlargeable({ title, render, children, pages, initialPage = 0 }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="enlarge">
@@ -141,7 +158,7 @@ export function Enlargeable({ title, render, children }) {
       <button type="button" className="btn sm icon-only enlarge-btn" onClick={() => setOpen(true)} aria-label={`Enlarge: ${title}`} title="Open larger">
         <Icon name="zoom" />
       </button>
-      {open && <Lightbox title={title} render={render} onClose={() => setOpen(false)} />}
+      {open && <Lightbox title={title} render={render} pages={pages} initialPage={initialPage} onClose={() => setOpen(false)} />}
     </div>
   );
 }

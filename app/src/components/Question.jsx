@@ -111,10 +111,26 @@ export function Stem({ set, question }) {
 export function Solution({ set, question }) {
   const s = question.solution;
   if (!s) return <p className="muted">This set has no worked solution for this question.</p>;
+  const pages = (s.pdf || []).map((crop) => {
+    const title = `Worked solution, page ${crop.page}`;
+    return {
+      title,
+      crop,
+      render: (width) => <PdfCanvas setId={set.id} pdf={set.manifest.pdf} crop={crop} trim label={title} fixedWidth={width} />,
+    };
+  });
   return (
     <div className="stem">
       {s.imageData && <DataImage url={s.imageData} alt="Worked solution" />}
-      {(s.pdf || []).map((crop) => <PdfCrop key={crop.page} setId={set.id} pdf={set.manifest.pdf} crop={crop} trim label={`Worked solution, page ${crop.page}`} />)}
+      {pages.length > 0 && (
+        <div className="solution-pages" aria-label="Worked solution pages">
+          {pages.map((page, index) => (
+            <Enlargeable key={page.crop.page} title={page.title} render={page.render} pages={pages} initialPage={index}>
+              <PdfCanvas setId={set.id} pdf={set.manifest.pdf} crop={page.crop} trim label={page.title} />
+            </Enlargeable>
+          ))}
+        </div>
+      )}
       {(s.images || []).map((path) => <LibImage key={path} setId={set.id} path={path} alt="Worked solution" />)}
       {s.text && <Markup text={s.text} />}
     </div>

@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.87';
+export const VERSION = '1.88';
 
 export const CHANGELOG = [
+  {
+    version: '1.88', date: '2026-10-30', title: 'Side-by-side worked solution pages',
+    items: [
+      'Worked solution PDF pages now scroll horizontally. Enlarge any page to switch between pages with the arrows while keeping the same zoom level.',
+    ],
+  },
   {
     version: '1.87', date: '2026-10-30', title: 'Question counts and validation messages',
     items: [
@@ -33,14 +39,6 @@ export const CHANGELOG = [
       'The side panel on the question page is wider, and the Previous and Next buttons are gone (the arrow keys still move between questions; a practice session keeps Finish and Results, and its numbered strip).',
       'The answer box of each part now starts at the left edge of its label, below the wording, instead of beside it.',
       'The Top and Bottom crop settings of a PDF question moved out of the answer key editor into the Edit the question window (the pencil beside Question in edit mode), so editing answers no longer shows them.',
-    ],
-  },
-  {
-    version: '1.82', date: '2026-10-30', title: 'Question page: controls in the side panel, bigger question',
-    items: [
-      'On an imported question, Previous and Next and the I got it / Not quite buttons moved to the side panel under Notes, with the shortcut hints beneath them, so the question card no longer needs extra height.',
-      'The question column is wider, so the question image shows larger.',
-      'The question title is smaller and kept to one line; a longer title slides along to show the rest when you hover or focus it, and can be scrolled by hand.',
     ],
   },
 ];
