@@ -68,7 +68,7 @@ export default function ModePicker({ set, value, onChange, onStart }) {
         )}
         <label htmlFor="run-mode">Practice mode</label>
         <select id="run-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-          {PICKABLE.map((id) => <option key={id} value={id}>{MODE_LABELS[id]}</option>)}
+          {PICKABLE.filter((id) => id !== 'topic' || set.categories.length > 1 || mode === 'topic').map((id) => <option key={id} value={id}>{MODE_LABELS[id]}</option>)}
         </select>
         {onStart && <button type="button" className="btn primary" onClick={onStart}>Start</button>}
       </div>

@@ -115,7 +115,7 @@ export function LibraryPracticePicker({ set }) {
         )}
         <label htmlFor="lib-mode">Practice mode</label>
         <select id="lib-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-          {MODES.map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
+          {MODES.filter((id) => id !== 'sections' || names.length > 1).map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
         </select>
         <button type="button" className="btn primary" onClick={start}>Start</button>
       </div>
