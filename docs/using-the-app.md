@@ -118,7 +118,7 @@ The **+** button's **Add a question from a screenshot** (also **Add a question**
 
 1. Paste a screenshot with `Ctrl+V` (or drop an image, or press **Choose an image**). Drag a box over the part to keep, then **Keep the selection** (or **Keep the whole image**). Images are scaled to at most 1400 px wide.
 2. Give it a title in the form `Topic - what is asked` (search finds questions by it), a section, a source and optionally marks, tags and typed wording (maths between `$` signs).
-3. Add the parts to answer: a number with its unit, multiple choice, or self-marked. Add a solution image or text if you have one.
+3. Add the parts to answer: a number with its unit, multiple choice, or self-marked. Add a solution image or text if you have one; a solution with several pages takes one image per page (add more, reorder or remove them).
 4. **Save question** puts it in **My questions**, a set of its own on the dashboard that behaves like any other (practice sessions, answers, difficult flag, search). Its questions and images are kept in this browser and are part of a backup (unlike sets copied from a folder, there is no folder to get them back from). **Delete** on a question in the list, or **Delete all my questions**, removes them.
 
 Questions can also be added to a folder's manifest by an AI agent: give it [question-set-format.md](question-set-format.md). A practice PDF must be laid out in a particular way for the app to find its questions: see [practice-pdf-prompt.md](practice-pdf-prompt.md).

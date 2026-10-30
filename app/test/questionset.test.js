@@ -135,10 +135,19 @@ test('applyEdit lays notes, hiding and replaced content over a question without 
   assert.equal(out.notes, 'mind the units');
   assert.equal(out.title, 'New');
   assert.deepEqual(out.stem, { text: 'Old text', imageData: 'data:image/png;base64,AA' });
-  assert.deepEqual(out.solution, { text: 'Because.', images: undefined, pdf: [{ page: 3, box: [0, 0, 1, 1] }] });
+  assert.deepEqual(out.solution, { text: 'Because.', pdf: [{ page: 3, box: [0, 0, 1, 1] }] });
   assert.equal(applyEdit(q, { hidden: true }).hidden, true);
   assert.equal(q.title, 'Old');
   assert.equal(applyEdit(q, { notes: '' }).notes, '');
+});
+
+test('applyEdit takes several solution images, one per page, replacing or adding to the existing pages', () => {
+  const q = { uid: 'a', stem: { text: 't' }, solution: { text: 'old', images: ['images/a.png'], pdf: [{ page: 3, box: [0, 0, 1, 1] }] } };
+  const pages = ['data:image/png;base64,AA', 'data:image/png;base64,BB'];
+  assert.deepEqual(applyEdit(q, { solutionImages: pages }).solution, { text: 'old', imagesData: pages });
+  assert.deepEqual(applyEdit(q, { solutionImages: pages, solutionAppend: true }).solution, { ...q.solution, imagesData: pages });
+  assert.deepEqual(applyEdit(q, { solutionImage: pages[0] }).solution, { text: 'old', imagesData: [pages[0]] }, 'an edit saved with one image');
+  assert.deepEqual(applyEdit(q, { solutionText: 'new' }).solution, { ...q.solution, text: 'new' }, 'text alone keeps the pages');
 });
 
 test('applyEdit keeps the imported parts when an answer key is saved with none', () => {

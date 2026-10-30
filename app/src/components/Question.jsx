@@ -107,7 +107,7 @@ export function Stem({ set, question }) {
   );
 }
 
-// A worked solution: PDF pages, images and text, in that order.
+// A worked solution: PDF pages, images (one per page) and text, in that order.
 export function Solution({ set, question }) {
   const s = question.solution;
   if (!s) return <p className="muted">This set has no worked solution for this question.</p>;
@@ -121,7 +121,6 @@ export function Solution({ set, question }) {
   });
   return (
     <div className="stem">
-      {s.imageData && <DataImage url={s.imageData} alt="Worked solution" />}
       {pages.length > 0 && (
         <div className="solution-pages" aria-label="Worked solution pages">
           {pages.map((page, index) => (
@@ -132,6 +131,7 @@ export function Solution({ set, question }) {
         </div>
       )}
       {(s.images || []).map((path) => <LibImage key={path} setId={set.id} path={path} alt="Worked solution" />)}
+      {(s.imagesData || []).map((url, i) => <DataImage key={i} url={url} alt={`Worked solution, page ${i + 1}`} />)}
       {s.text && <Markup text={s.text} />}
     </div>
   );

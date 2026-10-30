@@ -131,14 +131,21 @@ export async function addQuestionToPdf(setId, question, images) {
   return applyToPdf(setId, async (bytes) => (await appendQuestion(bytes, { number, section: question.section, title: question.title, source: question.source, stem, solution })).bytes);
 }
 
-// Puts a new image or text over a PDF question's crop (what: 'stem' | 'solution'). content: { image: data URL } or { text }.
+// Puts new content over a PDF question's crop (what: 'stem' | 'solution'). content: { image: data URL } or { text }; a
+// solution may take { images: [data URL, ...] } instead, one per solution page of the PDF, in order. Solution pages the
+// images do not reach are cleared, and the PDF cannot take more images than it has solution pages.
 export async function replaceInPdf(setId, question, what, content) {
   const crops = what === 'stem' ? [question.stem.pdf] : (question.solution && question.solution.pdf) || [];
   if (!crops.length) throw new Error(`This ${what} is not part of the PDF.`);
-  const paint = content.image ? { image: await pngImage(content.image) } : { text: content.text };
+  const images = content.images || (content.image ? [content.image] : []);
+  if (images.length > crops.length) throw new Error(`The PDF has ${crops.length} solution ${crops.length === 1 ? 'page' : 'pages'} here, so it can take at most ${crops.length} ${crops.length === 1 ? 'image' : 'images'}.`);
+  const paints = await Promise.all(images.map(async (url) => ({ image: await pngImage(url) })));
   return applyToPdf(setId, async (bytes) => {
-    let out = await paintBox(bytes, crops[0].page, crops[0].box, paint);
-    for (const crop of crops.slice(1)) out = await paintBox(out, crop.page, crop.box, { text: '' });   // later solution pages are cleared
+    let out = bytes;
+    for (const [i, crop] of crops.entries()) {
+      const paint = paints[i] || (i === 0 ? { text: content.text } : { text: '' });   // pages left over are cleared
+      out = await paintBox(out, crop.page, crop.box, paint);
+    }
     return out;
   });
 }

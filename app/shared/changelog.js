@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.97';
+export const VERSION = '1.98';
 
 export const CHANGELOG = [
+  {
+    version: '1.98', date: '2026-10-31', title: 'Solutions with several pages',
+    items: [
+      'Adding or editing a solution now takes as many images as it needs, one per page, which you can reorder or remove. When editing, new pages can replace the existing ones or be added after them. Writing them into a PDF puts one image on each of its existing solution pages.',
+    ],
+  },
   {
     version: '1.97', date: '2026-10-31', title: 'Same practice modes for coding questions',
     items: [
@@ -28,12 +34,6 @@ export const CHANGELOG = [
     version: '1.94', date: '2026-10-30', title: 'Tighter location breadcrumbs',
     items: [
       'Folder paths in the top bar now sit directly between their slash separators, with no uneven spacing.',
-    ],
-  },
-  {
-    version: '1.93', date: '2026-10-30', title: 'Sharper formula sheets',
-    items: [
-      'Formula-sheet PDFs now render at higher resolution without changing their displayed size, and the zoom Reset control works reliably.',
     ],
   },
 ];

@@ -114,6 +114,28 @@ export function ImagePicker({ label, hint, value, onChange, file }) {
   );
 }
 
+// Several images, one per page (a worked solution): the ones added so far with Move / Remove, then a picker for the next.
+// `file` is a pasted image the picker takes as the next page.
+export function ImageList({ label, hint, values, onChange, file }) {
+  const move = (i, by) => { const next = values.slice(); [next[i], next[i + by]] = [next[i + by], next[i]]; onChange(next); };
+  return (
+    <div className="stack">
+      {values.map((url, i) => (
+        <div className="stack" key={i}>
+          <b>{label}, page {i + 1}</b>
+          <img src={url} alt={`${label}, page ${i + 1}`} className="lib-image" style={{ maxHeight: 260, objectFit: 'contain', justifySelf: 'start' }} />
+          <div className="row">
+            <button type="button" className="btn sm" disabled={i === 0} onClick={() => move(i, -1)}>Move up</button>
+            <button type="button" className="btn sm" disabled={i === values.length - 1} onClick={() => move(i, 1)}>Move down</button>
+            <button type="button" className="btn sm" onClick={() => onChange(values.filter((_, j) => j !== i))}>Remove page</button>
+          </div>
+        </div>
+      ))}
+      <ImagePicker label={values.length ? `${label}, page ${values.length + 1}` : label} hint={hint} value={null} onChange={(url) => url && onChange([...values, url])} file={file} />
+    </div>
+  );
+}
+
 const sameName = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
 const lastOf = (set) => set.manifest.questions[set.manifest.questions.length - 1];
 
@@ -131,7 +153,7 @@ export default function AddQuestionDialog({ close, setId }) {
   const [tags, setTags] = useState('');
   const [wording, setWording] = useState('');
   const [stemImage, setStemImage] = useState(null);
-  const [solImage, setSolImage] = useState(null);
+  const [solImages, setSolImages] = useState([]);
   const [solText, setSolText] = useState('');
   const [parts, setParts] = useState(blankDrafts);
   const [pasted, setPasted] = useState({ stem: null, sol: null });
@@ -183,10 +205,13 @@ export default function AddQuestionDialog({ close, setId }) {
     if (wording.trim()) stem.text = wording.trim();
     if (stemImage) { stem.image = `images/{uid}.${extensionOf(stemImage)}`; images[stem.image] = stemImage; }
     let solution = null;
-    if (solImage || solText.trim()) {
+    if (solImages.length || solText.trim()) {
       solution = {};
       if (solText.trim()) solution.text = solText.trim();
-      if (solImage) { const path = `images/{uid}-solution.${extensionOf(solImage)}`; solution.images = [path]; images[path] = solImage; }
+      if (solImages.length) {
+        solution.images = solImages.map((url, i) => `images/{uid}-solution${solImages.length > 1 ? `-${i + 1}` : ''}.${extensionOf(url)}`);
+        solution.images.forEach((path, i) => { images[path] = solImages[i]; });
+      }
     }
     const question = {
       title: title.trim(), section: section.trim(), source: source.trim(), marks: marks.trim() === '' ? null : Number(marks),
@@ -270,7 +295,7 @@ export default function AddQuestionDialog({ close, setId }) {
               <label className="stack">Tags (comma separated search words)
                 <TagInput value={tags} tags={tagChoices} onChange={typed('tags', setTags)} />
               </label>
-              <ImagePicker label="Solution image" hint="Paste or drop a screenshot of the worked solution." value={solImage} onChange={setSolImage} file={pasted.sol} />
+              <ImageList label="Solution image" hint="Paste or drop a screenshot of the worked solution. Each image is one page; add as many as it needs." values={solImages} onChange={setSolImages} file={pasted.sol} />
               <label className="stack">Solution text
                 <textarea rows={2} value={solText} onChange={(e) => setSolText(e.target.value)} />
               </label>
