@@ -1,8 +1,11 @@
 // How each test mode picks its questions. Works on a set as described in catalog.json.
 import { weightedSample } from './weights.js';
 
-export const MODES = ['practice', 'random', 'topic', 'all', 'custom'];
-export const MODE_LABELS = { practice: 'Practice test', random: 'Random', topic: 'By topic', all: 'All questions', custom: 'Single question' };
+export const MODES = ['practice', 'random', 'topic', 'difficult', 'unseen', 'wrong', 'all', 'custom'];
+export const MODE_LABELS = {
+  practice: 'Practice test', random: 'Random', topic: 'By topic', difficult: 'Marked difficult', unseen: 'Not seen yet',
+  wrong: 'Not right last time', all: 'All questions', custom: 'Single question',
+};
 
 export const capQuestionCount = (count, maximum) =>
   Math.min(Math.max(0, Math.floor(Number(count) || 0)), Math.max(0, Math.floor(Number(maximum) || 0)));
@@ -24,6 +27,12 @@ export function eligibleCategories(set, opts) {
   return set.categories.filter((c) =>
     c.group === 'core' || (c.group === 'revision' && opts.includeRevision) ||
     (c.group === 'extra' && opts.includeExtra));
+}
+
+// The categories a run draws from: the topics ticked in the picker if any, else the assessed ones plus the optional groups.
+export function poolCategories(set, opts) {
+  const ids = Array.isArray(opts.categories) ? opts.categories : [];
+  return ids.length ? set.categories.filter((c) => ids.includes(c.id)) : eligibleCategories(set, opts);
 }
 
 // A "split evenly" random run takes count / (topics) questions from each topic. The count must
@@ -54,6 +63,8 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
   const done = new Set(options.hideCompleted && Array.isArray(options.completed) ? options.completed.map(Number) : []);
   const open = (list) => list.filter((n) => !done.has(n));
   const weight = typeof options.weight === 'function' ? options.weight : null;   // question number -> weight
+  // Question numbers the user marked difficult, has not tried, or did not pass last time (from their stats).
+  const flagged = (key) => new Set(Array.isArray(options[key]) ? options[key].map(Number) : []);
   const byId = (ids) => set.categories.filter((c) => ids.includes(c.id));
   let picked = [];
 
@@ -68,7 +79,7 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
       picked.push(...draw(open(cat.questions), 1, rng, weight));
     }
   } else if (mode === 'random') {
-    const cats = eligibleCategories(set, opts).map((c) => open(c.questions)).filter((l) => l.length);
+    const cats = poolCategories(set, opts).map((c) => open(c.questions)).filter((l) => l.length);
     const all = cats.flat();
     if (opts.count < 1) throw new Error('Choose how many questions you want');
     if (opts.split && opts.count < all.length) {
@@ -84,8 +95,12 @@ export function pickQuestions(set, mode, options = {}, rng = Math.random) {
   } else if (mode === 'topic') {
     picked = open(byId(opts.categories).flatMap((c) => c.questions));
     if (!picked.length) throw new Error('Pick at least one topic');
+  } else if (mode === 'difficult' || mode === 'unseen' || mode === 'wrong') {
+    const keep = flagged(mode);
+    picked = open(poolCategories(set, opts).flatMap((c) => c.questions)).filter((n) => keep.has(n));
+    if (!picked.length) throw new Error('No questions match those options');
   } else {
-    picked = open(eligibleCategories(set, opts).flatMap((c) => c.questions));
+    picked = open(poolCategories(set, opts).flatMap((c) => c.questions));
   }
 
   const order = new Map();

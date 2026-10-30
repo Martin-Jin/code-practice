@@ -64,6 +64,7 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 - **Practice test:** a short mixed paper. For a set with a recipe it is a fixed few questions plus one from each of some topics chosen at random (the sample set's is one array question and one other). The recipe lives in `set.json` (`practice`), so each set defines its own.
 - **Random:** a random number of questions (you choose how many) from the assessed topics. Tick the boxes to also draw from quick revision or extra practice.
 - **By topic:** every question in the topics you tick.
+- **Marked difficult**, **Not seen yet** and **Not right last time:** the questions you flagged with **Mark as difficult** (on the Task tab), have not run yet, or whose last run did not pass. Random, All and these three take the same topic ticks to narrow the pool.
 - **All questions:** the whole set. Quick revision and extra practice are off unless you tick them.
 
 ## Inside a run

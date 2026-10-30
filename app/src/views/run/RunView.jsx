@@ -306,7 +306,7 @@ export default function RunView({ runId, param, theme }) {
 
   const resetSizes = () => { setSizes(DEFAULT_SIZES); save('sizes', DEFAULT_SIZES); };
 
-  const taskPane = <TaskPane q={q} onHide={toggleTask} />;
+  const taskPane = <TaskPane setId={run.setId} q={q} onHide={toggleTask} />;
 
   actionsRef.current = {
     run: handleRun, task: toggleTask, side: toggleSide, output: toggleOutput,

@@ -110,7 +110,7 @@ function freshQuestionState(q) {
 }
 
 const freshQuestionStats = () => ({
-  attempts: 0, compileErrors: 0, correct: 0, wrong: 0, crashes: 0, lastAt: null, firstSolvedAt: null, lastStatus: null,
+  attempts: 0, compileErrors: 0, correct: 0, wrong: 0, crashes: 0, difficult: false, lastAt: null, firstSolvedAt: null, lastStatus: null,
 });
 
 export function statsFor(setId) {
@@ -130,8 +130,12 @@ function fillRun(run, mode, options) {
   const counters = state.prioritise ? statsFor(run.setId).questions : null;
   const weight = counters ? (n) => weightOf(codingTrouble(counters[n])) : undefined;
   const stats = statsFor(run.setId).questions;
+  const numbers = set.categories.flatMap((c) => c.questions);
   const completed = Object.keys(stats).filter((n) => stats[n].correct > 0).map(Number);
-  const questions = pickQuestions(set, mode, { ...options, weight, completed });
+  const difficult = numbers.filter((n) => stats[n] && stats[n].difficult);
+  const unseen = numbers.filter((n) => !stats[n] || !stats[n].attempts);
+  const wrong = numbers.filter((n) => stats[n] && stats[n].attempts && stats[n].lastStatus !== 'passed');
+  const questions = pickQuestions(set, mode, { ...options, weight, completed, difficult, unseen, wrong });
   if (!questions.length) throw new Error('No questions match those options');
   run.mode = mode;
   run.options = options || {};
@@ -287,6 +291,15 @@ export async function runQuestion(id, n, code) {
   saveStats(run.setId);
   notify();
   return { result, justCompleted, counted: true };
+}
+
+// The "difficult" mark on a question, kept with its stats so the Marked difficult mode can find it.
+export function setDifficult(setId, n, value) {
+  const stats = statsFor(setId);
+  const qs = (stats.questions[n] = stats.questions[n] || freshQuestionStats());
+  qs.difficult = !!value;
+  saveStats(setId);
+  notify();
 }
 
 export function resetStats(setId) {

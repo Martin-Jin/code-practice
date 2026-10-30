@@ -37,7 +37,7 @@ const SECTIONS = [
       <>
         <ol>
           <li>Open the <b>Question sets</b> tab and click a coding set.</li>
-          <li>Pick a mode (practice test, random, by topic or all questions) and start a run. Random can split its questions evenly across topics, and a tick box leaves out questions you have already got right.</li>
+          <li>Pick a mode (practice test, random, by topic, marked difficult, not seen yet, not right last time or all questions) and start a run. Random can split its questions evenly across topics, and a tick box leaves out questions you have already got right.</li>
           <li>Write your answer in the editor and press <b>Run</b> (Ctrl+Shift+Enter). Each test shows pass or fail, with what it expected and what it got.</li>
         </ol>
         <Shot file="set.jpg" alt="A coding set page with its test modes" />

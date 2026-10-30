@@ -8,14 +8,19 @@ export const STRENGTH = 4;
 
 export const weightOf = (trouble) => 1 + STRENGTH * trouble;
 
-// A C++ question, from its stats counters ({ attempts, wrong, compileErrors, lastStatus }). The share
+// A C++ question, from its stats counters ({ attempts, wrong, compileErrors, lastStatus, difficult }). The share
 // of runs that did not pass (a compile error counts half), smoothed so one failed run is not a
-// verdict, and halved once the latest run passed.
+// verdict, and halved once the latest run passed. Marked difficult counts as 0.7 on its own and
+// combines with that share like an imported question's (see libraryTrouble).
 export function codingTrouble(stats) {
-  if (!stats || !stats.attempts) return 0;
-  const failures = (stats.wrong || 0) + 0.5 * (stats.compileErrors || 0);
-  const rate = (failures / (stats.attempts + 2)) * (stats.lastStatus === 'passed' ? 0.5 : 1.5);
-  return Math.min(1, rate);
+  if (!stats) return 0;
+  const flagged = stats.difficult ? 0.7 : 0;
+  let rate = 0;
+  if (stats.attempts) {
+    const failures = (stats.wrong || 0) + 0.5 * (stats.compileErrors || 0);
+    rate = Math.min(1, (failures / (stats.attempts + 2)) * (stats.lastStatus === 'passed' ? 0.5 : 1.5));
+  }
+  return 1 - (1 - flagged) * (1 - rate);
 }
 
 // An imported question, from its progress record ({ difficult, right, wrong }). Marked difficult

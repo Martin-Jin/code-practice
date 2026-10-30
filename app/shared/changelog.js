@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.96';
+export const VERSION = '1.97';
 
 export const CHANGELOG = [
+  {
+    version: '1.97', date: '2026-10-31', title: 'Same practice modes for coding questions',
+    items: [
+      'Coding sets now offer the same modes as imported sets: Marked difficult, Not seen yet and Not right last time, alongside Practice test, Random, By topic and All. Tick topics to limit Random, All and those modes to them. Mark a question as difficult from its Task tab. Split evenly no longer fails when ticked.',
+    ],
+  },
   {
     version: '1.96', date: '2026-10-30', title: 'Practise folders as combined sets',
     items: [
@@ -28,12 +34,6 @@ export const CHANGELOG = [
     version: '1.93', date: '2026-10-30', title: 'Sharper formula sheets',
     items: [
       'Formula-sheet PDFs now render at higher resolution without changing their displayed size, and the zoom Reset control works reliably.',
-    ],
-  },
-  {
-    version: '1.92', date: '2026-10-30', title: 'Choose where to open the tutor',
-    items: [
-      'Solve with agent now offers Claude Desktop or the configured chat website from one button. The clipboard includes the prompt as text and rich HTML with the question image embedded, alongside the image itself; chats that accept rich clipboard content can receive both in one paste.',
     ],
   },
 ];

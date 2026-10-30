@@ -1,4 +1,4 @@
-import { capQuestionCount, eligibleCategories, practiceSize, splitProblem, MODE_LABELS } from '../../shared/modes.js';
+import { capQuestionCount, poolCategories, practiceSize, splitProblem, MODE_LABELS } from '../../shared/modes.js';
 import { plural } from '../lib/format.js';
 import { statsFor } from '../lib/service.js';
 
@@ -21,9 +21,11 @@ export default function ModePicker({ set, value, onChange }) {
   const counters = statsFor(set.id).questions;
   const isDone = (n) => options.hideCompleted && counters[n] && counters[n].correct > 0;
   const openCats = (cats) => cats.map((c) => ({ ...c, questions: c.questions.filter((n) => !isDone(n)) })).filter((c) => c.questions.length);
-  const pool = openCats(eligibleCategories(set, options));
+  const pool = openCats(poolCategories(set, options));
   const total = sum(pool);
   const count = capQuestionCount(options.count, total);
+  const splitError = options.split && count >= 1 && count < total ? splitProblem(pool.length, total, count) : null;
+  const matching = (test) => sum(pool) && pool.reduce((n, c) => n + c.questions.filter((q) => test(counters[q])).length, 0);
   const hasRevision = set.categories.some((c) => c.group === 'revision');
   const hasExtra = set.categories.some((c) => c.group === 'extra');
 
@@ -54,6 +56,37 @@ export default function ModePicker({ set, value, onChange }) {
     setOpt({ categories: all ? options.categories.filter((id) => !ids.includes(id)) : [...new Set([...options.categories, ...ids])] });
   };
 
+  // Topics to draw from, for every mode that works on a pool (none ticked means the usual pool).
+  const topicFilter = (
+    <>
+      {Object.entries(set.groups).map(([group, label]) => {
+        const cats = set.categories.filter((c) => c.group === group);
+        if (!cats.length) return null;
+        const allOn = cats.every((c) => options.categories.includes(c.id));
+        return (
+          <div className="topic-group" key={group}>
+            <h4>{label}
+              <button type="button" className="btn ghost sm" onClick={() => toggleGroup(cats)}>{allOn ? 'Clear' : 'Select all'}</button>
+            </h4>
+            <div className="topic-list">
+              {cats.map((c) => (
+                <label className="check" key={c.id}>
+                  <input type="checkbox" checked={options.categories.includes(c.id)} onChange={() => toggleCategory(c.id)} />
+                  {c.name} <span className="muted">({c.questions.length})</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      <span className="muted">
+        {options.categories.length
+          ? `${plural(sum(set.categories.filter((c) => options.categories.includes(c.id))), 'question')} in the ticked topics`
+          : 'None ticked means every topic (and the optional groups above)'}
+      </span>
+    </>
+  );
+
   const card = (id, desc, body) => (
     <div className={`mode${mode === id ? ' selected' : ''}`}>
       <label>
@@ -83,44 +116,26 @@ export default function ModePicker({ set, value, onChange }) {
             <input type="checkbox" checked={options.split} onChange={(e) => setOpt({ split: e.target.checked })} />
             Split evenly across topics ({plural(pool.length, 'topic')} in the pool)
           </label>
+          {options.split && splitError && <span className="muted" role="alert">{splitError}</span>}
           {options.split && !splitError && count >= 1 && (
             <span className="muted">
               {count >= total ? `That is every question, so this runs as All questions.` : `${count / pool.length} from each topic, chosen at random.`}
             </span>
           )}
           {extraToggles}
+          {topicFilter}
         </>
       ))}
 
-      {card('topic', 'Every question in the topics you choose.', (
-        <>
-          {Object.entries(set.groups).map(([group, label]) => {
-            const cats = set.categories.filter((c) => c.group === group);
-            if (!cats.length) return null;
-            const allOn = cats.every((c) => options.categories.includes(c.id));
-            return (
-              <div className="topic-group" key={group}>
-                <h4>{label}
-                  <button type="button" className="btn ghost sm" onClick={() => toggleGroup(cats)}>{allOn ? 'Clear' : 'Select all'}</button>
-                </h4>
-                <div className="topic-list">
-                  {cats.map((c) => (
-                    <label className="check" key={c.id}>
-                      <input type="checkbox" checked={options.categories.includes(c.id)} onChange={() => toggleCategory(c.id)} />
-                      {c.name} <span className="muted">({c.questions.length})</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-          <span className="muted">
-            {plural(sum(set.categories.filter((c) => options.categories.includes(c.id))), 'question')} selected
-          </span>
-        </>
-      ))}
+      {card('topic', 'Every question in the topics you choose.', topicFilter)}
 
-      {card('all', `Work through the whole set (${plural(total, 'question')} with the options below).`, extraToggles)}
+      {card('difficult', `Only the questions you marked difficult (${matching((c) => c && c.difficult)} available).`, <>{extraToggles}{topicFilter}</>)}
+
+      {card('unseen', `Questions you have not run yet (${matching((c) => !c || !c.attempts)} available).`, <>{extraToggles}{topicFilter}</>)}
+
+      {card('wrong', `Questions whose last run did not pass (${matching((c) => c && c.attempts && c.lastStatus !== 'passed')} available).`, <>{extraToggles}{topicFilter}</>)}
+
+      {card('all', `Work through the whole set (${plural(total, 'question')} with the options below).`, <>{extraToggles}{topicFilter}</>)}
       <label className="check">
         <input type="checkbox" checked={options.hideCompleted} onChange={(e) => setOpt({ hideCompleted: e.target.checked })} />
         Leave out completed questions (ones you have got right at least once)

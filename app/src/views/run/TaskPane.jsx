@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { plural } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
 import { useStore } from '../../lib/store.js';
+import { setDifficult } from '../../lib/service.js';
 import { comboFor } from '../../lib/shortcuts.js';
 import { RESTRICTION_LABELS, RESTRICTIONS } from '../../../shared/restrictions.js';
 
@@ -126,7 +127,7 @@ function CodeBlock({ code }) {
 
 const TABS = ['task', 'provided', 'tests'];
 
-export default function TaskPane({ q, onHide }) {
+export default function TaskPane({ setId, q, onHide }) {
   const st = useStore();
   // The pane unmounts when hidden, so the last tab is kept in this browser (not reset per question).
   const [tab, setTabState] = useState(() => {
@@ -136,6 +137,7 @@ export default function TaskPane({ q, onHide }) {
     setTabState(next);
     try { localStorage.setItem('taskTab', next); } catch { /* storage blocked */ }
   };
+  const difficult = !!(st.stats[setId]?.questions[q.number]?.difficult);
   return (
     <section className="qpane" aria-label="Question">
       <div className="tabs" role="tablist">
@@ -158,6 +160,11 @@ export default function TaskPane({ q, onHide }) {
               <span className="chip">{q.topic}</span>
               <span className="chip">{q.visibleTests} visible / {q.hiddenTests} hidden tests</span>
               {(q.restrict || []).map((r) => <span key={r} className="chip warn" title={`${RESTRICTIONS[r]} The app checks this when you press Run.`}>{RESTRICTION_LABELS[r]}</span>)}
+            </div>
+            <div className="row" style={{ margin: '8px 0' }}>
+              <button type="button" className="btn sm" aria-pressed={difficult} onClick={() => setDifficult(setId, q.number, !difficult)} title="Mark this question as difficult. Difficult questions can be drawn more often, and the Marked difficult mode runs just them.">
+                <Icon name="flag" /> {difficult ? 'Marked difficult' : 'Mark as difficult'}
+              </button>
             </div>
             <Statement text={q.statement} />
           </>

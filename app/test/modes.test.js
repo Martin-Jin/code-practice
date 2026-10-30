@@ -99,3 +99,20 @@ test('hide completed leaves finished questions out of every pool', () => {
     assert.ok(!pickQuestions(set, 'practice', opts, seeded(seed)).some((n) => completed.includes(n)));
   }
 });
+
+test('difficult, unseen and wrong modes draw only the flagged questions from the pool', () => {
+  const all = pickQuestions(set, 'all', {});
+  const some = all.slice(1, 4);
+  for (const mode of ['difficult', 'unseen', 'wrong']) {
+    assert.deepEqual(pickQuestions(set, mode, { [mode]: some }), some);
+    assert.deepEqual(pickQuestions(set, mode, { [mode]: some, hideCompleted: true, completed: [some[0]] }), some.slice(1));
+    assert.throws(() => pickQuestions(set, mode, {}), /No questions match/);
+  }
+});
+
+test('ticked topics narrow random, all and the flagged modes', () => {
+  const cat = set.categories[0];
+  assert.deepEqual(pickQuestions(set, 'all', { categories: [cat.id] }), [...cat.questions]);
+  assert.deepEqual(pickQuestions(set, 'difficult', { categories: [cat.id], difficult: cat.questions.concat(-1) }), [...cat.questions]);
+  assert.equal(pickQuestions(set, 'random', { categories: [cat.id], count: 99 }).length, cat.questions.length);
+});
