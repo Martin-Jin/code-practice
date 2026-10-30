@@ -7,6 +7,7 @@ export const defaultChoice = () => ({
   options: { count: 5, includeRevision: false, includeExtra: false, categories: [], split: false, hideCompleted: false },
 });
 
+const PICKABLE = ['practice', 'random', 'topic', 'difficult', 'unseen', 'wrong', 'all'];
 const sum = (cats) => cats.reduce((n, c) => n + c.questions.length, 0);
 
 // Controlled picker for a run's test mode and its options. value = { mode, options }.
@@ -87,19 +88,25 @@ export default function ModePicker({ set, value, onChange }) {
     </>
   );
 
-  const card = (id, desc, body) => (
-    <div className={`mode${mode === id ? ' selected' : ''}`}>
-      <label>
-        <input type="radio" name="mode" checked={mode === id} onChange={() => setMode(id)} />
+  // Only the chosen mode's card is shown, under the dropdown.
+  const card = (id, desc, body) => mode === id && (
+    <div className="mode selected">
+      <div className="m-head">
         <span className="m-title">{MODE_LABELS[id]}</span>
         <span className="m-desc">{desc}</span>
-      </label>
-      {mode === id && body && <div className="m-opts">{body}</div>}
+      </div>
+      {body && <div className="m-opts">{body}</div>}
     </div>
   );
 
   return (
     <div className="modes">
+      <div className="row">
+        <label htmlFor="run-mode">Practice mode</label>
+        <select id="run-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+          {PICKABLE.map((id) => <option key={id} value={id}>{MODE_LABELS[id]}</option>)}
+        </select>
+      </div>
       {card('practice',
         `${practiceSize(set)} questions: ${fixed}, plus 1 each from ${bp.pick.count} randomly chosen topics. Like a short test.`,
         <span className="muted">Topics in the draw: {bp.pick.from.map(catName).join(', ')}.</span>)}

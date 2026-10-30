@@ -125,7 +125,7 @@ Questions can also be added to a folder's manifest by an AI agent: give it [ques
 
 ### Practising a library set
 
-A set's page (**Browse**) has a **Practise** panel with selectable cards for each mode. Choose one and press **Start**; Random lets you choose a question count up to the number available, limit the draw to sections and split it evenly across them. **Leave out completed questions** excludes questions you have got right at least once. The session keeps its list of questions, so you can leave and **Resume** it from the dashboard.
+A set's page (**Browse**) has a **Practise** panel with a **Practice mode** dropdown that shows the chosen mode's options. Choose one and press **Start**; Random lets you choose a question count up to the number available, limit the draw to sections and split it evenly across them. **Leave out completed questions** excludes questions you have got right at least once. The session keeps its list of questions, so you can leave and **Resume** it from the dashboard.
 
 - **All questions**, in the order of the set; **Random** (you choose how many, optionally only from some sections); **By section**; **Marked difficult**; **Not seen yet**; **Not right last time**. A mode with nothing to pick says so instead of starting.
 - A strip of numbers along the top shows each question's result in this session (green right, red not right, an orange underline for difficult) and takes you to it. **Finish** appears once you have checked every question that has an answer key (right or not right; a question with no key cannot be checked, so it does not hold the session back) and marks the session finished. It opens a summary with the counts, every question's result, and **Practise the questions not right** to start a retry session.

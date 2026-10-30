@@ -54,12 +54,11 @@ export function LibraryPracticePicker({ set }) {
   };
 
   const picker = (id) => (
-    <div className={`mode${mode === id ? ' selected' : ''}`} key={id}>
-      <label>
-        <input type="radio" name="lib-mode" checked={mode === id} onChange={() => setMode(id)} />
+    <div className="mode selected" key={id}>
+      <div className="m-head">
         <span className="m-title">{LIB_MODE_LABELS[id]}</span>
         <span className="m-desc">{DESC[id]}</span>
-      </label>
+      </div>
       {mode === id && id === 'random' && (
         <div className="m-opts">
           <div className="row">
@@ -92,14 +91,18 @@ export function LibraryPracticePicker({ set }) {
   return (
     <section>
       <div className="section-title"><h2>Practise</h2>{st.prioritise && <span className="chip accent">Drawing hard questions more often</span>}</div>
-      <div className="modes">{MODES.map(picker)}</div>
+      <div className="row" style={{ marginBottom: 10 }}>
+        <label htmlFor="lib-mode">Practice mode</label>
+        <select id="lib-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+          {MODES.map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
+        </select>
+        <button type="button" className="btn primary" onClick={start}>Start</button>
+      </div>
+      <div className="modes">{picker(mode)}</div>
       <label className="check" style={{ marginTop: 10 }}>
         <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
         Leave out completed questions (ones you have got right at least once)
       </label>
-      <div className="row" style={{ marginTop: 16 }}>
-        <button type="button" className="btn primary lg" onClick={start}>Start</button>
-      </div>
     </section>
   );
 }
