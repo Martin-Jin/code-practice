@@ -174,7 +174,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
     })();
   };
   const chooseAgent = () => open(({ close }) => (
-    <Modal compact title="Open tutoring chat" onClose={() => close()} footer={(
+    <Modal compact className="agent-choice" title="Open tutoring chat" onClose={() => close()} footer={(
       <>
         <button type="button" className="btn" onClick={() => close()}>Cancel</button>
         <a className="btn" href={readAgentUrl()} target="_blank" rel="noopener noreferrer" onClick={() => { close(); solveWithAgent(); }}>Use chat website</a>

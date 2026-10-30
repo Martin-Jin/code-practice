@@ -101,7 +101,7 @@ const SECTIONS = [
     body: (
       <>
         <ul>
-          <li><b>Formulas</b> (Alt+T) in a library question opens that set's sheets in a side panel. PDFs render sharply in the app, so Alt+T still works after you click the page; use the arrows to change pages, Ctrl+scroll to zoom, and Reset to return to the fit view.</li>
+          <li><b>Formulas</b> (Alt+T) in a library question opens that set's sheets in a side panel. PDFs render sharply in the app, so Alt+T still works after you click the page; use the arrows to change pages, Ctrl+scroll to zoom, and the pinned Reset button to return to the fit view.</li>
           <li><b>+ &gt; Add a formula sheet to several sets</b>: choose the file, search and tick the sets. Each gets its own copy, so it travels with the set when exported.</li>
           <li>To remove one, open the set and press <b>Edit this set &gt; Formula sheets</b>.</li>
           <li>Typed answers are checked once a question has an answer: press the pen beside <b>Answers</b> to add or correct it. Numbers match within 1%, or the decimal places asked for.</li>

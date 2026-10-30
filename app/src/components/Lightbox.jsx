@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 
@@ -99,7 +100,7 @@ const bound = (v, size, k) => clamp(v, Math.min(0, size * (1 - k)), Math.max(0, 
 
 // Lets a figure be zoomed in place: Ctrl + scroll zooms around the pointer, and with the left button held, dragging
 // moves the figure around inside its frame. Double-click puts it back. Plain scrolling is left to the page.
-export function ZoomPan({ children }) {
+export function ZoomPan({ children, resetTarget = null }) {
   const box = useRef(null);
   const drag = useRef(null);
   const [view, setView] = useState({ k: 1, x: 0, y: 0 });   // scale, and where the figure's top-left corner sits in the frame
@@ -136,6 +137,7 @@ export function ZoomPan({ children }) {
     setView((v) => ({ k: v.k, x: bound(e.clientX - d.x, r.width, v.k), y: bound(e.clientY - d.y, r.height, v.k) }));
   };
   const reset = () => setView({ k: 1, x: 0, y: 0 });
+  const resetButton = view.k !== 1 && <button type="button" className="btn sm zoompan-reset" onClick={reset} onDoubleClick={(e) => e.stopPropagation()}>{Math.round(view.k * 100)}% · Reset</button>;
 
   return (
     <div
@@ -144,7 +146,7 @@ export function ZoomPan({ children }) {
       onDoubleClick={reset}
     >
       <div className="zoompan-inner" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})` }}>{children}</div>
-      {view.k !== 1 && <button type="button" className="btn sm zoompan-reset" onClick={reset} onDoubleClick={(e) => e.stopPropagation()}>{Math.round(view.k * 100)}% · Reset</button>}
+      {resetTarget ? resetButton && createPortal(resetButton, resetTarget) : resetButton}
     </div>
   );
 }

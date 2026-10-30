@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.94';
+export const VERSION = '1.95';
 
 export const CHANGELOG = [
+  {
+    version: '1.95', date: '2026-10-30', title: 'Pinned PDF reset and roomier chat choice',
+    items: [
+      'The formula PDF Reset control stays in the sticky toolbar while you scroll, and the tutoring chat choice now sizes to fit its buttons.',
+    ],
+  },
   {
     version: '1.94', date: '2026-10-30', title: 'Tighter location breadcrumbs',
     items: [
@@ -28,12 +34,6 @@ export const CHANGELOG = [
     version: '1.91', date: '2026-10-30', title: 'Try Claude Desktop',
     items: [
       'The solution view can launch Claude Desktop through its standard claude:// link and copy the tutoring prompt; the configured website remains available as a fallback.',
-    ],
-  },
-  {
-    version: '1.90', date: '2026-10-30', title: 'Question images copy in Firefox',
-    items: [
-      'Solve with agent now starts the image clipboard write with the button click, so Firefox keeps permission while it prepares the image. SVG question images are converted through an image element when Firefox cannot decode them as a bitmap.',
     ],
   },
 ];

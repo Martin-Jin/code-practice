@@ -13,6 +13,7 @@ function PdfViewer({ setId, sheet }) {
   const [renderError, setRenderError] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
   const [width, setWidth] = useState(0);
+  const [resetTarget, setResetTarget] = useState(null);
   const frame = useRef(null);
   const canvas = useRef(null);
 
@@ -92,14 +93,14 @@ function PdfViewer({ setId, sheet }) {
       {!pdf && !error && <div className="pdf-wait"><span className="spinner" /></div>}
       {pdf && (
         <>
-          <div className="formula-pdf-controls">
+          <div ref={setResetTarget} className="formula-pdf-controls">
             <button type="button" className="btn ghost sm" aria-label="Previous PDF page" disabled={pageNumber <= 1} onClick={() => setPageNumber((n) => n - 1)}>‹</button>
             <span>Page {pageNumber} of {pdf.numPages}</span>
             <button type="button" className="btn ghost sm" aria-label="Next PDF page" disabled={pageNumber >= pdf.numPages} onClick={() => setPageNumber((n) => n + 1)}>›</button>
           </div>
           {renderError && <div className="notice bad" role="alert">{renderError}</div>}
           <div className="formula-pdf-frame" ref={frame}>
-            <ZoomPan><canvas ref={canvas} role="img" aria-label={`${sheet.name}, page ${pageNumber}`} /></ZoomPan>
+            <ZoomPan resetTarget={resetTarget}><canvas ref={canvas} role="img" aria-label={`${sheet.name}, page ${pageNumber}`} /></ZoomPan>
           </div>
         </>
       )}
