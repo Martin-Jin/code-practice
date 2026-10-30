@@ -133,20 +133,20 @@ export async function addQuestionToPdf(setId, question, images) {
 
 // Puts new content over a PDF question's crop (what: 'stem' | 'solution'). content: { image: data URL } or { text }; a
 // solution may take { images: [data URL, ...] } instead, one per solution page of the PDF, in order. Solution pages the
-// images do not reach are cleared, and the PDF cannot take more images than it has solution pages.
+// new content does not reach are removed (not left blank), and the PDF cannot take more images than it has solution
+// pages. The "Worked solution (i/n)" headers of the pages that stay are not redrawn, so they may still show the old n.
 export async function replaceInPdf(setId, question, what, content) {
   const crops = what === 'stem' ? [question.stem.pdf] : (question.solution && question.solution.pdf) || [];
   if (!crops.length) throw new Error(`This ${what} is not part of the PDF.`);
   const images = content.images || (content.image ? [content.image] : []);
   if (images.length > crops.length) throw new Error(`The PDF has ${crops.length} solution ${crops.length === 1 ? 'page' : 'pages'} here, so it can take at most ${crops.length} ${crops.length === 1 ? 'image' : 'images'}.`);
   const paints = await Promise.all(images.map(async (url) => ({ image: await pngImage(url) })));
+  const used = Math.max(1, paints.length);
   return applyToPdf(setId, async (bytes) => {
     let out = bytes;
-    for (const [i, crop] of crops.entries()) {
-      const paint = paints[i] || (i === 0 ? { text: content.text } : { text: '' });   // pages left over are cleared
-      out = await paintBox(out, crop.page, crop.box, paint);
-    }
-    return out;
+    for (const [i, crop] of crops.slice(0, used).entries()) out = await paintBox(out, crop.page, crop.box, paints[i] || { text: content.text });
+    const spare = crops.slice(used).map((crop) => crop.page);
+    return spare.length ? removePages(out, spare) : out;
   });
 }
 

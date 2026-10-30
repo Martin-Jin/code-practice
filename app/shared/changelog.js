@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.98';
+export const VERSION = '1.99';
 
 export const CHANGELOG = [
+  {
+    version: '1.99', date: '2026-10-31', title: 'No blank solution pages in the PDF',
+    items: [
+      'Changing a multi-page solution in the PDF with fewer images (or text) now removes the leftover solution pages instead of leaving them blank under a "Worked solution" header.',
+    ],
+  },
   {
     version: '1.98', date: '2026-10-31', title: 'Solutions with several pages',
     items: [
@@ -28,12 +34,6 @@ export const CHANGELOG = [
     version: '1.95', date: '2026-10-30', title: 'Pinned PDF reset and roomier chat choice',
     items: [
       'The formula PDF Reset control stays in the sticky toolbar while you scroll, and the tutoring chat choice now sizes to fit its buttons.',
-    ],
-  },
-  {
-    version: '1.94', date: '2026-10-30', title: 'Tighter location breadcrumbs',
-    items: [
-      'Folder paths in the top bar now sit directly between their slash separators, with no uneven spacing.',
     ],
   },
 ];
