@@ -123,6 +123,7 @@ export function ZoomPan({ children }) {
   }, []);
 
   const onPointerDown = (e) => {
+    if (e.target.closest?.('.zoompan-reset')) return;
     if (e.button !== 0 || view.k === 1) return;
     e.preventDefault();
     box.current.setPointerCapture(e.pointerId);

@@ -62,7 +62,7 @@ function PdfViewer({ setId, sheet }) {
         if (!live) return;
         const baseViewport = page.getViewport({ scale: 1 });
         const scale = width / baseViewport.width;
-        const pixelRatio = window.devicePixelRatio || 1;
+        const pixelRatio = Math.max(window.devicePixelRatio || 1, 2);
         const viewport = page.getViewport({ scale: scale * pixelRatio });
         const target = canvas.current;
         const context = target.getContext('2d');

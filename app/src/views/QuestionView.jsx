@@ -158,7 +158,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
       }
       try {
         if (await imageCopy) {
-          toast('Prompt and question image copied. Paste them into the new chat.', 'info');
+          toast('Prompt and question image copied. Paste them together into the chat.', 'info');
         } else {
           const copied = await copyText(prompt);
           toast(copied
@@ -173,6 +173,18 @@ export default function QuestionView({ setId, uid, run, theme }) {
       }
     })();
   };
+  const chooseAgent = () => open(({ close }) => (
+    <Modal compact title="Open tutoring chat" onClose={() => close()} footer={(
+      <>
+        <button type="button" className="btn" onClick={() => close()}>Cancel</button>
+        <a className="btn" href={readAgentUrl()} target="_blank" rel="noopener noreferrer" onClick={() => { close(); solveWithAgent(); }}>Use chat website</a>
+        <a className="btn primary" href={CLAUDE_DESKTOP_URL} target="_blank" rel="noopener noreferrer" onClick={() => { close(); solveWithAgent(); }}>Try Claude Desktop</a>
+      </>
+    )}>
+      <p>Choose where to open the tutoring chat. The prompt and question image will be copied when supported; paste them into the chat with Ctrl+V. Browsers cannot paste into another app automatically.</p>
+      <p className="muted">If Claude Desktop is not installed or does not open, choose the website instead.</p>
+    </Modal>
+  ));
 
   useEffect(() => {
     if (!question) return undefined;
@@ -291,8 +303,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
                 {editMode && <div className="edit-row">Solution {pencil('Edit the solution: wording, image', () => openEdit('solution'))}</div>}
                 <Solution set={set} question={question} />
                 <div style={{ marginTop: 12 }}>
-                  <a className="btn primary" href={readAgentUrl()} target="_blank" rel="noopener noreferrer" onClick={solveWithAgent}><Icon name="robot" /> Solve with agent</a>
-                  <a className="btn" href={CLAUDE_DESKTOP_URL} target="_blank" rel="noopener noreferrer" onClick={solveWithAgent} title="Try to open Claude Desktop, then paste with Ctrl+V"><Icon name="robot" /> Try Claude Desktop</a>
+                  <button type="button" className="btn primary" onClick={chooseAgent}><Icon name="robot" /> Solve with agent</button>
                 </div>
               </>
             )}

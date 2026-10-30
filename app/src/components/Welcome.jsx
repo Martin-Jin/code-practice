@@ -67,12 +67,13 @@ const SECTIONS = [
     id: 'agent-help', title: 'Get hints from an AI agent',
     body: (
       <>
-        <p>On a question in <b>Your library</b>, choose <b>Solve with agent</b> to open your chosen AI chat website and copy a tutoring prompt with the question, your saved answers and notes. Claude is the default; change it in Settings if you prefer another site. You can also try <b>Try Claude Desktop</b> to open the desktop app instead.</p>
+        <p>On a question in <b>Your library</b>, choose <b>Solve with agent</b> to choose between opening the Claude Desktop app and your chosen chat website. Claude is the default website; change it in Settings if you prefer another site.</p>
         <ul>
           <li>Set the chat website in <b>Settings &gt; AI agent</b>. It must be an HTTPS address.</li>
-          <li>Paste the copied prompt into the new chat. The prompt asks the agent to guide you with one hint at a time, and to ask for your working first if you have not included any.</li>
-          <li>The app copies the question image with the prompt when the browser supports it, including Firefox. If the chat does not receive the image, attach it yourself.</li>
-          <li>The desktop option tries the <code>claude://</code> app link. Paste from the clipboard with <b>Ctrl+V</b> after Claude opens; browsers cannot paste into another app automatically. If Claude Desktop is not installed, use the website button.</li>
+          <li>The prompt asks the agent to guide you with one hint at a time, and to ask for your working first if you have not included any.</li>
+          <li>The clipboard includes the prompt as text and rich HTML with the question image embedded, as well as the image itself. Chat apps that accept rich clipboard content can receive both with one <b>Ctrl+V</b>. Some chat apps use only the image or text; if so, paste those separately or attach the image.</li>
+          <li>Browsers cannot insert clipboard content into another app automatically, so paste with <b>Ctrl+V</b> after the chat opens.</li>
+          <li>The desktop option uses the standard <code>claude://</code> app link. If Claude Desktop is not installed or does not open, choose the website in the same dialog.</li>
           <li>Opening a solution (or pressing <b>S</b>) first asks whether you have tried the question. Confirm once to skip the reminder for that question for the rest of the run; starting a new run asks again.</li>
         </ul>
         <p className="muted">The app does not send anything to the AI website. You choose what to paste and share; check that service's privacy terms before sending your work.</p>
@@ -100,7 +101,7 @@ const SECTIONS = [
     body: (
       <>
         <ul>
-          <li><b>Formulas</b> (Alt+T) in a library question opens that set's sheets in a side panel. PDFs render in the app, so Alt+T still works after you click the page; use the arrows to change pages and Ctrl+scroll to zoom.</li>
+          <li><b>Formulas</b> (Alt+T) in a library question opens that set's sheets in a side panel. PDFs render sharply in the app, so Alt+T still works after you click the page; use the arrows to change pages, Ctrl+scroll to zoom, and Reset to return to the fit view.</li>
           <li><b>+ &gt; Add a formula sheet to several sets</b>: choose the file, search and tick the sets. Each gets its own copy, so it travels with the set when exported.</li>
           <li>To remove one, open the set and press <b>Edit this set &gt; Formula sheets</b>.</li>
           <li>Typed answers are checked once a question has an answer: press the pen beside <b>Answers</b> to add or correct it. Numbers match within 1%, or the decimal places asked for.</li>

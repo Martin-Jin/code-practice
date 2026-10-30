@@ -39,6 +39,21 @@ function canvasBlob(canvas) {
   });
 }
 
+function blobDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('The question image could not be prepared for rich-text paste.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]);
+}
+
 function loadImage(blob) {
   const url = URL.createObjectURL(blob);
   const image = new Image();
@@ -86,9 +101,16 @@ async function asPng(blob) {
 export function copyPromptAndImage(prompt, image) {
   if (!navigator.clipboard || typeof navigator.clipboard.write !== 'function' || typeof ClipboardItem === 'undefined') return false;
   const png = Promise.resolve(image).then(asPng);
+  const html = png.then(async (blob) => {
+    const dataUrl = await blobDataUrl(blob);
+    return new Blob([
+      `<div><pre>${escapeHtml(prompt)}</pre><img src="${dataUrl}" alt="Question image" style="max-width:100%"></div>`,
+    ], { type: 'text/html' });
+  });
   try {
     return navigator.clipboard.write([new ClipboardItem({
       'text/plain': new Blob([prompt], { type: 'text/plain' }),
+      'text/html': html,
       'image/png': png,
     })]).then(() => true);
   } catch (error) {

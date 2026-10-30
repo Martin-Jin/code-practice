@@ -15,6 +15,7 @@ test('clipboard image write starts before the image is ready', async () => {
   let writeStarted = false;
   let clipboardItem;
   let resolveImage;
+  let htmlBlob;
   const image = new Promise((resolve) => { resolveImage = resolve; });
   const restoreNavigator = replaceGlobal('navigator', {
     clipboard: {
@@ -22,22 +23,33 @@ test('clipboard image write starts before the image is ready', async () => {
         writeStarted = true;
         assert.equal(item.items['text/plain'].type, 'text/plain');
         await item.items['image/png'];
+        htmlBlob = await item.items['text/html'];
       },
     },
   });
   const restoreClipboardItem = replaceGlobal('ClipboardItem', class {
     constructor(items) { this.items = items; clipboardItem = this; }
   });
+  const restoreFileReader = replaceGlobal('FileReader', class {
+    readAsDataURL(blob) {
+      this.result = `data:${blob.type};base64,AA==`;
+      queueMicrotask(() => this.onload());
+    }
+  });
   try {
-    const copied = copyPromptAndImage('Tutor prompt', image);
+    const copied = copyPromptAndImage('Tutor <prompt>', image);
     assert.equal(writeStarted, true);
-    assert.equal(clipboardItem.items['text/plain'].size, 'Tutor prompt'.length);
+    assert.equal(clipboardItem.items['text/plain'].size, 'Tutor <prompt>'.length);
     resolveImage(new Blob(['png bytes'], { type: 'image/png' }));
     assert.equal(await clipboardItem.items['image/png'].then((blob) => blob.type), 'image/png');
     assert.equal(await copied, true);
+    assert.equal(htmlBlob.type, 'text/html');
+    assert.match(await htmlBlob.text(), /Tutor &lt;prompt&gt;/);
+    assert.match(await htmlBlob.text(), /<img src="data:image\/png;base64,AA==" alt="Question image"/);
   } finally {
     restoreNavigator();
     restoreClipboardItem();
+    restoreFileReader();
   }
 });
 
@@ -54,8 +66,14 @@ test('SVG questions fall back to image-element rendering when bitmap decoding fa
     set src(value) { this.url = value; queueMicrotask(() => this.onload()); }
   }
   const restore = [
-    replaceGlobal('navigator', { clipboard: { write: async ([item]) => { replaced.push(await item.items['image/png']); } } }),
+    replaceGlobal('navigator', { clipboard: { write: async ([item]) => { replaced.push(await item.items['image/png']); await item.items['text/html']; } } }),
     replaceGlobal('ClipboardItem', class { constructor(items) { this.items = items; } }),
+    replaceGlobal('FileReader', class {
+      readAsDataURL(blob) {
+        this.result = `data:${blob.type};base64,AA==`;
+        queueMicrotask(() => this.onload());
+      }
+    }),
     replaceGlobal('createImageBitmap', async () => { throw new DOMException('Cannot decode SVG', 'InvalidStateError'); }),
     replaceGlobal('Image', TestImage),
     replaceGlobal('document', { createElement: () => canvas }),

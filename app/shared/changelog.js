@@ -3,13 +3,25 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.91';
+export const VERSION = '1.93';
 
 export const CHANGELOG = [
   {
+    version: '1.93', date: '2026-10-30', title: 'Sharper formula sheets',
+    items: [
+      'Formula-sheet PDFs now render at higher resolution without changing their displayed size, and the zoom Reset control works reliably.',
+    ],
+  },
+  {
+    version: '1.92', date: '2026-10-30', title: 'Choose where to open the tutor',
+    items: [
+      'Solve with agent now offers Claude Desktop or the configured chat website from one button. The clipboard includes the prompt as text and rich HTML with the question image embedded, alongside the image itself; chats that accept rich clipboard content can receive both in one paste.',
+    ],
+  },
+  {
     version: '1.91', date: '2026-10-30', title: 'Try Claude Desktop',
     items: [
-      'A separate button attempts to open Claude Desktop via its claude:// link and copies the question prompt to the clipboard. Paste it into the app with Ctrl+V; the browser website button remains available as a fallback.',
+      'The solution view can launch Claude Desktop through its standard claude:// link and copy the tutoring prompt; the configured website remains available as a fallback.',
     ],
   },
   {
@@ -24,19 +36,6 @@ export const CHANGELOG = [
       'Library questions can open your chosen HTTPS AI chat website (Claude by default) and copy a prompt with the question, saved answers and notes. The prompt asks for your working first when none is provided; attach the question image manually if clipboard image copy is unavailable.',
       'The first time you open a solution for a question in a run, a short reminder asks whether you have attempted it. Confirm once to skip the reminder for that question in the rest of the run; a new run asks again. The S shortcut follows the same rule.',
       'Formula-sheet PDFs now render inside the app, keeping shortcuts such as Alt+T available after clicking the page. The top bar stays on one line, hides path breadcrumbs when less than a full word fits, and keeps History available as an icon on small screens.',
-    ],
-  },
-  {
-    version: '1.88', date: '2026-10-30', title: 'Side-by-side worked solution pages',
-    items: [
-      'Worked solution PDF pages now scroll horizontally. Enlarge any page to switch between pages with the arrows while keeping the same zoom level.',
-    ],
-  },
-  {
-    version: '1.87', date: '2026-10-30', title: 'Question counts and validation messages',
-    items: [
-      'Random mode now starts with no more questions than are available in the pool, for both coding and imported sets.',
-      'Invalid fields and form entries now use consistent error pop-ups that fade away.',
     ],
   },
 ];
