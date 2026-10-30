@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, setSelfMark, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, setSelfMark, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus, hasAttemptedSolution, recordSolutionAttempted } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
@@ -9,9 +9,13 @@ import { PartAnswer, SelfMark, AnswerKeyEditor } from '../components/Parts.jsx';
 import { knownTags } from '../components/TagInput.jsx';
 import FormulaSidebar from '../components/FormulaSidebar.jsx';
 import EditContent from '../components/EditContent.jsx';
-import { useDialogs } from '../components/Dialogs.jsx';
+import { Modal, useDialogs } from '../components/Dialogs.jsx';
+import { toast } from '../components/Toasts.jsx';
 import { sheetsOf } from '../lib/formulas.js';
 import { folderCrumbs } from '../lib/folders.js';
+import { copyText } from '../lib/clipboard.js';
+import { copyPromptAndImage, questionImage, readAgentUrl } from '../lib/solve-agent.js';
+import { formatSolvePrompt } from '../../shared/solve-agent.js';
 
 const loadFlag = (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : v === 'true'; } catch { return fallback; } };
 const saveFlag = (key, value) => { try { localStorage.setItem(key, String(value)); } catch { /* storage blocked */ } };
@@ -50,6 +54,13 @@ const BANNER = {
   nokey: ['warn', 'This question has no answer key yet, so it cannot be checked. Add one in the Answer key tab.'],
 };
 
+const SOLUTION_ENCOURAGEMENT = [
+  'Even a rough first attempt gives you something useful to learn from.',
+  'A little persistence now can make the worked steps click later.',
+  'Try writing down what you know so far; it is a good starting point.',
+  'Give it one more honest go. You can compare your approach afterwards.',
+];
+
 // One question of an imported set: the question, an answer box for each part, and a side panel
 // with the solution and the answer key editor. Inside a practice session (`run`), Previous and Next
 // follow the session's questions and a strip along the top shows how each one went.
@@ -63,6 +74,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const question = questions[index];
   const progress = getProgress(setId, uid);
   const [panel, setPanel] = useState(null);   // 'solution' | 'key' | null
+  const solutionPromptOpen = useRef(false);
   const [result, setResult] = useState(null); // the last check's overall result
   const [editMode, setEditMode] = useState(() => loadFlag('editMode', false));   // shows the controls that change the question
   const [formulaOpen, setFormulaOpen] = useState(() => loadFlag('formulaOpen', false));
@@ -100,7 +112,67 @@ export default function QuestionView({ setId, uid, run, theme }) {
     const ok = await confirm({ title: 'Reset the checks?', body: 'The count of times this question was checked, and how many were right, goes back to zero. Your typed answers and notes are kept.', confirmText: 'Reset' });
     if (ok) { resetChecks(setId, uid); setResult(null); }
   };
+  const toggleSolution = async () => {
+    if (panel === 'solution') { setPanel(null); return; }
+    if (!hasAttemptedSolution(setId, uid, run ? run.id : null)) {
+      if (solutionPromptOpen.current) return;
+      solutionPromptOpen.current = true;
+      const encouragement = SOLUTION_ENCOURAGEMENT[Math.floor(Math.random() * SOLUTION_ENCOURAGEMENT.length)];
+      let attempted;
+      try {
+        attempted = await open(({ close }) => (
+          <Modal compact className="attempt-prompt" title="Have you attempted this question?" onClose={() => close(false)}
+            footer={(
+              <>
+                <button type="button" className="btn" onClick={() => close(false)}>Not yet</button>
+                <button type="button" className="btn primary" autoFocus onClick={() => close(true)}>Yes, I've attempted this myself</button>
+              </>
+            )}>
+            <div className="attempt-prompt-body">
+              <span className="attempt-spark" aria-hidden="true">✦</span>
+              <p>{encouragement}</p>
+            </div>
+          </Modal>
+        ));
+      } finally {
+        solutionPromptOpen.current = false;
+      }
+      if (!attempted) return;
+      recordSolutionAttempted(setId, uid, run ? run.id : null);
+    }
+    setPanel('solution');
+  };
   const toggleDifficult = () => setDifficult(setId, uid, !(progress && progress.difficult));
+  const solveWithAgent = () => {
+    const prompt = formatSolvePrompt({ set, question, answers, notes });
+    const copied = copyText(prompt);
+    void (async () => {
+      if (!(await copied)) {
+        toast('Could not copy the prompt. Check clipboard permissions and try again.', 'bad');
+        return;
+      }
+      let image;
+      try {
+        image = await questionImage(set, question);
+      } catch {
+        toast('Prompt copied. The question image could not be prepared; attach it to the chat manually.', 'info');
+        return;
+      }
+      if (!image) {
+        toast('Prompt copied. Paste it into the new chat.', 'info');
+        return;
+      }
+      try {
+        if (await copyPromptAndImage(prompt, image)) {
+          toast('Prompt and question image copied. Paste them into the new chat.', 'info');
+        } else {
+          toast('Prompt copied. This browser cannot copy the image with it; attach the image manually.', 'info');
+        }
+      } catch {
+        toast('Prompt copied. The image could not be copied with it; attach the image manually.', 'info');
+      }
+    })();
+  };
 
   useEffect(() => {
     if (!question) return undefined;
@@ -108,7 +180,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
       if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === 'KeyT') { e.preventDefault(); toggleFormula(); return; }
       if (e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]')) return;
       if (e.key === 'd') { e.preventDefault(); toggleDifficult(); }
-      else if (e.key === 's') { e.preventDefault(); setPanel((p) => (p === 'solution' ? null : 'solution')); }
+      else if (e.key === 's') { e.preventDefault(); void toggleSolution(); }
       else if (e.key === 'ArrowRight' && index < questions.length - 1) window.location.hash = go(index + 1);
       else if (e.key === 'ArrowLeft' && index > 0) window.location.hash = go(index - 1);
     };
@@ -201,7 +273,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
               <button type="button" className="btn" aria-pressed={difficult} onClick={toggleDifficult} title="Mark this question as difficult (D). Difficult questions can be drawn more often.">
                 <Icon name="flag" /> {difficult ? 'Marked difficult' : 'Mark as difficult'}
               </button>
-              <button type="button" className="btn" aria-pressed={panel === 'solution'} onClick={() => setPanel(panel === 'solution' ? null : 'solution')} title="Show or hide the solution (S)">Solution</button>
+              <button type="button" className="btn" aria-pressed={panel === 'solution'} onClick={() => void toggleSolution()} title="Show or hide the solution (S)">Solution</button>
               <button type="button" className="btn" aria-pressed={formulaOpen} onClick={toggleFormula} title="Show or hide the formula sheets (Alt+T)">Formulas{sheetsOf(setId).length ? ` (${sheetsOf(setId).length})` : ''}</button>
             </div>
             <label className="stack" style={{ gap: 4 }}>
@@ -218,6 +290,9 @@ export default function QuestionView({ setId, uid, run, theme }) {
               <>
                 {editMode && <div className="edit-row">Solution {pencil('Edit the solution: wording, image', () => openEdit('solution'))}</div>}
                 <Solution set={set} question={question} />
+                <div style={{ marginTop: 12 }}>
+                  <a className="btn primary" href={readAgentUrl()} target="_blank" rel="noopener noreferrer" onClick={solveWithAgent}><Icon name="robot" /> Solve with agent</a>
+                </div>
               </>
             )}
             {editMode && panel === 'key' && (

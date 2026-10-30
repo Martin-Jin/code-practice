@@ -46,9 +46,10 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 
 - **Dashboard** (`#/`): a banner with a greeting that changes each visit (and a button to resume your latest session), then every run in progress and finished runs. The question sets are on their own tab, **Question sets** (`#/sets`). Runs keep their progress until you reset or abandon them. You can have several going at once, including several in the same set.
 - **Set page**: choose a test mode and start a run. Also lists your runs in that set and links to its stats.
-- **Library** (on the dashboard): question sets from folders on your computer. See [Your own question sets](#your-own-question-sets).
+- **Library** (on the dashboard): question sets from folders on your computer. See [Your own question sets](#your-own-question-sets), including how to ask an AI agent for hints.
 - **Run**: the workspace described below.
 - **Stats**: counters per question for a set (attempts, correct, wrong, compile errors, crashes, pass rate). An *attempt* is one press of Run, so it counts compiles. Stats are lifetime counters: resetting or abandoning a run never changes them. Use **Reset stats** on the stats page to clear them.
+- **History**: past runs, including imported-set practice sessions. On narrow screens the top bar reduces the tabs to icons; the History icon remains available.
 
 ## Drawing the questions you struggle with more often
 
@@ -92,6 +93,8 @@ Below 820 px wide the run screen shows one panel at a time, chosen from the bar 
 
 It works, but a phone is a cramped place to write C++: the on-screen keyboard covers most of the editor and brackets are awkward to reach. Expect to use it for reading tasks, checking results and light edits; use a laptop for real practice. Pane resizing and the keyboard shortcuts are desktop-only.
 
+On library-question pages, the top bar stays on one line. It scrolls long labels on hover or focus, hides parent-folder breadcrumbs when space is tight, and hides the whole path when there is not enough room to show even its first full word.
+
 ## Your own question sets
 
 The **Question sets** tab shows the coding sets, then **Your library**: question sets that come from your own folders (practice PDFs, quiz screenshots), not from the repo. They must follow [question-set-format.md](question-set-format.md): a `.questions.json` file per set, with its images and PDF beside it. Each set is a tile; click it to open it, where **Browse**, **Stats**, **Add a question**, **Formula sheets** and **Remove** are.
@@ -132,7 +135,11 @@ A question opens with its wording (typed text with maths, an image, or the page 
 - **Number parts** take a typed number (`1,234.5`, `0,297` and `1e3` all work). **Check answer** (or Enter in a box) marks it right when it is within 1% of the answer, or within half a unit of the decimal places the question asks for, if that allows more. A wrong answer shows the right one. **Multiple choice** needs exactly the right options. **Self-marked** parts have **I got it** and **Not quite** buttons: read the solution, then mark yourself.
 - A check counts as an attempt only when every part has an answer. The question shows how many times you were right or not right, and the set page shows it in the list.
 - **Mark as difficult** (or `D`) flags a question. The flag is saved with your progress and shows in the set's list.
-- **Solution** (or `S`) shows the worked solution: PDF pages with the blank space trimmed, images, or typed text. `←` and `→` move to the previous and next question.
+- **Solution** (or `S`) shows the worked solution: PDF pages with the blank space trimmed, images, or typed text. The first reveal in a run asks whether you have attempted that question. Confirm to dismiss the reminder for that question for the rest of the run; declining keeps the solution hidden and asks again next time. A new run starts fresh. Outside a run, the confirmation is remembered with that question's progress. `←` and `→` move between questions.
+- **Solve with agent** opens the HTTPS chat address saved in **Settings > AI agent** (Claude by default) and copies a tutoring prompt with the question wording, your current answers and your notes. Paste it into the chat yourself. The prompt tells the agent to ask for your working first if you have not included any; it does not include the set's reference solution.
+- The app tries to put the question image on the clipboard with the prompt, including a crop from a PDF. Browser and chat clipboard support varies: if the image is not pasted, attach it manually. Firefox still gets the text prompt; its image clipboard support may require manual attachment.
+- The app does not send your work to the AI site. You choose whether to paste the prompt or attach the image, and the external service's own privacy terms apply.
+- Formula-sheet PDFs render inside the app with page controls and Ctrl+scroll zoom rather than in the browser's built-in PDF viewer. This keeps shortcuts such as `Alt+T` available after clicking the page; images are unchanged.
 - **Stats** (on a set's card or its page) shows how you are doing in that set: totals (checks, right, not right, right rate, questions solved, tried but never right, not checked yet, marked difficult), **Worth another go** (the questions you marked difficult or got not right, worst first, each a link), and a row per section with its solved count and right rate. **Reset stats** clears the counts and last results of the set; your typed answers, difficult marks and answer keys are kept. Only checks that count are included (see above), and the stats are part of a backup.
 - **Enlarge a figure:** click any question or solution image or PDF crop (or its **Enlarge** button) to open it full window. A click on the figure toggles 200%, **+** and **−** (or the keys) step through 100%, 150%, 200%, 300% and 400%, `0` fits the window, drag to move around when zoomed, and `Esc` or a click outside closes it. PDF crops are redrawn at the new size, so they stay sharp.
 - **Answer key** is where you add or correct what the app checks against: parts (number with unit, decimal places and accepted error; multiple choice with its options; self-marked), marks, tags, and for a PDF question the top and bottom of the crop. It is saved in this browser as your own correction (the imported file is not changed), is part of a backup, and **Revert to the imported version** removes it. A question the PDF indexer found starts with one self-marked part, so this is where to add the numeric answer from the solution. Questions of your library are found by the search box (`Ctrl+P` or `/`) through their title, section, source, tags and wording.

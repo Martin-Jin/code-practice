@@ -67,7 +67,7 @@ export const STORES = {
 // localStorage is this app's to touch, and a backup never carries another app's data or credentials.
 export const OWN_SETTINGS = [
   'runner', 'autoSuggest', 'prioritise', 'shortcuts', 'theme', 'wandbox-compiler', 'online-ack', 'taskTab', 'taskOpen', 'sideOpen',
-  'outputOpen', 'sizes', 'editMode', 'formulaOpen', 'formulaWidth',
+  'outputOpen', 'sizes', 'editMode', 'formulaOpen', 'formulaWidth', 'solveAgentUrl',
 ];
 export const isOwnSetting = (key) => OWN_SETTINGS.includes(key) || key.startsWith('collapsed:');
 

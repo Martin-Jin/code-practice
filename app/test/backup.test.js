@@ -138,10 +138,10 @@ test('the file name carries the local date', () => {
 });
 
 test("a backup carries only this app's settings, and ignores other apps' keys in a file it reads", () => {
-  const b = buildBackup({ stores: {}, settings: { runner: 'local', theme: 'dark', 'collapsed:x': '1', 'taskflow:v1:tasks': '[]', 'firebase:authUser:abc': '{}', 'taskflow:v1:aiGeminiApiKey': 'k' } });
-  assert.deepEqual(Object.keys(b.settings).sort(), ['collapsed:x', 'runner', 'theme']);
+  const b = buildBackup({ stores: {}, settings: { runner: 'local', theme: 'dark', solveAgentUrl: 'https://chat.example', 'collapsed:x': '1', 'taskflow:v1:tasks': '[]', 'firebase:authUser:abc': '{}', 'taskflow:v1:aiGeminiApiKey': 'k' } });
+  assert.deepEqual(Object.keys(b.settings).sort(), ['collapsed:x', 'runner', 'solveAgentUrl', 'theme']);
   const raw = { ...b, settings: { ...b.settings, 'taskflow:v1:tasks': '[]', 'firebase:authUser:abc': '{}' } };
-  assert.deepEqual(Object.keys(parseBackup(JSON.stringify(raw)).settings).sort(), ['collapsed:x', 'runner', 'theme']);
+  assert.deepEqual(Object.keys(parseBackup(JSON.stringify(raw)).settings).sort(), ['collapsed:x', 'runner', 'solveAgentUrl', 'theme']);
 });
 
 test('a share file holds only the questions made in the app and their answer keys, and is marked as a share', () => {

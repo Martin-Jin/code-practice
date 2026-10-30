@@ -31,6 +31,7 @@ const PATHS = {
   exit: <path d="M6.5 2.5h-3v11h3M9.5 5.5L12.5 8l-3 2.5M12.5 8H6" />,
   questions: <path d="M6 4h8M6 8h8M6 12h8M2.5 4h.01M2.5 8h.01M2.5 12h.01" strokeWidth="2" />,
   code: <path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5" />,
+  robot: <><rect x="3" y="5" width="10" height="8" rx="2" /><path d="M8 2.5V5M1.5 8H3M13 8h1.5M6 10.5h4" /><circle cx="5.7" cy="8" r=".65" /><circle cx="10.3" cy="8" r=".65" /></>,
 };
 
 export default function Icon({ name, solid, ...rest }) {

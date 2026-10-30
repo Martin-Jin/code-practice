@@ -64,6 +64,21 @@ const SECTIONS = [
     ),
   },
   {
+    id: 'agent-help', title: 'Get hints from an AI agent',
+    body: (
+      <>
+        <p>On a question in <b>Your library</b>, choose <b>Solve with agent</b> to open your chosen AI chat website and copy a tutoring prompt with the question, your saved answers and notes. Claude is the default; change it in Settings if you prefer another site.</p>
+        <ul>
+          <li>Set the chat website in <b>Settings &gt; AI agent</b>. It must be an HTTPS address.</li>
+          <li>Paste the copied prompt into the new chat. The prompt asks the agent to guide you with one hint at a time, and to ask for your working first if you have not included any.</li>
+          <li>The app tries to copy the question image with the prompt. If the chat does not receive it, attach the image yourself. This also applies in Firefox when image clipboard access is unavailable.</li>
+          <li>Opening a solution (or pressing <b>S</b>) first asks whether you have tried the question. Confirm once to skip the reminder for that question for the rest of the run; starting a new run asks again.</li>
+        </ul>
+        <p className="muted">The app does not send anything to the AI website. You choose what to paste and share; check that service's privacy terms before sending your work.</p>
+      </>
+    ),
+  },
+  {
     id: 'pdf', title: 'Format a PDF with an agent',
     body: (
       <>
@@ -84,7 +99,7 @@ const SECTIONS = [
     body: (
       <>
         <ul>
-          <li><b>Formulas</b> (Alt+T) in a library question opens that set's sheets in a side panel.</li>
+          <li><b>Formulas</b> (Alt+T) in a library question opens that set's sheets in a side panel. PDFs render in the app, so Alt+T still works after you click the page; use the arrows to change pages and Ctrl+scroll to zoom.</li>
           <li><b>+ &gt; Add a formula sheet to several sets</b>: choose the file, search and tick the sets. Each gets its own copy, so it travels with the set when exported.</li>
           <li>To remove one, open the set and press <b>Edit this set &gt; Formula sheets</b>.</li>
           <li>Typed answers are checked once a question has an answer: press the pen beside <b>Answers</b> to add or correct it. Numbers match within 1%, or the decimal places asked for.</li>

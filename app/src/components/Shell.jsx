@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { setRunner, setAutoSuggest, setPrioritise, setShortcut, resetShortcuts } from '../lib/service.js';
 import { ACTIONS, FIXED, comboFor, eventCombo, checkCombo } from '../lib/shortcuts.js';
@@ -12,15 +12,58 @@ import GlobalSearch from './GlobalSearch.jsx';
 import { BackupSection } from './Backup.jsx';
 import KebabMenu from './KebabMenu.jsx';
 import { APP_NAME } from '../../shared/brand.js';
+import { DEFAULT_AGENT_URL, normaliseAgentUrl } from '../../shared/solve-agent.js';
+import { readAgentUrl, saveAgentUrl } from '../lib/solve-agent.js';
+import { toast } from './Toasts.jsx';
 import { openWelcome } from './Welcome.jsx';
 
 export const THEME_ICON = { auto: 'auto', light: 'sun', dark: 'moon' };
 export const THEME_LABEL = { auto: 'Auto (follows your system)', light: 'Light', dark: 'Dark' };
 
+function ScrollCrumb({ text, href }) {
+  const label = useRef(null);
+  const frame = useRef(0);
+  const slide = (toEnd) => {
+    const element = label.current;
+    cancelAnimationFrame(frame.current);
+    if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const from = element.scrollLeft;
+    const to = toEnd ? element.scrollWidth - element.clientWidth : 0;
+    if (from === to) return;
+    const duration = Math.max(400, Math.abs(to - from) * 12);
+    const start = performance.now();
+    const step = (now) => {
+      const progress = Math.min(1, (now - start) / duration);
+      element.scrollLeft = from + (to - from) * (progress < .5 ? 2 * progress * progress : 1 - 2 * (1 - progress) * (1 - progress));
+      if (progress < 1) frame.current = requestAnimationFrame(step);
+    };
+    frame.current = requestAnimationFrame(step);
+  };
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+  const props = { className: 'crumb-item', title: text, onMouseEnter: () => slide(true), onMouseLeave: () => slide(false), onFocus: () => slide(true), onBlur: () => slide(false) };
+  const content = <span ref={label} className="crumb-label">{text}</span>;
+  return href ? <a {...props} href={href}>{content}</a> : <b {...props} tabIndex={0}>{content}</b>;
+}
+
 export function SettingsDialog({ close }) {
   const st = useStore();
   const { open } = useDialogs();
+  const [agentUrl, setAgentUrl] = useState(readAgentUrl);
+  const [agentUrlError, setAgentUrlError] = useState('');
   const options = ['local', 'online'];
+  const saveAgentWebsite = () => {
+    if (!normaliseAgentUrl(agentUrl)) {
+      setAgentUrlError('Enter a complete HTTPS address without a username or password.');
+      return;
+    }
+    try {
+      setAgentUrl(saveAgentUrl(agentUrl));
+      setAgentUrlError('');
+      toast('AI chat website saved.');
+    } catch (e) {
+      setAgentUrlError(`Could not save this setting: ${e.message}`);
+    }
+  };
   return (
     <Modal title="Settings" onClose={() => close()} footer={<button type="button" className="btn primary" onClick={() => close()}>Done</button>}>
       <div className="modes">
@@ -54,6 +97,13 @@ export function SettingsDialog({ close }) {
       <p className="muted">
         Applies to random picks: the practice test, Random mode, and random sessions in your library. C++ questions you fail often come up more; library questions you marked difficult or got wrong come up more. Every question can still appear.
       </p>
+      <h3>AI agent</h3>
+      <label className="field">AI chat website
+        <input type="text" value={agentUrl} placeholder={DEFAULT_AGENT_URL} autoComplete="url" onChange={(e) => { setAgentUrl(e.target.value); setAgentUrlError(''); }} />
+      </label>
+      <p className="muted">Solve with agent opens this HTTPS address and copies the question, your saved answers and notes. Nothing is sent until you paste it into the chat. The question image is copied when the browser supports it; otherwise attach it manually.</p>
+      {agentUrlError && <div className="notice bad" role="alert">{agentUrlError}</div>}
+      <button type="button" className="btn" onClick={saveAgentWebsite}>Save AI chat website</button>
       {!persistent && <div className="notice">This browser is not letting the page save data, so progress will be lost when you close the tab.</div>}
       <h3>Help</h3>
       <div><button type="button" className="btn" onClick={() => { close(); openWelcome(open); }}>Open the tutorial and what's new</button></div>
@@ -167,9 +217,49 @@ const tabOfHash = () => (/^#\/(sets|set|lib|q)(\/|$)/.test(window.location.hash)
 
 // Top bar for the dashboard, set and stats pages. `hero` is a banner between the bar and the page (the landing page's).
 export default function Shell({ crumbs = [], theme, hero = null, children }) {
+  const nav = useRef(null);
+  const crumbKey = crumbs.map((c) => c.label).join('\0');
+  const [hideCrumbs, setHideCrumbs] = useState(false);
+
+  useEffect(() => {
+    const element = nav.current;
+    if (!element || !crumbKey) { setHideCrumbs(false); return undefined; }
+    const crumbBox = element.querySelector('.crumbs');
+    let frame = 0;
+    const measure = () => {
+      const item = crumbBox.querySelector('.crumb-group.current .crumb-item');
+      const label = item && item.querySelector('.crumb-label');
+      const word = label && label.textContent.trim().match(/\S+/)?.[0];
+      const textNode = label && label.firstChild;
+      if (!item || !textNode || !word) { setHideCrumbs(false); return; }
+      const range = document.createRange();
+      range.setStart(textNode, 0);
+      range.setEnd(textNode, Math.min(word.length, textNode.length));
+      setHideCrumbs(item.clientWidth < range.getBoundingClientRect().width + 8);
+    };
+    const scheduleMeasure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => { frame = requestAnimationFrame(measure); });
+    };
+    const handleResize = () => {
+      setHideCrumbs(false);
+      scheduleMeasure();
+    };
+    setHideCrumbs(false);
+    scheduleMeasure();
+    const observer = new ResizeObserver(scheduleMeasure);
+    observer.observe(element);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [crumbKey]);
+
   return (
     <>
-      <nav className="shell-nav">
+      <nav ref={nav} className="shell-nav">
         <a className="brand" href="#/"><span className="logo"><Logo /></span><span className="brand-name">{APP_NAME}</span></a>
         <div className="top-tabs" role="navigation" aria-label="Pages">
           {TABS.map(([id, label, href, icon]) => (
@@ -178,11 +268,11 @@ export default function Shell({ crumbs = [], theme, hero = null, children }) {
             </a>
           ))}
         </div>
-        <div className="crumbs">
+        <div className={`crumbs${hideCrumbs ? ' path-hidden' : ''}`} role="group" aria-label="Current location">
           {crumbs.map((c, i) => (
-            <span key={i} style={{ display: 'contents' }}>
-              <span>/</span>
-              {c.href ? <a href={c.href}>{c.label}</a> : <b>{c.label}</b>}
+            <span key={i} className={`crumb-group${i === crumbs.length - 1 ? ' current' : ''}`}>
+              <span className="crumb-sep" aria-hidden="true">/</span>
+              <ScrollCrumb text={c.label} href={c.href} />
             </span>
           ))}
         </div>

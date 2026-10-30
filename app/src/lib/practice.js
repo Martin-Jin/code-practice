@@ -6,6 +6,7 @@ import { checkQuestion, uncheckedQuestions } from '../../shared/answers.js';
 import { applyEdit } from '../../shared/questionset.js';
 import { pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes.js';
 import { weightOf, libraryTrouble } from '../../shared/weights.js';
+import { acknowledgeSolution as markSolutionAcknowledged, hasAcknowledgedSolution } from '../../shared/solution-gate.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { syncMine } from './library.js';
@@ -52,6 +53,32 @@ export function discardPracticeSaves() {
 // ---- progress ----
 
 export const getProgress = (setId, uid) => state.libProgress[keyOf(setId, uid)] || null;
+
+export function hasAttemptedSolution(setId, uid, runId = null) {
+  const progress = getProgress(setId, uid);
+  if (runId) {
+    const run = state.libRuns[runId];
+    return run ? hasAcknowledgedSolution(run, null, uid) : false;
+  }
+  return hasAcknowledgedSolution(null, progress, uid);
+}
+
+export function recordSolutionAttempted(setId, uid, runId = null) {
+  if (runId) {
+    const run = state.libRuns[runId];
+    if (!run) throw new Error(`Practice run not found: ${runId}`);
+    Object.assign(run, markSolutionAcknowledged(run, null, uid));
+    run.updatedAt = now();
+    db.put('libRuns', run);
+    notify();
+    return;
+  }
+  const progress = ensure(setId, uid);
+  Object.assign(progress, markSolutionAcknowledged(null, progress, uid));
+  progress.updatedAt = now();
+  db.put('libProgress', progress);
+  notify();
+}
 
 function ensure(setId, uid) {
   const key = keyOf(setId, uid);
@@ -254,7 +281,7 @@ export function createLibRun({ setId, mode, options = {}, name }) {
   const stamp = now();
   const run = {
     id: newId(), setId, name: (name && name.trim().slice(0, 80)) || autoName(mode), mode, options,
-    questions, current: questions[0], createdAt: stamp, updatedAt: stamp, completedAt: null,
+    questions, current: questions[0], createdAt: stamp, updatedAt: stamp, completedAt: null, solutionAcknowledged: {},
   };
   state.libRuns[run.id] = run;
   db.put('libRuns', run);

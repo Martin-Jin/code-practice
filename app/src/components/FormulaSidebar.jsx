@@ -5,9 +5,110 @@ import { ZoomPan } from './Lightbox.jsx';
 import Icon from './Icon.jsx';
 import { toast } from './Toasts.jsx';
 import { useDialogs } from './Dialogs.jsx';
+import { loadPdfjs } from '../lib/pdfjs.js';
 
-// One sheet: a PDF in the browser's own viewer, or an image that can be zoomed and moved.
-function Sheet({ setId, sheet }) {
+function PdfViewer({ setId, sheet }) {
+  const [pdf, setPdf] = useState(null);
+  const [error, setError] = useState('');
+  const [renderError, setRenderError] = useState('');
+  const [pageNumber, setPageNumber] = useState(1);
+  const [width, setWidth] = useState(0);
+  const frame = useRef(null);
+  const canvas = useRef(null);
+
+  useEffect(() => {
+    let live = true;
+    let loadingTask = null;
+    let loadedPdf = null;
+    const load = async () => {
+      try {
+        const blob = await formulaBlob(setId, sheet.path);
+        if (!blob) throw new Error('The saved PDF could not be found.');
+        const pdfjs = await loadPdfjs();
+        if (!live) return;
+        loadingTask = pdfjs.getDocument({ data: new Uint8Array(await blob.arrayBuffer()) });
+        loadedPdf = await loadingTask.promise;
+        if (live) setPdf(loadedPdf);
+      } catch (e) {
+        if (live) setError(`Could not open this PDF: ${e.message}`);
+      }
+    };
+    void load();
+    return () => {
+      live = false;
+      if (loadedPdf) void loadedPdf.destroy();
+      else if (loadingTask) void loadingTask.destroy();
+    };
+  }, [setId, sheet.path]);
+
+  useEffect(() => {
+    const element = frame.current;
+    if (!element) return undefined;
+    const measure = () => setWidth(element.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [pdf]);
+
+  useEffect(() => {
+    if (!pdf || !width || !canvas.current) return undefined;
+    let live = true;
+    let renderTask = null;
+    setRenderError('');
+    const draw = async () => {
+      try {
+        const page = await pdf.getPage(pageNumber);
+        if (!live) return;
+        const baseViewport = page.getViewport({ scale: 1 });
+        const scale = width / baseViewport.width;
+        const pixelRatio = window.devicePixelRatio || 1;
+        const viewport = page.getViewport({ scale: scale * pixelRatio });
+        const target = canvas.current;
+        const context = target.getContext('2d');
+        if (!context) throw new Error('This browser could not create a canvas for the PDF.');
+        target.width = Math.ceil(viewport.width);
+        target.height = Math.ceil(viewport.height);
+        target.style.width = `${baseViewport.width * scale}px`;
+        target.style.height = `${baseViewport.height * scale}px`;
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, target.width, target.height);
+        renderTask = page.render({ canvasContext: context, viewport });
+        await renderTask.promise;
+      } catch (e) {
+        if (live && e.name !== 'RenderingCancelledException') setRenderError(`Could not render this page: ${e.message}`);
+      }
+    };
+    void draw();
+    return () => {
+      live = false;
+      if (renderTask) renderTask.cancel();
+    };
+  }, [pdf, pageNumber, width]);
+
+  return (
+    <>
+      {error && <div className="notice bad" role="alert">{error}</div>}
+      {!pdf && !error && <div className="pdf-wait"><span className="spinner" /></div>}
+      {pdf && (
+        <>
+          <div className="formula-pdf-controls">
+            <button type="button" className="btn ghost sm" aria-label="Previous PDF page" disabled={pageNumber <= 1} onClick={() => setPageNumber((n) => n - 1)}>‹</button>
+            <span>Page {pageNumber} of {pdf.numPages}</span>
+            <button type="button" className="btn ghost sm" aria-label="Next PDF page" disabled={pageNumber >= pdf.numPages} onClick={() => setPageNumber((n) => n + 1)}>›</button>
+          </div>
+          {renderError && <div className="notice bad" role="alert">{renderError}</div>}
+          <div className="formula-pdf-frame" ref={frame}>
+            <ZoomPan><canvas ref={canvas} role="img" aria-label={`${sheet.name}, page ${pageNumber}`} /></ZoomPan>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
+// One sheet: PDFs render in the app so keyboard shortcuts remain available; images can be zoomed and moved.
+function ImageSheet({ setId, sheet }) {
   const [url, setUrl] = useState(null);
   useEffect(() => {
     let live = true;
@@ -21,9 +122,11 @@ function Sheet({ setId, sheet }) {
     return () => { live = false; if (made) URL.revokeObjectURL(made); };
   }, [setId, sheet.path]);
   if (!url) return <div className="pdf-wait"><span className="spinner" /></div>;
-  return sheet.type === 'pdf'
-    ? <iframe className="formula-frame" src={url} title={sheet.name} />
-    : <ZoomPan><img className="lib-image" src={url} alt={sheet.name} /></ZoomPan>;
+  return <ZoomPan><img className="lib-image" src={url} alt={sheet.name} /></ZoomPan>;
+}
+
+function Sheet({ setId, sheet }) {
+  return sheet.type === 'pdf' ? <PdfViewer setId={setId} sheet={sheet} /> : <ImageSheet setId={setId} sheet={sheet} />;
 }
 
 const MIN_WIDTH = 280;
@@ -76,7 +179,7 @@ export default function FormulaSidebar({ setId, onClose, hidden = false }) {
   };
 
   return (
-    <aside className="formula-side" aria-label="Formula sheets" aria-hidden={hidden || undefined} inert={hidden || undefined}
+    <aside className="formula-side" aria-label="Formula sheets" aria-hidden={hidden || undefined} inert={hidden ? '' : undefined}
       style={{ width, top, ...(hidden ? { visibility: 'hidden', pointerEvents: 'none' } : {}) }}>
       <div className={`splitter v formula-handle${drag ? ' drag' : ''}`} role="separator" aria-orientation="vertical" title="Drag to resize. Double-click to reset."
         onPointerDown={(e) => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); document.body.classList.add('resizing', 'resizing-x'); setDrag(true); }}

@@ -3,9 +3,17 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.88';
+export const VERSION = '1.89';
 
 export const CHANGELOG = [
+  {
+    version: '1.89', date: '2026-10-30', title: 'Hints and solution reminders',
+    items: [
+      'Library questions can open your chosen HTTPS AI chat website (Claude by default) and copy a prompt with the question, saved answers and notes. The prompt asks for your working first when none is provided; attach the question image manually if clipboard image copy is unavailable.',
+      'The first time you open a solution for a question in a run, a short reminder asks whether you have attempted it. Confirm once to skip the reminder for that question in the rest of the run; a new run asks again. The S shortcut follows the same rule.',
+      'Formula-sheet PDFs now render inside the app, keeping shortcuts such as Alt+T available after clicking the page. The top bar stays on one line, hides path breadcrumbs when less than a full word fits, and keeps History available as an icon on small screens.',
+    ],
+  },
   {
     version: '1.88', date: '2026-10-30', title: 'Side-by-side worked solution pages',
     items: [
@@ -31,14 +39,6 @@ export const CHANGELOG = [
     items: [
       'I got it and Not quite are now a toggle: pressing the other one swaps the mark, and pressing the same one takes it back, with the right and not right counts following, so a question can no longer be counted twice in one session. A new session starts with both unpressed.',
       'Reset only shows when there is a typed or chosen answer to clear, not for a question that is only marked I got it / Not quite.',
-    ],
-  },
-  {
-    version: '1.83', date: '2026-10-30', title: 'Wider side panel, tidier answers, crop moved',
-    items: [
-      'The side panel on the question page is wider, and the Previous and Next buttons are gone (the arrow keys still move between questions; a practice session keeps Finish and Results, and its numbered strip).',
-      'The answer box of each part now starts at the left edge of its label, below the wording, instead of beside it.',
-      'The Top and Bottom crop settings of a PDF question moved out of the answer key editor into the Edit the question window (the pencil beside Question in edit mode), so editing answers no longer shows them.',
     ],
   },
 ];
