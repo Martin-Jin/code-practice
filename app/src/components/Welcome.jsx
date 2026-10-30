@@ -116,12 +116,12 @@ const SECTIONS = [
       <>
         <ul>
           <li>A set's page shows one section at a time: click the underlined section name under <b>Questions in</b> to type and pick another. The tick beside it (<b>Mark all correct</b>) counts every question in that section as done, for work you finished before using the app.</li>
-          <li>Start a practice session from a set's page.<b>Mark as difficult</b> (or press D) flags a question; <b>Settings &gt; Practice</b> makes flagged ones come up more often.</li>
+          <li>Choose a practice mode from the cards on a set's page and start a session. On <b>Question sets</b>, <b>Practise</b> beside <b>Select</b> and <b>New folder</b> runs every set in that folder (including subfolders); from the root it combines your whole library. <b>Mark as difficult</b> (or press D) flags a question; <b>Settings &gt; Practice</b> makes flagged ones come up more often.</li>
           <li>Worked solution PDF pages scroll horizontally. Enlarge a page to switch between pages with the arrows without losing your zoom.</li>
           <li>Each set has a <b>Stats</b> page with attempts, right and wrong counts.</li>
           <li>Press Alt+K for the command palette: search sets and questions, add a question, move a set to a folder.</li>
         </ul>
-        <Shot file="library.jpg" alt="An imported set page, with its questions grouped by section" />
+        <Shot file="library.jpg" alt="An imported set page with practice mode cards and questions grouped by section" />
       </>
     ),
   },

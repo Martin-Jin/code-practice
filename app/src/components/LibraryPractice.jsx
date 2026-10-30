@@ -3,12 +3,12 @@ import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
 import { LIB_MODE_LABELS } from '../../shared/librarymodes.js';
 import { capQuestionCount, splitProblem } from '../../shared/modes.js';
-import { createLibRun, deleteLibRun, runStatus, getProgress } from '../lib/practice.js';
+import { createLibRun, deleteLibRun, runStatus, getQuestionProgress, libraryRunSet } from '../lib/practice.js';
 import { useDialogs } from './Dialogs.jsx';
 import { toast, validationError } from './Toasts.jsx';
 import { backupNote } from '../lib/backup.js';
 
-const MODES = ['all', 'random', 'sections', 'difficult', 'unseen', 'wrong'];
+const MODES = ['random', 'sections', 'difficult', 'unseen', 'wrong', 'all'];
 const DESC = {
   all: 'Every question, in the order of the set.',
   random: 'A random selection. With "draw questions I struggle with more often" on in Settings, difficult ones come up more.',
@@ -30,7 +30,7 @@ export function LibraryPracticePicker({ set }) {
   const names = [...new Set(set.manifest.questions.map((q) => q.section))];
   // The pool a Random run draws from, as the picker shows it: the ticked sections, minus completed questions if asked.
   const pool = set.manifest.questions.filter((q) => (!sections.length || sections.includes(q.section))
-    && !(hideCompleted && ((getProgress(set.id, q.uid) || {}).right > 0)));
+    && !(hideCompleted && ((getQuestionProgress(set.id, q) || {}).right > 0)));
   const groups = new Set(pool.map((q) => q.section)).size;
   const n = capQuestionCount(count, pool.length);
   const splitError = split && n >= 1 && n < pool.length ? splitProblem(groups, pool.length, n, 'section') : null;
@@ -42,7 +42,11 @@ export function LibraryPracticePicker({ set }) {
     const name = await prompt({ title: 'Start session', label: 'Session name (optional)', placeholder: 'Leave blank for an automatic name', confirmText: 'Start' });
     if (name === null) return;
     try {
-      const run = createLibRun({ setId: set.id, mode, options: { count: n, sections, split, hideCompleted }, name });
+      const run = createLibRun({
+        setId: set.id,
+        ...(set.folderRun ? { folderId: set.folderId, sourceSetIds: set.sourceSetIds } : {}),
+        mode, options: { count: n, sections, split, hideCompleted }, name,
+      });
       window.location.hash = `#/practice/${run.id}`;
     } catch (e) {
       toast(e.message, 'bad');
@@ -51,10 +55,11 @@ export function LibraryPracticePicker({ set }) {
 
   const picker = (id) => (
     <div className={`mode${mode === id ? ' selected' : ''}`} key={id}>
-      <div className="m-head">
+      <label>
+        <input type="radio" name="lib-mode" checked={mode === id} onChange={() => setMode(id)} />
         <span className="m-title">{LIB_MODE_LABELS[id]}</span>
         <span className="m-desc">{DESC[id]}</span>
-      </div>
+      </label>
       {mode === id && id === 'random' && (
         <div className="m-opts">
           <div className="row">
@@ -87,18 +92,14 @@ export function LibraryPracticePicker({ set }) {
   return (
     <section>
       <div className="section-title"><h2>Practise</h2>{st.prioritise && <span className="chip accent">Drawing hard questions more often</span>}</div>
-      <div className="row" style={{ marginBottom: 10 }}>
-        <label htmlFor="lib-mode">Practice mode</label>
-        <select id="lib-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-          {MODES.map((id) => <option key={id} value={id}>{LIB_MODE_LABELS[id]}</option>)}
-        </select>
-        <button type="button" className="btn primary" onClick={start}>Start</button>
-      </div>
-      <div className="modes">{picker(mode)}</div>
+      <div className="modes">{MODES.map(picker)}</div>
       <label className="check" style={{ marginTop: 10 }}>
         <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
         Leave out completed questions (ones you have got right at least once)
       </label>
+      <div className="row" style={{ marginTop: 16 }}>
+        <button type="button" className="btn primary lg" onClick={start}>Start</button>
+      </div>
     </section>
   );
 }
@@ -107,7 +108,7 @@ export function LibraryPracticePicker({ set }) {
 export function LibRunRow({ run, showSet = true }) {
   const st = useStore();
   const { confirm } = useDialogs();
-  const set = st.library.sets[run.setId];
+  const set = libraryRunSet(run);
   const done = run.questions.filter((uid) => runStatus(run, uid)).length;
   const right = run.questions.filter((uid) => runStatus(run, uid) === 'right').length;
   const pct = run.questions.length ? (done / run.questions.length) * 100 : 0;

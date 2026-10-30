@@ -11,6 +11,21 @@ const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) =>
 export const foldersSorted = () => Object.values(state.libFolders).sort((a, b) => a.name.localeCompare(b.name));
 export const folderOf = (setId) => foldersSorted().find((f) => f.items.some((i) => i.setId === setId)) || null;
 
+// Root practice includes every library set; a folder includes its sets and those in nested folders.
+export function setsInFolder(folderId = null) {
+  const ids = new Set();
+  const visit = (id) => {
+    const folder = state.libFolders[id];
+    if (!folder) return;
+    for (const item of folder.items) if (state.library.sets[item.setId]) ids.add(item.setId);
+    for (const child of foldersIn(id)) visit(child.id);
+  };
+  if (folderId === null) {
+    for (const id of Object.keys(state.library.sets)) ids.add(id);
+  } else visit(folderId);
+  return [...ids].map((id) => state.library.sets[id]).sort((a, b) => a.title.localeCompare(b.title));
+}
+
 // Breadcrumb links from the top folder down to the one holding this set, so a set page can lead back out.
 export const folderCrumbs = (setId) => {
   const f = folderOf(setId);

@@ -1,6 +1,7 @@
 import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
 import Shell from '../components/Shell.jsx';
+import { libraryRunSet } from '../lib/practice.js';
 
 export const HISTORY_SIZE = 5;
 
@@ -18,8 +19,9 @@ export function recentSets(st, size = HISTORY_SIZE) {
   const codeName = (id) => (st.catalog.sets.find((s) => s.id === id) || {}).name;
   for (const r of Object.values(st.runs)) add('code', r, codeName(r.setId), `#/set/${r.setId}`);
   for (const r of Object.values(st.libRuns)) {
-    const set = st.library.sets[r.setId];
-    add('lib', r, set && set.title, `#/lib/${encodeURIComponent(r.setId)}`);
+    const set = libraryRunSet(r);
+    const href = r.folderRun ? `#/folder-practice/${r.folderId || 'root'}` : `#/lib/${encodeURIComponent(r.setId)}`;
+    add('lib', r, set && set.title, href);
   }
   return [...latest.values()].sort((a, b) => b.at.localeCompare(a.at)).slice(0, size)
     .map((e) => ({ ...e, kind: e.key.startsWith('code:') ? 'code' : 'lib' }));

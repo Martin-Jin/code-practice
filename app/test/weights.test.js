@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { STRENGTH, weightOf, codingTrouble, libraryTrouble, weightedSample } from '../shared/weights.js';
-import { pickLibraryQuestions, LIB_MODES } from '../shared/librarymodes.js';
+import { combineLibraryQuestions, pickLibraryQuestions, LIB_MODES } from '../shared/librarymodes.js';
 import { buildCatalog } from '../server/catalog.js';
 import { pickQuestions } from '../shared/modes.js';
 
@@ -95,6 +95,19 @@ test('library modes pick the right questions', () => {
   assert.deepEqual(pickLibraryQuestions(qs, of, 'custom', { uids: ['e', 'a', 'zzz'] }), ['a', 'e']);
   assert.throws(() => pickLibraryQuestions(qs, of, 'custom', { uids: [] }), /No questions match/);
   assert.equal(LIB_MODES.length, 7);
+});
+
+test('combined folder questions retain unique source identities and section names', () => {
+  const sets = [
+    { id: 'one', title: 'First set', manifest: { questions: [{ uid: 'q1', section: 'Basics' }] } },
+    { id: 'two', title: 'Second set', manifest: { questions: [{ uid: 'q1', section: 'Basics' }] } },
+  ];
+  const combined = combineLibraryQuestions(sets);
+  assert.equal(new Set(combined.map((q) => q.uid)).size, 2);
+  assert.deepEqual(combined.map((q) => [q.sourceSetId, q.sourceUid, q.section]), [
+    ['one', 'q1', 'First set · Basics'],
+    ['two', 'q1', 'Second set · Basics'],
+  ]);
 });
 
 test('library random: count, sections and weights', () => {

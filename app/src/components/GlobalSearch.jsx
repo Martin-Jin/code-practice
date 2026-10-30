@@ -16,7 +16,7 @@ function scopeOf(hash, st) {
   if (view === 'set' && id) return { coding: true, id };
   if (view === 'lib' || view === 'q') return id ? { coding: false, id } : null;
   if (view === 'run' && st.runs[id]) return { coding: true, id: st.runs[id].setId };
-  if (view === 'practice' && st.libRuns[id]) return { coding: false, id: st.libRuns[id].setId };
+  if (view === 'practice' && st.libRuns[id] && !st.libRuns[id].folderRun) return { coding: false, id: st.libRuns[id].setId };
   return null;
 }
 

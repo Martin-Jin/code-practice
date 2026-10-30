@@ -8,6 +8,16 @@ export const LIB_MODE_LABELS = {
   all: 'All questions', random: 'Random', sections: 'By section', difficult: 'Marked difficult', unseen: 'Not seen yet', wrong: 'Not right last time', custom: 'Chosen questions',
 };
 
+export function combineLibraryQuestions(sets) {
+  return sets.flatMap((set) => set.manifest.questions.map((q) => ({
+    ...q,
+    uid: `folder:${JSON.stringify([set.id, q.uid])}`,
+    section: `${set.title} · ${q.section}`,
+    sourceSetId: set.id,
+    sourceUid: q.uid,
+  })));
+}
+
 function shuffle(list, rng) {
   const a = list.slice();
   for (let i = a.length - 1; i > 0; i--) {

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { foldersSorted, foldersIn, folderOf, folderPath, descendantIds, createFolder, renameFolder, deleteFolder, moveSet, moveFolder, startDrag, hasDrag, readDrag } from '../lib/folders.js';
+import { foldersSorted, foldersIn, folderOf, folderPath, descendantIds, setsInFolder, createFolder, renameFolder, deleteFolder, moveSet, moveFolder, startDrag, hasDrag, readDrag } from '../lib/folders.js';
+import { effectiveQuestions } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import KebabMenu from '../components/KebabMenu.jsx';
@@ -58,6 +59,8 @@ export default function SetsPage({ folderId, theme }) {
   useEffect(() => { setSelecting(false); setPicked(new Set()); }, [folderId]);
   const folder = folderId ? st.libFolders[folderId] || null : null;
   const folders = foldersIn(folderId || null);
+  const practiceSets = setsInFolder(folderId || null);
+  const practiceQuestionCount = practiceSets.reduce((count, set) => count + effectiveQuestions(set).length, 0);
   const sets = Object.values(st.library.sets).sort((a, b) => a.title.localeCompare(b.title));
   const here =folder ? sets.filter((x) => folder.items.some((i) => i.setId === x.id)) : sets.filter((x) => !folderOf(x.id));
   // Selecting: press and drag over tiles to tick several, or shift-click a range, in the order the tiles are shown.
@@ -143,6 +146,12 @@ export default function SetsPage({ folderId, theme }) {
         <div className="section-title">
           <h2>{folder ? folder.name : 'Your library'}</h2><span className="muted">{folder ? plural(here.length, 'set') : sets.length}</span>
           <span className="spacer" />
+          {practiceQuestionCount > 0 && (
+            <a className="btn ghost sm" href={`#/folder-practice/${folderId || 'root'}`}
+              title={`Practise all ${plural(practiceQuestionCount, 'question')} in ${folder ? `this folder and its subfolders` : 'your library'}`}>
+              <Icon name="play" /> Practise
+            </a>
+          )}
           {selecting && (
             <KebabMenu label="Actions for the selected items" icon="move" text={`Actions${picked.size ? ` (${picked.size})` : ''}`} buttonClass="btn primary sm"
               items={[

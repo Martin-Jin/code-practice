@@ -4,12 +4,13 @@
 // store.notify(). Data is saved to IndexedDB (see db.js) and is part of a backup.
 import { checkQuestion, uncheckedQuestions } from '../../shared/answers.js';
 import { applyEdit } from '../../shared/questionset.js';
-import { pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes.js';
+import { combineLibraryQuestions, pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes.js';
 import { weightOf, libraryTrouble } from '../../shared/weights.js';
 import { acknowledgeSolution as markSolutionAcknowledged, hasAcknowledgedSolution } from '../../shared/solution-gate.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { syncMine } from './library.js';
+import { setsInFolder } from './folders.js';
 
 export const keyOf = (setId, uid) => `${setId}/${uid}`;
 const now = () => new Date().toISOString();
@@ -26,8 +27,43 @@ export async function loadPractice() {
 
 // ---- questions with the user's edits ----
 
-export const effectiveQuestion = (setId, q) => applyEdit(q, state.libEdits[keyOf(setId, q.uid)]);
+export const effectiveQuestion = (setId, q) => {
+  const sourceSetId = q.sourceSetId || setId;
+  const sourceUid = q.sourceUid || q.uid;
+  const edited = applyEdit(q, state.libEdits[keyOf(sourceSetId, sourceUid)]);
+  return q.sourceSetId ? { ...edited, uid: q.uid, sourceSetId, sourceUid } : edited;
+};
 export const effectiveQuestions = (set) => set.manifest.questions.map((q) => effectiveQuestion(set.id, q)).filter((q) => !q.hidden);
+export const getQuestionProgress = (setId, q) => getProgress(q.sourceSetId || setId, q.sourceUid || q.uid);
+
+export function folderPracticeSet(folderId = null, sourceSetIds = null) {
+  const sets = sourceSetIds
+    ? sourceSetIds.map((id) => state.library.sets[id]).filter(Boolean)
+    : setsInFolder(folderId);
+  const folder = folderId ? state.libFolders[folderId] : null;
+  return {
+    id: `folder:${folderId || 'root'}`,
+    title: folder ? folder.name : 'Your library',
+    folderRun: true,
+    folderId,
+    sourceSetIds: sets.map((set) => set.id),
+    manifest: { questions: combineLibraryQuestions(sets) },
+  };
+}
+
+export function libraryRunSet(run) {
+  return run.folderRun ? folderPracticeSet(run.folderId, run.sourceSetIds) : state.library.sets[run.setId] || null;
+}
+
+export function libraryRunQuestions(run) {
+  const set = libraryRunSet(run);
+  if (!set) return [];
+  const all = effectiveQuestions(set);
+  return run.questions.map((ref) => {
+    const question = all.find((q) => q.uid === ref);
+    return question ? { ref, question, setId: question.sourceSetId || set.id, uid: question.sourceUid || question.uid } : null;
+  }).filter(Boolean);
+}
 
 // ---- saving ----
 const timers = new Map();
@@ -274,13 +310,23 @@ function autoName(mode) {
 
 // Starts a session: the uids it covers are fixed now. With "draw questions I struggle with more often"
 // on, Random leans towards questions marked difficult or often not right.
-export function createLibRun({ setId, mode, options = {}, name }) {
-  const set = state.library.sets[setId];
-  const weight = state.prioritise ? (q) => weightOf(libraryTrouble(getProgress(setId, q.uid))) : undefined;
-  const questions = pickLibraryQuestions(effectiveQuestions(set), (uid) => getProgress(setId, uid), mode, options, Math.random, weight);
+export function createLibRun({ setId, folderId, sourceSetIds, mode, options = {}, name }) {
+  const folderRun = folderId !== undefined;
+  const set = folderRun ? folderPracticeSet(folderId, sourceSetIds) : state.library.sets[setId];
+  if (!set) throw new Error('This question set is no longer available.');
+  const available = effectiveQuestions(set);
+  const byUid = new Map(available.map((q) => [q.uid, q]));
+  const progressOf = (uid) => {
+    const question = byUid.get(uid);
+    return question ? getQuestionProgress(set.id, question) : null;
+  };
+  const weight = state.prioritise ? (q) => weightOf(libraryTrouble(getQuestionProgress(set.id, q))) : undefined;
+  const questions = pickLibraryQuestions(available, progressOf, mode, options, Math.random, weight);
   const stamp = now();
   const run = {
-    id: newId(), setId, name: (name && name.trim().slice(0, 80)) || autoName(mode), mode, options,
+    id: newId(), setId: set.id, ...(folderRun ? { folderRun: true, folderId, sourceSetIds: set.sourceSetIds } : {}),
+    ...(folderRun ? { questionSources: Object.fromEntries(available.filter((q) => q.sourceSetId).map((q) => [q.uid, { setId: q.sourceSetId, uid: q.sourceUid }])) } : {}),
+    name: (name && name.trim().slice(0, 80)) || autoName(mode), mode, options,
     questions, current: questions[0], createdAt: stamp, updatedAt: stamp, completedAt: null, solutionAcknowledged: {},
   };
   state.libRuns[run.id] = run;
@@ -305,11 +351,8 @@ export function setLibCurrent(id, uid) {
 
 // The uids of a session's questions that still need a counted check (right or wrong) before it can finish.
 export function pendingChecks(run) {
-  const set = state.library.sets[run.setId];
-  if (!set) return [];
-  const all = effectiveQuestions(set);
-  const questions = run.questions.map((uid) => all.find((q) => q.uid === uid)).filter(Boolean);
-  return uncheckedQuestions(questions, (uid) => runStatus(run, uid));
+  const questions = libraryRunQuestions(run);
+  return uncheckedQuestions(questions.map((item) => item.question), (uid) => runStatus(run, uid));
 }
 
 // Marks a session finished, but only once every checkable question has been checked, whether right or wrong.
@@ -328,6 +371,7 @@ export function finishLibRun(id) {
 // How a question went in this session: 'right' or 'wrong' from its latest counted check since the
 // session began, or null if it has not been checked in this session.
 export function runStatus(run, uid) {
-  const p = getProgress(run.setId, uid);
+  const source = run.questionSources && run.questionSources[uid];
+  const p = getProgress(source ? source.setId : run.setId, source ? source.uid : uid);
   return p && p.lastAt && p.lastAt >= run.createdAt ? p.lastOverall : null;
 }

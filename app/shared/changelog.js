@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '1.95';
+export const VERSION = '1.96';
 
 export const CHANGELOG = [
+  {
+    version: '1.96', date: '2026-10-30', title: 'Practise folders as combined sets',
+    items: [
+      'Practise a whole library folder, or every set at the root, with the same mode cards and session controls as an individual set. Practice-mode selection now uses consistent cards throughout.',
+    ],
+  },
   {
     version: '1.95', date: '2026-10-30', title: 'Pinned PDF reset and roomier chat choice',
     items: [
@@ -28,12 +34,6 @@ export const CHANGELOG = [
     version: '1.92', date: '2026-10-30', title: 'Choose where to open the tutor',
     items: [
       'Solve with agent now offers Claude Desktop or the configured chat website from one button. The clipboard includes the prompt as text and rich HTML with the question image embedded, alongside the image itself; chats that accept rich clipboard content can receive both in one paste.',
-    ],
-  },
-  {
-    version: '1.91', date: '2026-10-30', title: 'Try Claude Desktop',
-    items: [
-      'The solution view can launch Claude Desktop through its standard claude:// link and copy the tutoring prompt; the configured website remains available as a fallback.',
     ],
   },
 ];

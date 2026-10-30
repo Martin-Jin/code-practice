@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, setSelfMark, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus, hasAttemptedSolution, recordSolutionAttempted } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, keyOf, visit, setAnswer, setSelfMark, check, resetAnswers, setDifficult, saveEdit, clearEdit, saveNotes, hasCorrections, resetChecks, setLibCurrent, finishLibRun, pendingChecks, runStatus, hasAttemptedSolution, recordSolutionAttempted, libraryRunSet } from '../lib/practice.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
 import { Stem, Solution } from '../components/Question.jsx';
@@ -67,19 +67,23 @@ const SOLUTION_ENCOURAGEMENT = [
 export default function QuestionView({ setId, uid, run, theme }) {
   const st = useStore();
   const { open, confirm } = useDialogs();
-  const set = st.library.sets[setId];
-  const all = set ? effectiveQuestions(set) : [];
+  const runSet = run ? libraryRunSet(run) : st.library.sets[setId];
+  const all = runSet ? effectiveQuestions(runSet) : [];
   const questions = run ? run.questions.map((id) => all.find((q) => q.uid === id)).filter(Boolean) : all;
   const index = questions.findIndex((q) => q.uid === uid);
   const question = questions[index];
-  const progress = getProgress(setId, uid);
+  const recordSetId = question ? question.sourceSetId || setId : setId;
+  const recordUid = question ? question.sourceUid || uid : uid;
+  const set = st.library.sets[recordSetId] || runSet;
+  const editQuestion = question && question.sourceUid ? { ...question, uid: recordUid } : question;
+  const progress = getProgress(recordSetId, recordUid);
   const [panel, setPanel] = useState(null);   // 'solution' | 'key' | null
   const solutionPromptOpen = useRef(false);
   const [result, setResult] = useState(null); // the last check's overall result
   const [editMode, setEditMode] = useState(() => loadFlag('editMode', false));   // shows the controls that change the question
   const [formulaOpen, setFormulaOpen] = useState(() => loadFlag('formulaOpen', false));
   const toggleEdit = () => setEditMode((on) => { saveFlag('editMode', !on); if (on) setPanel((p) => (p === 'key' ? null : p)); return !on; });
-  const openEdit = (what) => open(({ close }) => <EditContent set={set} question={question} what={what} close={close} />);
+  const openEdit = (what) => open(({ close }) => <EditContent set={set} question={editQuestion} what={what} close={close} />);
   // In edit mode a small pencil sits beside each thing that can be changed.
   const pencil = (label, onClick) => <button type="button" className="btn ghost sm icon-only edit-pencil" onClick={onClick} title={label} aria-label={label}><Icon name="pencil" /></button>;
   const [formulaSeen, setFormulaSeen] = useState(formulaOpen);   // once opened, the panel stays mounted (hidden) so Alt+T does not reload the sheet
@@ -87,7 +91,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
 
   useEffect(() => {
     setPanel(null); setResult(null); window.scrollTo(0, 0);
-    if (question) { visit(setId, uid); if (run) setLibCurrent(run.id, uid); }
+    if (question) { visit(recordSetId, recordUid); if (run) setLibCurrent(run.id, uid); }
   }, [setId, uid, !!question]);
 
   const go = (i) => (run ? `#/practice/${run.id}/${encodeURIComponent(questions[i].uid)}` : `#/q/${encodeURIComponent(setId)}/${encodeURIComponent(questions[i].uid)}`);
@@ -96,25 +100,25 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const finish = () => { if (finishLibRun(run.id)) window.location.hash = `#/practice/${run.id}/summary`; };
   const answers = progress ? progress.answers : {};
 
-  const runCheck = () => setResult(check(setId, uid, question).overall);
+  const runCheck = () => setResult(check(recordSetId, recordUid, question).overall);
   const onAnswer = (part, value) => {
     // A question with only self-marked parts is finished as soon as it is marked; pressing a mark again takes it back.
     if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) {
-      const overall = setSelfMark(setId, uid, question, part.label, value, run ? run.id : null);
+      const overall = setSelfMark(recordSetId, recordUid, question, part.label, value, run ? run.id : null);
       setResult(overall === 'right' || overall === 'wrong' ? overall : null);   // no banner once the mark is taken back
       return;
     }
-    setAnswer(setId, uid, part.label, value);
+    setAnswer(recordSetId, recordUid, part.label, value);
     setResult(null);
   };
-  const reset = () => { resetAnswers(setId, uid); setResult(null); };
+  const reset = () => { resetAnswers(recordSetId, recordUid); setResult(null); };
   const resetStats = async () => {
     const ok = await confirm({ title: 'Reset the checks?', body: 'The count of times this question was checked, and how many were right, goes back to zero. Your typed answers and notes are kept.', confirmText: 'Reset' });
-    if (ok) { resetChecks(setId, uid); setResult(null); }
+    if (ok) { resetChecks(recordSetId, recordUid); setResult(null); }
   };
   const toggleSolution = async () => {
     if (panel === 'solution') { setPanel(null); return; }
-    if (!hasAttemptedSolution(setId, uid, run ? run.id : null)) {
+    if (!hasAttemptedSolution(recordSetId, run ? uid : recordUid, run ? run.id : null)) {
       if (solutionPromptOpen.current) return;
       solutionPromptOpen.current = true;
       const encouragement = SOLUTION_ENCOURAGEMENT[Math.floor(Math.random() * SOLUTION_ENCOURAGEMENT.length)];
@@ -138,13 +142,13 @@ export default function QuestionView({ setId, uid, run, theme }) {
         solutionPromptOpen.current = false;
       }
       if (!attempted) return;
-      recordSolutionAttempted(setId, uid, run ? run.id : null);
+      recordSolutionAttempted(recordSetId, run ? uid : recordUid, run ? run.id : null);
     }
     setPanel('solution');
   };
-  const toggleDifficult = () => setDifficult(setId, uid, !(progress && progress.difficult));
+  const toggleDifficult = () => setDifficult(recordSetId, recordUid, !(progress && progress.difficult));
   const solveWithAgent = () => {
-    const prompt = formatSolvePrompt({ set, question, answers, notes });
+    const prompt = formatSolvePrompt({ set, question: editQuestion, answers, notes });
     const hasImage = question.stem.imageData || question.stem.image || (question.stem.pdf && set.manifest.pdf);
     const imageCopy = hasImage ? copyPromptAndImage(prompt, questionImage(set, question)) : null;
     void (async () => {
@@ -224,16 +228,16 @@ export default function QuestionView({ setId, uid, run, theme }) {
   );
   const difficult = !!(progress && progress.difficult);
   const banner = result && BANNER[result];
-  const edited = hasCorrections(setId, uid);
-  const notes = (st.libEdits[keyOf(setId, uid)] || {}).notes ?? question.notes ?? '';
+  const edited = hasCorrections(recordSetId, recordUid);
+  const notes = (st.libEdits[keyOf(recordSetId, recordUid)] || {}).notes ?? question.notes ?? '';
 
   return (
-    <Shell theme={theme} crumbs={[...folderCrumbs(setId), { label: set.title, href: `#/lib/${encodeURIComponent(setId)}` }, { label: run ? run.name : question.section }]}>
+    <Shell theme={theme} crumbs={[...folderCrumbs(recordSetId), { label: set.title, href: `#/lib/${encodeURIComponent(recordSetId)}` }, { label: run ? run.name : question.section }]}>
       {run && (
         <nav className="qstrip" aria-label="Questions in this session">
           {questions.map((q, i) => {
             const status = runStatus(run, q.uid);
-            const p = getProgress(setId, q.uid);
+            const p = getProgress(q.sourceSetId || setId, q.sourceUid || q.uid);
             return (
               <a key={q.uid} href={go(i)} title={q.title} aria-current={q.uid === uid ? 'step' : undefined}
                 className={`qdot${q.uid === uid ? ' cur' : ''}${status ? ` ${status}` : ''}${p && p.difficult ? ' diff' : ''}`}>{i + 1}</a>
@@ -286,11 +290,11 @@ export default function QuestionView({ setId, uid, run, theme }) {
                 <Icon name="flag" /> {difficult ? 'Marked difficult' : 'Mark as difficult'}
               </button>
               <button type="button" className="btn" aria-pressed={panel === 'solution'} onClick={() => void toggleSolution()} title="Show or hide the solution (S)">Solution</button>
-              <button type="button" className="btn" aria-pressed={formulaOpen} onClick={toggleFormula} title="Show or hide the formula sheets (Alt+T)">Formulas{sheetsOf(setId).length ? ` (${sheetsOf(setId).length})` : ''}</button>
+              <button type="button" className="btn" aria-pressed={formulaOpen} onClick={toggleFormula} title="Show or hide the formula sheets (Alt+T)">Formulas{sheetsOf(recordSetId).length ? ` (${sheetsOf(recordSetId).length})` : ''}</button>
             </div>
             <label className="stack" style={{ gap: 4 }}>
               <b>Notes</b>
-              <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(setId, uid, e.target.value)} />
+              <textarea rows={3} value={notes} placeholder="What went wrong last time, or what to remember" onChange={(e) => saveNotes(recordSetId, recordUid, e.target.value)} />
             </label>
             {selfParts.map((p) => <SelfMark key={p.label} part={p} value={markedHere ? answers[p.label] : undefined} onChange={(v) => onAnswer(p, v)}>{selfParts.length === 1 && nav}</SelfMark>)}
             {selfParts.length !== 1 && nav && <div className="row">{nav}</div>}
@@ -308,14 +312,14 @@ export default function QuestionView({ setId, uid, run, theme }) {
               </>
             )}
             {editMode && panel === 'key' && (
-              <AnswerKeyEditor key={uid} question={question} edited={edited} tagChoices={knownTags(st, setId)}
-                onSave={(edit) => { saveEdit(setId, uid, edit); setResult(null); }}
-                onRevert={() => { clearEdit(setId, uid); resetChecks(setId, uid); setResult(null); }} />
+              <AnswerKeyEditor key={recordUid} question={editQuestion} edited={edited} tagChoices={knownTags(st, recordSetId)}
+                onSave={(edit) => { saveEdit(recordSetId, recordUid, edit); setResult(null); }}
+                onRevert={() => { clearEdit(recordSetId, recordUid); resetChecks(recordSetId, recordUid); setResult(null); }} />
             )}
           </div>
         </aside>
       </div>
-      {(formulaOpen || formulaSeen) && <FormulaSidebar setId={setId} onClose={toggleFormula} hidden={!formulaOpen} />}
+      {(formulaOpen || formulaSeen) && <FormulaSidebar setId={recordSetId} onClose={toggleFormula} hidden={!formulaOpen} />}
     </Shell>
   );
 }

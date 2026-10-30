@@ -3,7 +3,7 @@
 A practice-question and quiz web app, called **Can'tviz quizzes** in the app itself (the repo and its GitHub address are still `practice-questions`, so existing links keep working). It runs two kinds of question side by side, with search, saved progress, stats and a backup of everything:
 
 - **Coding questions:** C++ questions in CodeRunner style, with test modes, an in-browser editor, test output with highlighted diffs and stats. They come in **sets**: folders under `sets/` that follow a fixed format, so adding more questions or a whole new set means adding files, not changing the app.
-- **Your own practice questions:** PDFs of worked problems, quiz screenshots and questions you type or paste. They stay in folders on your own computer and are never committed. You can answer and check them, mark them difficult, practise in sessions, and ask for the ones you struggle with to come up more often.
+- **Your own practice questions:** PDFs of worked problems, quiz screenshots and questions you type or paste. They stay in folders on your own computer and are never committed. You can answer and check them, mark them difficult, practise a set or combine every set in a library folder into one session, and ask for the ones you struggle with to come up more often.
 
 **New here?** [docs/adding-questions.md](docs/adding-questions.md) walks through setting the project up after cloning and adding questions of either kind.
 
