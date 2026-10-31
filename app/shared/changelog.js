@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.06';
+export const VERSION = '2.07';
 
 export const CHANGELOG = [
+  {
+    version: '2.07', date: '2026-10-31', title: 'Search and menu at the top right',
+    items: [
+      'The search box and the three-dot menu in the top bar now sit at the right edge instead of next to the page tabs.',
+    ],
+  },
   {
     version: '2.06', date: '2026-10-31', title: 'Rename a question set from its page',
     items: [
@@ -30,13 +36,6 @@ export const CHANGELOG = [
     items: [
       'Changes to folders, questions, sessions, removed sets and difficult marks now show a note at the top right, under the top bar. Click it within a second to undo, or press Ctrl+Z; Ctrl+Shift+Z redoes. Up to three notes stack, and error messages moved there too.',
       'Writing a change into a PDF, or restoring a backup, clears the undo history, because those cannot be rolled back.',
-    ],
-  },
-  {
-    version: '2.02', date: '2026-10-31', title: 'Topic list stays level with the practice options',
-    items: [
-      'On a set page the topic list now stops at the height of the practice options and scrolls, instead of pushing the page down, and its top lines up with them.',
-      'A new button beside Stats and Search in an imported set title opens a window listing every topic in the set.',
     ],
   },
 ];

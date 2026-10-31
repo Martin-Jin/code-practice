@@ -222,7 +222,7 @@ table.stats tr.zero td { color: var(--muted); }
 .run-top { display: flex; align-items: center; gap: 6px; padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); min-width: 0; }
 .run-top > * { flex: none; }
 .run-top > .qt { flex: 0 1 auto; font-weight: 650; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 36px; }
-.run-top > .spacer { flex: 1 1 0; }
+.run-top > .spacer, .shell-nav > .spacer { flex: 1 1 0; }
 .run-top .progress { display: flex; align-items: center; gap: 8px; width: 130px; margin: 0 6px; font-size: 12px; color: var(--muted); }
 .run-top .progress .bar { flex: 1; }
 .run-body { display: grid; grid-template-columns: 44px var(--side-w, 290px) minmax(0, 1fr); min-height: 0; }
