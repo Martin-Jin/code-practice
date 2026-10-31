@@ -693,6 +693,9 @@ dialog.modal.agent-choice { width: min(560px, calc(100vw - 32px)); }
 
 .edit-toggle { color: var(--muted); }
 .btn.ghost.edit-toggle.on { color: var(--accent); border-color: var(--accent); }
+.renamable { cursor: text; border-radius: 4px; text-decoration: underline dotted var(--muted); text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.renamable:hover, .renamable:focus-visible { text-decoration-style: solid; text-decoration-color: var(--accent); outline: none; }
+.rename-input { font: inherit; letter-spacing: inherit; color: inherit; background: transparent; border: 0; border-bottom: 2px solid var(--accent); border-radius: 0; padding: 0; margin: 0; min-width: 0; max-width: 100%; outline: none; }
 .title-with-icon { display: flex; align-items: center; gap: 10px; }
 .title-with-icon .btn { flex: none; }
 .qtitle { flex: 1; min-width: 0; font-size: 19px; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }

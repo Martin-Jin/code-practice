@@ -129,7 +129,9 @@ async function ensureRoom(bytes) {
 export async function importSet(item) {
   const existing = state.library.sets[item.set.id];
   const own = ownOf(existing).filter((q) => !item.set.questions.some((x) => x.uid === q.uid));
-  const set = own.length ? { ...item.set, questions: [...item.set.questions, ...own] } : item.set;
+  const kept0 = existing && existing.customTitle;   // a name the user chose survives importing the folder or PDF again
+  const set0 = kept0 ? { ...item.set, title: kept0 } : item.set;
+  const set = own.length ? { ...set0, questions: [...set0.questions, ...own] } : set0;
   const ownFiles = new Set(own.flatMap(imagesOf));
   const kept = (rel) => existing && existing.files[rel] && existing.files[rel].size === item.files[rel].size && existing.files[rel].modified === item.files[rel].modified;
   const changed = Object.keys(item.files).filter((rel) => !kept(rel));
@@ -137,7 +139,7 @@ export async function importSet(item) {
   await ensureRoom(changed.reduce((n, rel) => n + item.files[rel].size, 0));
 
   const record = {
-    id: set.id, title: set.title, course: set.course, manifest: set, folder: dirOf(item.path), importedAt: new Date().toISOString(),
+    id: set.id, title: set.title, ...(kept0 ? { customTitle: kept0 } : {}), course: set.course, manifest: set, folder: dirOf(item.path), importedAt: new Date().toISOString(),
     bytes: item.bytes, missing: item.missing, generated: !!item.generated, indexedFrom: item.generated ? item.path : null,
     files: {
       ...Object.fromEntries([...ownFiles].filter((rel) => existing.files[rel]).map((rel) => [rel, existing.files[rel]])),
@@ -177,6 +179,17 @@ async function deleteSet(id) {
   delete state.library.sets[id];
   delete state.libFormulas[id];
   notify();
+}
+
+// Gives an imported set a name of the user's choosing. It is kept when the set is imported or its PDF re-indexed.
+export async function renameSet(id, name) {
+  const title = String(name || '').trim().slice(0, 80);
+  if (!title) throw new Error('Give the set a name.');
+  const previous = state.library.sets[id];
+  if (!previous || previous.title === title) return;
+  const record = { ...previous, title, customTitle: title, manifest: { ...previous.manifest, title } };
+  await writeSet(id, record);
+  recordUndo(`Renamed ${previous.title}`, () => writeSet(id, previous), () => writeSet(id, record));
 }
 
 // Removing a set keeps a copy of its record, files and formula sheets so that Undo can put it back (its folders only list its id).

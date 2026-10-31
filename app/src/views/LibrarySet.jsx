@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { fuzzyFilter } from '../lib/fuzzy.js';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
-import { removeSet, deleteOwnQuestion } from '../lib/library.js';
-import { deleteMine, deleteMineQuestion } from '../lib/mine.js';
+import { removeSet, deleteOwnQuestion, renameSet } from '../lib/library.js';
+import { deleteMine, deleteMineQuestion, renameMine } from '../lib/mine.js';
 import AddQuestionDialog from '../components/AddQuestion.jsx';
 import { effectiveQuestions, getProgress } from '../lib/practice.js';
 import Icon from '../components/Icon.jsx';
@@ -156,6 +156,7 @@ export default function LibrarySet({ setId, theme }) {
   const record = st.library.sets[setId];
   const [expanded, setExpanded] = useState([]);
   const [picked, setPicked] = useState(null);
+  const [renaming, setRenaming] = useState(null);   // the title being edited in place, or null
 
   if (!record) {
     return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">There is no imported set called "{setId}". <a href="#/">Back to the dashboard</a></div></Shell>;
@@ -171,6 +172,14 @@ export default function LibrarySet({ setId, theme }) {
 
   // The section shown: the one chosen, or the first when none is chosen or it no longer exists.
   const current = sections.find((s) => s.name === picked) || sections[0];
+
+  // The title is edited in place: click it, type, Enter or clicking away saves, Escape cancels.
+  const finishRename = async (save) => {
+    const name = renaming;
+    setRenaming(null);
+    if (!save || name === null || name.trim() === record.title) return;
+    try { await (record.userOwned ? renameMine(setId, name) : renameSet(setId, name)); } catch (e) { toast(e.message, 'bad'); }
+  };
 
   // A window listing every session of this set, newest first (the page itself shows them beside the practice options too).
   const showHistory = () => open(({ close }) => (
@@ -242,7 +251,10 @@ export default function LibrarySet({ setId, theme }) {
   return (
     <Shell theme={theme} crumbs={[...folderCrumbs(setId), { label: record.title }]}>
       <div className="page-head">
-        <h1 className="title-with-icon">{record.title} <button type="button" className="btn ghost icon-only reveal" onClick={showHistory} title="Past sessions in this set" aria-label="Past sessions in this set"><Icon name="history" /><span className="label">History</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
+        <h1 className="title-with-icon">{renaming === null
+          ? <span className="renamable" role="button" tabIndex={0} title="Click to rename this set" onClick={() => setRenaming(record.title)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRenaming(record.title); } }}>{record.title}</span>
+          : <input className="rename-input" autoFocus aria-label="Set name" value={renaming} maxLength={80} size={Math.max(8, renaming.length)} onChange={(e) => setRenaming(e.target.value)} onFocus={(e) => e.target.select()} onBlur={() => finishRename(true)}
+            onKeyDown={(e) => { if (e.key === 'Enter') finishRename(true); else if (e.key === 'Escape') finishRename(false); }} />} <button type="button" className="btn ghost icon-only reveal" onClick={showHistory} title="Past sessions in this set" aria-label="Past sessions in this set"><Icon name="history" /><span className="label">History</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>

@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.05';
+export const VERSION = '2.06';
 
 export const CHANGELOG = [
+  {
+    version: '2.06', date: '2026-10-31', title: 'Rename a question set from its page',
+    items: [
+      'The title on an imported set page is underlined: click it and type to rename the set in place (Enter saves, Esc cancels). The name is kept when you import the folder or re-index the PDF again, and Ctrl+Z undoes it.',
+    ],
+  },
   {
     version: '2.05', date: '2026-10-31', title: 'Struggling means not right last time',
     items: [
@@ -31,13 +37,6 @@ export const CHANGELOG = [
     items: [
       'On a set page the topic list now stops at the height of the practice options and scrolls, instead of pushing the page down, and its top lines up with them.',
       'A new button beside Stats and Search in an imported set title opens a window listing every topic in the set.',
-    ],
-  },
-  {
-    version: '2.01', date: '2026-10-31', title: 'Customise a run by topic',
-    items: [
-      'A button beside the Practice mode dropdown opens a window listing every topic (or section): choose which to include and, for Random, how many questions from each. It replaces the topic tick boxes, and coding sets and imported sets now share the same layout, with the topic list beside the picker.',
-      'The page location (for example / Question sets / Folder / This set) now sits above the page title instead of in the top bar. Run rows no longer wrap their progress text.',
     ],
   },
 ];

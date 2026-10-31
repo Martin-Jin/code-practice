@@ -75,6 +75,15 @@ async function dropQuestion(setId, uid) {
   else await save(record);
 }
 
+// Renames one of the user's own sets.
+export const renameMine = (setId, name) => undoable(`Renamed ${state.libMine[setId].manifest.title}`, ['libMine'], async () => {
+  const title = String(name || '').trim().slice(0, 80);
+  if (!title) throw new Error('Give the set a name.');
+  const record = structuredClone(state.libMine[setId]);
+  record.manifest.title = title;
+  await save(record);
+});
+
 export const deleteMine = (setId = MINE_ID) => undoable(`Removed ${state.libMine[setId] ? state.libMine[setId].manifest.title : 'a question set'}`, ['libMine'], () => dropSet(setId));
 
 async function dropSet(setId) {
