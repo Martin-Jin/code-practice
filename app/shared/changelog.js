@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.14';
+export const VERSION = '2.15';
 
 export const CHANGELOG = [
+  {
+    version: '2.15', date: '2026-10-31', title: 'No top bar in a session',
+    items: [
+      'During a practice session the top bar is gone. A back arrow at the start of the location line exits to the question sets, and the timer floats at the top centre of the page.',
+      'Phones: question pages no longer stretch wider than the screen, the coding run keeps its timer in a smaller top bar (the previous and next buttons are hidden there; use the Questions tab), and the new Stats, menus, question strip and recent sessions were checked at phone width.',
+    ],
+  },
   {
     version: '2.14', date: '2026-10-31', title: 'Recent sessions beside the practice options',
     items: [
@@ -31,12 +38,6 @@ export const CHANGELOG = [
       'The timer note on imported-set questions moved from the top right to the bottom right, so it no longer sits over the page header and the notifications.',
       'Fixed garbled symbols (the sparkle in the attempted-this-question window, the arrows in the shortcut hints, and the dots and ellipsis in a few labels) that appeared after the last update.',
       'Items in the three-dot and cog menus now stay on one line. A long one slides sideways while you hover over it, so you can read the end.',
-    ],
-  },
-  {
-    version: '2.10', date: '2026-10-31', title: 'Timer follows the theme',
-    items: [
-      'The timer note now uses the same colours as the rest of the page, so it is dark in the dark theme and light in the light theme.',
     ],
   },
 ];

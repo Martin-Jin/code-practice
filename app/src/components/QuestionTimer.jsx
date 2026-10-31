@@ -6,13 +6,13 @@ import Icon from './Icon.jsx';
 
 // The timer note: time on this question and, in a practice session, the session's total. It counts while the question is open
 // and the window is showing and focused, stops when the question is marked (the time is saved with that attempt), and clicking
-// either time pauses every timer. Imported sets show it as a standing note at the bottom right (centred in the top bar during a practice session), where the
+// either time pauses every timer. Imported sets show it as a standing note at the bottom right (at the top centre during a practice session, which has no top bar), where the
 // formula sheets cover it; the coding run shows it inline in its top bar (`inline`).
 //
 // `identity` names the question (the clocks restart when it changes) and `pauseKey` the session or context the pause belongs
 // to. `source` supplies the data: open(), read() -> { ms, done }, add(ms) -> whether the time counted, reset(), and
 // total() -> ms or null; `frozen` stops counting (a finished session being reviewed).
-export default function Timer({ identity, pauseKey, source, frozen = false, inline = false }) {
+export default function Timer({ identity, pauseKey, source, frozen = false, inline = false, top = false }) {
   const [, redraw] = useReducer((n) => n + 1, 0);
   const latest = useRef(source);
   latest.current = source;
@@ -43,7 +43,7 @@ export default function Timer({ identity, pauseKey, source, frozen = false, inli
   const hint = done ? 'Marked: this time is saved. Click to pause every timer.' : paused ? 'Paused. Click to carry on.' : 'Click to pause every timer.';
 
   return (
-    <div className={`timer${inline ? ' inline' : ''}${paused ? ' paused' : ''}${done ? ' done' : ''}`} role="group" aria-label="Timers">
+    <div className={`timer${inline ? ' inline' : ''}${top ? ' top' : ''}${paused ? ' paused' : ''}${done ? ' done' : ''}`} role="group" aria-label="Timers">
       {state && <span className="timer-state" title={done ? 'Marked' : 'Paused'}><Icon name={state} /></span>}
       <button type="button" className="timer-read" aria-pressed={paused} title={hint} onClick={() => togglePause(pauseKey)}>
         <span className="timer-label">This question</span>
@@ -63,7 +63,7 @@ export default function Timer({ identity, pauseKey, source, frozen = false, inli
 
 // The timer of an imported-set question. `uid` is the question's id here (in a session, its id in the session);
 // `recordSetId`/`recordUid` name its progress record.
-export function QuestionTimer({ recordSetId, recordUid, uid, run, inline = false }) {
+export function QuestionTimer({ recordSetId, recordUid, uid, run, top = false }) {
   const runId = run ? run.id : null;
   const source = {
     open: () => openClock(recordSetId, recordUid, runId, uid),
@@ -72,5 +72,5 @@ export function QuestionTimer({ recordSetId, recordUid, uid, run, inline = false
     reset: () => resetClock(recordSetId, recordUid, runId, uid),
     total: () => (run ? runTotal(run) : null),
   };
-  return <Timer identity={`${recordSetId}/${recordUid}/${runId}/${uid}`} pauseKey={runId || 'solo'} source={source} frozen={!!(run && run.completedAt)} inline={inline} />;
+  return <Timer identity={`${recordSetId}/${recordUid}/${runId}/${uid}`} pauseKey={runId || 'solo'} source={source} frozen={!!(run && run.completedAt)} top={top} />;
 }

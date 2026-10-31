@@ -336,7 +336,7 @@ export default function RunView({ runId, param, theme }) {
         {stq.attempts > 0 && <span className="muted small hide-mobile">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
         {status === 'passed' && <span className="chip ok">Passed</span>}
         <span className="spacer" />
-        <span className="hide-mobile">
+        <span className="run-timer">
           <Timer inline identity={`${run.id}/${n}`} pauseKey={run.id} frozen={!!run.completedAt} source={{
             open: () => openCodingClock(run.id, n),
             read: () => readCodingClock(run.id, n),
@@ -350,8 +350,8 @@ export default function RunView({ runId, param, theme }) {
           <span>{sum.passed}/{sum.total}</span>
         </div>
         {run.completedAt && <button type="button" className="btn" onClick={() => { setCelebrate(false); setFinishOpen(true); }}>Results</button>}
-        <button type="button" className="btn ghost icon-only" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
-        <button type="button" className="btn ghost icon-only" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
+        <button type="button" className="btn ghost icon-only hide-mobile" disabled={idx <= 0} onClick={() => goto(numbers[idx - 1])} title="Previous question" aria-label="Previous question"><Icon name="back" /></button>
+        <button type="button" className="btn ghost icon-only hide-mobile" disabled={idx >= numbers.length - 1} onClick={() => goto(numbers[idx + 1])} title="Next question" aria-label="Next question">
           <Icon name="back" style={{ transform: 'rotate(180deg)' }} />
         </button>
         <button type="button" className="btn ghost icon-only hide-mobile" onClick={() => editor.current && editor.current.format()} title={`Format the code (${keyOf('format')})`} aria-label="Format code"><Icon name="format" /></button>

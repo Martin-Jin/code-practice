@@ -131,7 +131,7 @@ label.check { display: inline-flex; align-items: center; gap: 8px; cursor: point
 .crumb-item { color: var(--muted); overflow-wrap: anywhere; }
 a.crumb-item:hover { color: var(--text); }
 b.crumb-item { color: var(--text); font-weight: 600; }
-.page { max-width: 1120px; margin: 0 auto; padding: 28px 24px 64px; display: grid; gap: 28px; }
+.page { max-width: 1120px; margin: 0 auto; padding: 28px 24px 64px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 .page-head { display: grid; gap: 6px; }
 .section-title { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
 .section-title.with-action { align-items: center; }
@@ -429,8 +429,12 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 /* The timer note: a standing note at the bottom right, in the page's own light or dark surface. Below the formula sheets (z-index 4), so they cover it. */
 .timer { position: fixed; right: 16px; bottom: 16px; z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px 4px; border-radius: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); }
 .timer.inline { position: static; box-shadow: none; margin-right: 8px; }
-.shell-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-.shell-center .timer.inline { margin: 0; }
+.timer.top { right: auto; bottom: auto; top: 12px; left: 50%; transform: translateX(-50%); }
+body.no-nav .formula-side { top: 0; }
+@media (max-width: 900px) { body.no-nav .page { padding-top: 70px; } }
+.crumb-back { display: inline-flex; align-items: center; color: var(--muted); padding: 4px; margin: -4px 0 -4px -4px; border-radius: 6px; }
+.crumb-back:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
+.crumb-back .icon { width: 18px; height: 18px; }
 .timer-state { display: inline-flex; padding: 0 2px 0 6px; opacity: .8; }
 .timer button { border: 0; background: none; color: inherit; font: inherit; cursor: pointer; border-radius: 6px; }
 .timer button:hover:not(:disabled) { background: var(--surface-3); }
@@ -560,7 +564,7 @@ dialog.quick { padding: 0; margin-top: 12vh; width: min(640px, calc(100vw - 24px
 
 /* ---------- library questions ---------- */
 .qview { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
-@media (max-width: 1000px) { .qview { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .qview { grid-template-columns: minmax(0, 1fr); } }
 .qside { position: sticky; top: 16px; display: grid; gap: 12px; }
 @media (max-width: 1000px) { .qside { position: static; } }
 .stem { display: grid; gap: 12px; }
@@ -900,3 +904,13 @@ dialog.modal.welcome { width: max(720px, 66vw); max-width: calc(100vw - 32px); h
 .set-picker .chosen { display: flex; gap: 6px; flex-wrap: wrap; }
 .chip-x { border: 0; background: none; padding: 0 0 0 4px; cursor: pointer; color: inherit; display: inline-flex; align-items: center; }
 .chip-x .icon { width: 12px; height: 12px; }
+
+/* Phones: the coding run's timer shrinks to the two times, so the title keeps its room. */
+@media (max-width: 820px) {
+  .run-top { padding: 0 12px; }
+  .run-top .timer-label { display: none; }
+  .run-top .timer.inline { margin-right: 0; padding: 1px 2px; }
+  .run-top .timer-read { padding: 2px 6px; }
+  .run-top .timer-time { font-size: 14px; }
+  .run-top .timer-state { display: none; }
+}
