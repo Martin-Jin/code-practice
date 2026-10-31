@@ -1,98 +1,32 @@
-import { useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { getSet, getQuestion } from '../lib/catalog.js';
 import { resetStats, statsFor } from '../lib/service.js';
-import { codingTrouble } from '../../shared/weights.js';
+import { libraryStats, questionRows, codingAsProgress, codingTroubleOf } from '../../shared/libstats.js';
 import { timeAgo, plural } from '../lib/format.js';
 import { backupNote } from '../lib/backup.js';
 import Shell from '../components/Shell.jsx';
 import Icon from '../components/Icon.jsx';
+import { SummaryBlocks, QuestionStats, CODING_WORDS } from '../components/StatsParts.jsx';
 import { useDialogs } from '../components/Dialogs.jsx';
 
-const FILTERS = [
-  ['all', 'All'],
-  ['attempted', 'Attempted'],
-  ['struggling', 'Struggling'],
-  ['new', 'Not tried'],
-];
-
-const empty = { attempts: 0, correct: 0, wrong: 0, compileErrors: 0, crashes: 0, lastAt: null };
-
-function keep(filter, s) {
-  if (filter === 'attempted') return s.attempts > 0;
-  if (filter === 'struggling') return s.attempts > 0 && s.lastStatus !== 'passed';   // as the Not right last time mode
-  if (filter === 'new') return s.attempts === 0;
-  return true;
-}
-
-const VIEWS = [['section', 'By section'], ['ranked', 'Ranked']];
-
-// One row per question. `section` adds the section's name, for the ranked list where rows are not grouped.
-function QuestionTable({ setId, rows, per, section }) {
-  return (
-    <table className="stats">
-      <thead>
-        <tr><th>#</th><th className="l">Question</th>{section && <th className="l">Section</th>}<th>Attempts</th><th>Correct</th><th>Wrong</th><th>Compile errors</th><th>Crashes</th><th>Pass rate</th><th>Last attempt</th></tr>
-      </thead>
-      <tbody>
-        {rows.map((n) => {
-          const s = per(n);
-          const ran = s.correct + s.wrong;
-          const pct = ran ? Math.round((s.correct / ran) * 100) : null;
-          return (
-            <tr key={n} className={s.attempts === 0 ? 'zero' : ''}>
-              <td>Q{n}</td>
-              <td className="title l">{getQuestion(setId, n).title}</td>
-              {section && <td className="l muted">{section(n)}</td>}
-              <td>{s.attempts}</td>
-              <td>{s.correct}</td>
-              <td>{s.wrong}</td>
-              <td>{s.compileErrors}</td>
-              <td>{s.crashes}</td>
-              <td>{pct === null ? '–' : <><span className="rate"><i style={{ width: `${pct}%` }} /></span>{pct}%</>}</td>
-              <td>{timeAgo(s.lastAt)}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  );
-}
-
-function Tile({ n, label, tone }) {
-  return <div className={`card tile ${tone || ''}`}><div className="n">{n}</div><div className="l">{label}</div></div>;
-}
-
+// Stats for a coding set: how it is going at a glance, then the questions, filtered and ranked as chosen.
 export default function Stats({ setId, theme }) {
-  const st = useStore();
+  useStore();
   const { confirm } = useDialogs();
   const set = getSet(setId);
-  const [filter, setFilter] = useState('all');
-  const [view, setView] = useState('section');
-  const [collapsed, setCollapsed] = useState({});
 
   if (!set) return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">Unknown question set. <a href="#/">Dashboard</a></div></Shell>;
 
   const stats = statsFor(setId);
-  const per = (n) => ({ ...empty, ...(stats.questions[n] || {}) });
-  const all = Object.values(stats.questions);
-  const sumOf = (k) => all.reduce((a, q) => a + (q[k] || 0), 0);
-  const total = set.categories.reduce((n, c) => n + c.questions.length, 0);
-  const solved = all.filter((q) => q.correct > 0).length;
-  const correct = sumOf('correct'), wrong = sumOf('wrong');
-  const rate = correct + wrong ? Math.round((correct / (correct + wrong)) * 100) : null;
-
-  // Every question in one list, the ones giving the most trouble first (the same measure "draw the questions I
-  // struggle with" uses); questions never tried keep the set's order at the end.
-  const sectionOf = Object.fromEntries(set.categories.flatMap((c) => c.questions.map((n) => [n, c.name])));
-  const order = set.categories.flatMap((c) => c.questions);
-  const ranked = order.filter((n) => keep(filter, per(n)))
-    .sort((a, b) => codingTrouble(per(b)) - codingTrouble(per(a)) || per(b).attempts - per(a).attempts || order.indexOf(a) - order.indexOf(b));
+  const questions = set.categories.flatMap((c) => c.questions.map((n) => ({ uid: n, title: `Q${n} ${getQuestion(setId, n).title}`, section: c.name })));
+  const progressOf = (n) => codingAsProgress(stats.questions[n]);
+  const { total, sections } = libraryStats(questions, progressOf);
+  const rows = questionRows(questions, progressOf, codingTroubleOf);
 
   const reset = async () => {
     const ok = await confirm({
       title: 'Reset stats for this set?',
-      body: `This clears every counter on this page (${plural(sumOf('attempts'), 'attempt')} so far). Your runs and their progress are not affected.${backupNote()}`,
+      body: `This clears every counter and time on this page (${plural(total.attempts, 'attempt')} so far). Your runs and their progress are not affected.${backupNote()}`,
       confirmText: 'Reset stats', danger: true,
     });
     if (ok) resetStats(setId);
@@ -101,58 +35,15 @@ export default function Stats({ setId, theme }) {
   return (
     <Shell theme={theme} crumbs={[{ label: set.name, href: `#/set/${setId}` }, { label: 'Stats' }]}>
       <div className="page-head">
-        <h1>{set.name}: stats</h1>
-        <p className="muted">Counted across all runs since {new Date(stats.since).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })}. An attempt is one press of Run (one compile).</p>
+        <div className="row" style={{ justifyContent: 'space-between' }}>
+          <h1>{set.name}: stats</h1>
+          <button type="button" className="btn danger sm" onClick={reset}><Icon name="trash" /> Reset stats</button>
+        </div>
+        <p className="muted">Counted across all runs since {new Date(stats.since).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })}; last attempt {timeAgo(total.lastAt)}. An attempt is one press of Run (one compile), and a compile error counts as not passed.</p>
       </div>
 
-      <div className="tiles">
-        <Tile n={sumOf('attempts')} label="Compile attempts" />
-        <Tile n={correct} label="Correct runs" tone="ok" />
-        <Tile n={wrong} label="Wrong runs" tone="bad" />
-        <Tile n={sumOf('compileErrors')} label="Compile errors" tone="warn" />
-        <Tile n={`${solved} / ${total}`} label="Questions solved" />
-        <Tile n={rate === null ? '–' : `${rate}%`} label="Pass rate (compiled runs)" />
-        <Tile n={`${stats.runsCompleted} / ${stats.runsStarted}`} label="Runs completed / started" />
-      </div>
-
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <div className="row">
-          <div className="filters" role="group" aria-label="Filter questions">
-            {FILTERS.map(([id, label]) => <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}
-          </div>
-          <div className="filters" role="group" aria-label="How to list the questions">
-            {VIEWS.map(([id, label]) => <button key={id} type="button" aria-pressed={view === id} onClick={() => setView(id)}>{label}</button>)}
-          </div>
-        </div>
-        <button type="button" className="btn danger" onClick={reset}><Icon name="trash" /> Reset stats</button>
-      </div>
-
-      {view === 'ranked' ? (
-        <div className="card stat-cat">
-          <div className="body">
-            <QuestionTable setId={setId} per={per} rows={ranked} section={(n) => sectionOf[n]} />
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: 14 }}>
-          {set.categories.map((c) => {
-            const rows = c.questions.filter((n) => keep(filter, per(n)));
-            if (!rows.length) return null;
-            const open = !collapsed[c.id];
-            const solvedHere = c.questions.filter((n) => per(n).correct > 0).length;
-            return (
-              <div key={c.id} className="card stat-cat">
-                <button type="button" className="cat-head" aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [c.id]: open })}>
-                  <span className="chev"><Icon name="chevron" /></span>
-                  <span style={{ flex: 1 }}>{c.name}</span>
-                  <span className="chip">{solvedHere} / {c.questions.length} solved</span>
-                </button>
-                {open && <div className="body"><QuestionTable setId={setId} per={per} rows={rows} /></div>}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <SummaryBlocks total={total} words={CODING_WORDS} />
+      <QuestionStats rows={rows} sections={sections} link={null} words={CODING_WORDS} />
     </Shell>
   );
 }

@@ -1,7 +1,8 @@
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { LIB_MODE_LABELS } from '../../shared/librarymodes.js';
-import { effectiveQuestions, getProgress, libraryRunQuestions, libraryRunSet, runStatus, createLibRun } from '../lib/practice.js';
+import { effectiveQuestions, getProgress, libraryRunQuestions, libraryRunSet, runStatus, createLibRun, runTotal } from '../lib/practice.js';
+import { formatDuration } from '../../shared/timing.js';
 import Shell from '../components/Shell.jsx';
 import QuestionView from './QuestionView.jsx';
 import { toast } from '../components/Toasts.jsx';
@@ -62,6 +63,7 @@ function Summary({ run, set, theme }) {
           <span className="chip bad">{count('wrong')} not right</span>
           <span className="chip">{rows.length - count('right') - count('wrong')} not checked</span>
           <span className="chip warn">{rows.filter((r) => r.difficult).length} marked difficult</span>
+          <span className="chip accent">{formatDuration(runTotal(run))} in total</span>
         </div>
         <div className="row">
           <a className="btn" href={`#/practice/${run.id}`}>Review the questions</a>
@@ -75,6 +77,7 @@ function Summary({ run, set, theme }) {
             <span className={`chip ${status === 'right' ? 'ok' : status === 'wrong' ? 'bad' : ''}`}>{STATUS_TEXT[status]}</span>
             <a href={`#/practice/${run.id}/${encodeURIComponent(ref)}`} className="title">{i + 1}. {q.title}</a>
             {difficult && <span className="chip warn">difficult</span>}
+            {run.clocks && run.clocks[ref] && run.clocks[ref].ms > 0 && <span className="muted">{formatDuration(run.clocks[ref].ms)}</span>}
           </div>
         ))}
       </div>

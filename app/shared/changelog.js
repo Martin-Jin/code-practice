@@ -3,9 +3,17 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.07';
+export const VERSION = '2.09';
 
 export const CHANGELOG = [
+  {
+    version: '2.09', date: '2026-10-31', title: 'Question timers and a tidier Stats page',
+    items: [
+      'Questions now have a timer. Imported-set questions show a note at the top right (coding runs show it in the top bar): the time on this question and, in a practice session, the session total. It runs while you are on the question, pauses when you switch away or leave the window, and stops when you mark the question right or not right. Click a time to pause everything; the refresh button resets the question\'s time and takes it off the total.',
+      'Each right or not right mark (or counted Run in a coding run, where a run that fails keeps the timer going and a pass stops it) saves a time for that attempt. The Stats pages of imported and coding sets show the average time per question, a Time block, a "time consuming" filter, and a click-to-open list of every attempt\'s time.',
+      'Stats is reorganised into three blocks (Results, Progress, Time), and the questions are chosen with a sentence: Display (filter) questions, ranked by (measure) with a highest/lowest first button. The drop-downs search as you type. Worth another go and the By section table are gone, as the sentence covers them, and the coding Stats page loses its Compile errors and Crashes columns (compile errors now count as not passed).',
+    ],
+  },
   {
     version: '2.07', date: '2026-10-31', title: 'Search and menu at the top right',
     items: [
@@ -29,13 +37,6 @@ export const CHANGELOG = [
     items: [
       'On an imported set, the new history button beside Stats and Search opens a window with every past session of that set. The sessions and sections lists beside the practice options are gone; the topics are still chosen with the button beside the practice mode.',
       'Coding sets and folders lose their topic list beside the practice options too.',
-    ],
-  },
-  {
-    version: '2.03', date: '2026-10-31', title: 'Undo and redo',
-    items: [
-      'Changes to folders, questions, sessions, removed sets and difficult marks now show a note at the top right, under the top bar. Click it within a second to undo, or press Ctrl+Z; Ctrl+Shift+Z redoes. Up to three notes stack, and error messages moved there too.',
-      'Writing a change into a PDF, or restoring a backup, clears the undo history, because those cannot be rolled back.',
     ],
   },
 ];

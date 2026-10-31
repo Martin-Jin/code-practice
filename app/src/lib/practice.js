@@ -7,6 +7,7 @@ import { applyEdit } from '../../shared/questionset.js';
 import { combineLibraryQuestions, pickLibraryQuestions, LIB_MODE_LABELS } from '../../shared/librarymodes.js';
 import { weightOf, libraryTrouble } from '../../shared/weights.js';
 import { acknowledgeSolution as markSolutionAcknowledged, hasAcknowledgedSolution } from '../../shared/solution-gate.js';
+import { newClock, isDone, recordPoint, dropPoint, runTotalMs } from '../../shared/timing.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { syncMine } from './library.js';
@@ -74,11 +75,20 @@ function persist(store, record, delay = 300) {
   timers.set(id, setTimeout(() => { timers.delete(id); db.put(store, record); }, delay));
 }
 
+// Saves a record a few seconds from now, without restarting the wait each time it is asked for, so a record that changes
+// every moment (a running timer) is still saved regularly. The latest state of the record is what gets written.
+function persistSoon(store, record, delay = 3000) {
+  const id = `soon:${store}:${record.key || record.id}`;
+  if (timers.has(id)) return;
+  timers.set(id, setTimeout(() => { timers.delete(id); record.updatedAt = now(); db.put(store, record); }, delay));
+}
+
 export function flushPracticeSaves() {
   for (const t of timers.values()) clearTimeout(t);
   timers.clear();
   for (const r of Object.values(state.libProgress)) db.put('libProgress', r);
   for (const r of Object.values(state.libEdits)) db.put('libEdits', r);
+  for (const r of Object.values(state.libRuns)) db.put('libRuns', r);
 }
 
 // Drops queued saves, so one cannot land after a restore and overwrite restored data.
@@ -149,7 +159,7 @@ export function setAnswer(setId, uid, label, value) {
 
 // Checks every part of the (edited) question against the saved answers and records the attempt.
 // An incomplete check (a box left empty, no key yet) shows its feedback but is not counted.
-export function check(setId, uid, question) {
+export function check(setId, uid, question, ctx = null) {
   const rec = ensure(setId, uid);
   const result = checkQuestion(question, rec.answers);
   rec.checked = result.parts;
@@ -157,6 +167,7 @@ export function check(setId, uid, question) {
     rec.attempts++;
     if (result.overall === 'right') rec.right++; else rec.wrong++;
     rec.lastAt = now();
+    timeResult(rec, ctx, result.overall);
   }
   rec.lastOverall = result.overall;
   touch(rec, 0);
@@ -168,8 +179,9 @@ export function check(setId, uid, question) {
 // counted, so a question is never counted twice. Returns the new overall result ('right', 'wrong', or 'incomplete' when nothing
 // is counted). Inside a practice session (`runId`) the marks belong to that session: in the next session the buttons start
 // unpressed and the first press counts afresh, leaving the earlier session's count alone.
-export function setSelfMark(setId, uid, question, label, value, runId = null) {
+export function setSelfMark(setId, uid, question, label, value, runId = null, ref = null) {
   const rec = ensure(setId, uid);
+  const ctx = ctxOf(runId, ref);
   const stale = !!runId && rec.markRun !== runId;
   const answers = stale ? {} : { ...rec.answers };
   if (answers[label] === value) delete answers[label]; else answers[label] = value;
@@ -184,14 +196,91 @@ export function setSelfMark(setId, uid, question, label, value, runId = null) {
     rec.lastAt = now();
     rec.lastOverall = result.overall;
     rec.checked = result.parts;
+    timeResult(rec, ctx, result.overall);
   } else if (!stale || counted) {
     delete rec.lastOverall;
     rec.checked = null;
     if (rec.attempts === 0) rec.lastAt = null;
+    timeResult(rec, ctx, null);
   }
   touch(rec, 0);
   return result.overall;
 }
+
+// ---- how long questions take ----
+// The clocks and data points are described in shared/timing.js. A session's clocks are saved on the session.
+
+const ctxOf = (runId, ref) => ({ run: runId ? state.libRuns[runId] || null : null, ref });
+
+// The attempt's clock: the session's own for this question (`ctx.ref` is its id in the session) or, outside a session, the record's.
+function clockOf(rec, ctx, create) {
+  if (ctx && ctx.run) {
+    const run = ctx.run;
+    if (!run.clocks) run.clocks = {};
+    if (!run.clocks[ctx.ref] && create) run.clocks[ctx.ref] = newClock(newId());
+    return run.clocks[ctx.ref] || null;
+  }
+  if (!rec.clock && create) rec.clock = newClock(newId());
+  return rec.clock || null;
+}
+
+const saveClock = (rec, ctx, delay) => (ctx && ctx.run ? (delay ? persistSoon('libRuns', ctx.run, delay) : db.put('libRuns', ctx.run)) : persist('libProgress', rec, delay || 0));
+
+// Marking right or not right writes the attempt's data point (one per attempt, so marking again only changes its result);
+// taking the mark back (`result` null) removes it and the clock counts again.
+function timeResult(rec, ctx, result) {
+  if (!ctx) return;
+  const clock = clockOf(rec, ctx, !!result);
+  if (!clock) return;
+  if (result) recordPoint(rec, clock, result, now(), ctx.run ? ctx.run.id : null); else dropPoint(rec, clock);
+  saveClock(rec, ctx, 0);
+}
+
+export function getClock(setId, uid, runId = null, ref = uid) {
+  const rec = getProgress(setId, uid);
+  return clockOf(rec || {}, ctxOf(runId, ref), false);
+}
+
+// Called when a question is opened, so it has a clock to show and a session's total can count it.
+export function openClock(setId, uid, runId = null, ref = uid) {
+  const rec = ensure(setId, uid);
+  const clock = clockOf(rec, ctxOf(runId, ref), true);
+  return { clock, done: isDone(rec, clock) };
+}
+
+export const clockDone = (setId, uid, runId = null, ref = uid) => {
+  const rec = getProgress(setId, uid);
+  return !!rec && isDone(rec, getClock(setId, uid, runId, ref));
+};
+
+// Adds time to the running clock (the timer calls this every moment it is counting); a marked attempt's clock is final.
+export function addTime(setId, uid, runId, ref, ms) {
+  const rec = ensure(setId, uid);
+  const ctx = ctxOf(runId, ref);
+  const clock = clockOf(rec, ctx, true);
+  if (isDone(rec, clock)) return false;
+  clock.ms += ms;
+  saveClock(rec, ctx, 3000);
+  return true;
+}
+
+// Zeroes a question's running time for the attempt, which takes it off the session's total. The data points already
+// written stay; a question marked before the reset gets a new data point when it is marked again.
+export function resetClock(setId, uid, runId = null, ref = uid) {
+  const rec = ensure(setId, uid);
+  const ctx = ctxOf(runId, ref);
+  const old = clockOf(rec, ctx, false);
+  const put = (clock) => {
+    if (ctx.run) { ctx.run.clocks = { ...(ctx.run.clocks || {}) }; if (clock) ctx.run.clocks[ref] = clock; else delete ctx.run.clocks[ref]; } else if (clock) rec.clock = clock; else delete rec.clock;
+    saveClock(rec, ctx, 0);
+    notify();
+  };
+  const fresh = newClock(newId());
+  put(fresh);
+  recordUndo('Reset the timer for a question', () => put(old), () => put(fresh));
+}
+
+export const runTotal = (run) => runTotalMs(run.clocks);
 
 // Marks questions as done without checking them, for work finished before the app was used. Ones whose last check was
 // already right are left alone so their counters stay true. Returns how many were marked.
@@ -217,7 +306,7 @@ export function markCorrect(setId, uids) {
 export function resetLibStats(setId) {
   for (const rec of Object.values(state.libProgress)) {
     if (rec.setId !== setId) continue;
-    rec.attempts = 0; rec.right = 0; rec.wrong = 0; rec.views = 0; rec.firstAt = null; rec.lastAt = null;
+    rec.attempts = 0; rec.right = 0; rec.wrong = 0; rec.views = 0; rec.firstAt = null; rec.lastAt = null; rec.times = [];
     delete rec.lastOverall;
     rec.updatedAt = now();
     persist('libProgress', rec, 0);
@@ -231,7 +320,7 @@ export function resetLibStats(setId) {
 export function resetChecks(setId, uid) {
   const rec = getProgress(setId, uid);
   if (!rec) return;
-  rec.attempts = 0; rec.right = 0; rec.wrong = 0; rec.lastAt = null; rec.checked = null;
+  rec.attempts = 0; rec.right = 0; rec.wrong = 0; rec.lastAt = null; rec.checked = null; rec.times = [];
   delete rec.lastOverall;
   touch(rec, 0);
 }
@@ -332,7 +421,7 @@ export function createLibRun({ setId, folderId, sourceSetIds, mode, options = {}
     id: newId(), setId: set.id, ...(folderRun ? { folderRun: true, folderId, sourceSetIds: set.sourceSetIds } : {}),
     ...(folderRun ? { questionSources: Object.fromEntries(available.filter((q) => q.sourceSetId).map((q) => [q.uid, { setId: q.sourceSetId, uid: q.sourceUid }])) } : {}),
     name: (name && name.trim().slice(0, 80)) || autoName(mode), mode, options,
-    questions, current: questions[0], createdAt: stamp, updatedAt: stamp, completedAt: null, solutionAcknowledged: {},
+    questions, current: questions[0], createdAt: stamp, updatedAt: stamp, completedAt: null, solutionAcknowledged: {}, clocks: {},
   };
   state.libRuns[run.id] = run;
   db.put('libRuns', run);

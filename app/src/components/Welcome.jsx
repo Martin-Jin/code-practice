@@ -118,7 +118,8 @@ const SECTIONS = [
           <li>A set's page shows one section at a time: click the underlined section name under <b>Questions in</b> to type and pick another. The tick beside it (<b>Mark all correct</b>) counts every question in that section as done, for work you finished before using the app.</li>
           <li>Choose a practice mode from the dropdown on a set's page and start a session. On <b>Question sets</b>, <b>Practise</b> beside <b>Select</b> and <b>New folder</b> runs every set in that folder (including subfolders); from the root it combines your whole library. <b>Mark as difficult</b> (or press D) flags a question; <b>Settings &gt; Practice</b> makes flagged ones come up more often.</li>
           <li>Worked solution PDF pages scroll horizontally. Enlarge a page to switch between pages with the arrows without losing your zoom.</li>
-          <li>Each set has a <b>Stats</b> page with attempts, right and wrong counts.</li>
+          <li>A timer times each question and the whole session (a note at the top right, or in the top bar of a coding run). It starts when you open a question, pauses when you switch away or leave the window, and stops when you mark the question right or not right (in a coding run, when a Run passes). Click a time to pause every timer; the refresh button resets this question's time.</li>
+          <li>Each set has a <b>Stats</b> page: results, progress and time at a glance, then the questions under <b>Display … questions, ranked by …</b>. Click a question there to see the time of each attempt.</li>
           <li>Press Alt+K for the command palette: search sets and questions, add a question, move a set to a folder.</li>
           <li>Every change you make (a folder, a moved or edited question, an abandoned session, a removed set) shows a note at the top right for a moment. Click it to undo, or press Ctrl+Z; Ctrl+Shift+Z redoes. Typing in a text box keeps its own Ctrl+Z.</li>
         </ul>

@@ -2,6 +2,7 @@
 // re-render through store.notify(). Data is saved to IndexedDB (see db.js).
 import { buildProgram, analyse, isUntouched } from '../../shared/program.js';
 import { pickQuestions, MODE_LABELS } from '../../shared/modes.js';
+import { newClock, isFinal, recordPoint, runTotalMs } from '../../shared/timing.js';
 import { weightOf, codingTrouble } from '../../shared/weights.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
@@ -279,6 +280,7 @@ export async function runQuestion(id, n, code) {
   }
   qs.lastStatus = st.status;
   st.lastResult = result;
+  recordPoint(qs, clockOf(run, n, true), st.status === 'passed' ? 'right' : 'wrong', now, run.id, 'right');
 
   let justCompleted = false;
   if (!run.completedAt && run.questions.every((m) => run.state[m].status === 'passed')) {
@@ -293,6 +295,56 @@ export async function runQuestion(id, n, code) {
   notify();
   return { result, justCompleted, counted: true };
 }
+
+// ---- how long questions take ----
+// One clock per question per run, in run.state[n].clock (see shared/timing.js). Every counted Run writes or updates the
+// attempt's data point in the question's stats (stats.questions[n].times); the clock stops once a run passes. A new run, or
+// a reset run, starts every question at zero.
+
+function clockOf(run, n, create) {
+  const st = run.state[n];
+  if (!st.clock && create) st.clock = newClock(newId());
+  return st.clock || null;
+}
+
+export function openCodingClock(runId, n) {
+  const run = state.runs[runId];
+  if (run && run.state[n]) clockOf(run, n, true);
+}
+
+export function readCodingClock(runId, n) {
+  const run = state.runs[runId];
+  const clock = run && run.state[n] && clockOf(run, n, false);
+  return { ms: clock ? clock.ms : 0, done: isFinal(clock) };
+}
+
+// Adds time to the running clock. A run that is complete, or a question that has passed, no longer counts. The run is saved
+// every so often rather than at each tick (it carries the drafts and last outputs), and whenever the page is hidden or left.
+export function addCodingTime(runId, n, ms) {
+  const run = state.runs[runId];
+  if (!run || !run.state[n] || run.completedAt) return false;
+  const clock = clockOf(run, n, true);
+  if (isFinal(clock)) return false;
+  clock.ms += ms;
+  if (!timers.has(run.id)) saveRun(run, 15000);
+  return true;
+}
+
+// Zeroes the question's running time for this run and takes it off the run's total. Data points already written stay.
+export function resetCodingClock(runId, n) {
+  const run = state.runs[runId];
+  const old = clockOf(run, n, false);
+  const put = (clock) => {
+    if (clock) run.state[n].clock = clock; else delete run.state[n].clock;
+    saveRun(run, 0);
+    notify();
+  };
+  const fresh = newClock(newId());
+  put(fresh);
+  recordUndo(`Reset the timer for Q${n}`, () => put(old), () => put(fresh));
+}
+
+export const codingRunTotal = (run) => runTotalMs(Object.fromEntries(run.questions.map((n) => [n, run.state[n].clock])));
 
 // The "difficult" mark on a question, kept with its stats so the Marked difficult mode can find it.
 export function setDifficult(setId, n, value) {

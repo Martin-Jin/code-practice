@@ -8,6 +8,7 @@ import { Stem, Solution } from '../components/Question.jsx';
 import { PartAnswer, SelfMark, AnswerKeyEditor } from '../components/Parts.jsx';
 import { knownTags } from '../components/TagInput.jsx';
 import FormulaSidebar from '../components/FormulaSidebar.jsx';
+import { QuestionTimer } from '../components/QuestionTimer.jsx';
 import EditContent from '../components/EditContent.jsx';
 import { Modal, useDialogs } from '../components/Dialogs.jsx';
 import { toast } from '../components/Toasts.jsx';
@@ -100,11 +101,11 @@ export default function QuestionView({ setId, uid, run, theme }) {
   const finish = () => { if (finishLibRun(run.id)) window.location.hash = `#/practice/${run.id}/summary`; };
   const answers = progress ? progress.answers : {};
 
-  const runCheck = () => setResult(check(recordSetId, recordUid, question).overall);
+  const runCheck = () => setResult(check(recordSetId, recordUid, question, { run: run || null, ref: uid }).overall);
   const onAnswer = (part, value) => {
     // A question with only self-marked parts is finished as soon as it is marked; pressing a mark again takes it back.
     if (part.type === 'self' && question.parts.every((p) => p.type === 'self')) {
-      const overall = setSelfMark(recordSetId, recordUid, question, part.label, value, run ? run.id : null);
+      const overall = setSelfMark(recordSetId, recordUid, question, part.label, value, run ? run.id : null, uid);
       setResult(overall === 'right' || overall === 'wrong' ? overall : null);   // no banner once the mark is taken back
       return;
     }
@@ -133,7 +134,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
               </>
             )}>
             <div className="attempt-prompt-body">
-              <span className="attempt-spark" aria-hidden="true">✦</span>
+              <span className="attempt-spark" aria-hidden="true">âœ¦</span>
               <p>{encouragement}</p>
             </div>
           </Modal>
@@ -233,6 +234,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
 
   return (
     <Shell theme={theme} crumbs={[...folderCrumbs(recordSetId), { label: set.title, href: `#/lib/${encodeURIComponent(recordSetId)}` }, { label: run ? run.name : question.section }]}>
+      <QuestionTimer recordSetId={recordSetId} recordUid={recordUid} uid={uid} run={run || null} />
       {run && (
         <nav className="qstrip" aria-label="Questions in this session">
           {questions.map((q, i) => {
@@ -298,7 +300,7 @@ export default function QuestionView({ setId, uid, run, theme }) {
             </label>
             {selfParts.map((p) => <SelfMark key={p.label} part={p} value={markedHere ? answers[p.label] : undefined} onChange={(v) => onAnswer(p, v)}>{selfParts.length === 1 && nav}</SelfMark>)}
             {selfParts.length !== 1 && nav && <div className="row">{nav}</div>}
-            {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">←</span> <span className="kbd">→</span> move between questions.</p>}
+            {!panel && <p className="muted">Shortcuts: <span className="kbd">D</span> difficult, <span className="kbd">S</span> solution, <span className="kbd">Alt</span>+<span className="kbd">T</span> formula sheets, <span className="kbd">â†</span> <span className="kbd">â†’</span> move between questions.</p>}
             {run && pending > 0 && index === questions.length - 1 && (
               <p className="muted">{plural(pending, 'question')} still to check before this session can finish: check each numbered question that is not yet green or red (a question with no answer key cannot be checked, so it does not count).</p>
             )}

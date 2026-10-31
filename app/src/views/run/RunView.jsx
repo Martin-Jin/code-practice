@@ -6,7 +6,9 @@ import { eventCombo, actionFor, comboFor } from '../../lib/shortcuts.js';
 import { getSet, getQuestion } from '../../lib/catalog.js';
 import {
   runQuestion, setAutoSuggest, resetCode, resetRun, reselect, renameRun, deleteRun, runSummary, flushSaves,
+  openCodingClock, readCodingClock, addCodingTime, resetCodingClock, codingRunTotal,
 } from '../../lib/service.js';
+import Timer from '../../components/QuestionTimer.jsx';
 import Icon from '../../components/Icon.jsx';
 import Logo from '../../components/Logo.jsx';
 import { Modal, useDialogs } from '../../components/Dialogs.jsx';
@@ -334,6 +336,15 @@ export default function RunView({ runId, param, theme }) {
         {stq.attempts > 0 && <span className="muted small hide-mobile">{stq.attempts} attempt{stq.attempts === 1 ? '' : 's'}</span>}
         {status === 'passed' && <span className="chip ok">Passed</span>}
         <span className="spacer" />
+        <span className="hide-mobile">
+          <Timer inline identity={`${run.id}/${n}`} pauseKey={run.id} frozen={!!run.completedAt} source={{
+            open: () => openCodingClock(run.id, n),
+            read: () => readCodingClock(run.id, n),
+            add: (ms) => addCodingTime(run.id, n, ms),
+            reset: () => resetCodingClock(run.id, n),
+            total: () => codingRunTotal(run),
+          }} />
+        </span>
         <div className="progress hide-mobile" title={`${sum.passed} of ${sum.total} questions pass`}>
           <div className={`bar${run.completedAt ? ' ok' : ''}`}><i style={{ width: `${(sum.passed / sum.total) * 100}%` }} /></div>
           <span>{sum.passed}/{sum.total}</span>

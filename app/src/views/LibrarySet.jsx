@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { fuzzyFilter } from '../lib/fuzzy.js';
+import { useEffect, useState } from 'react';
+import UnderlineSelect from '../components/UnderlineSelect.jsx';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { removeSet, deleteOwnQuestion, renameSet } from '../lib/library.js';
@@ -106,43 +106,8 @@ function progressChips(p) {
   return (
     <>
       {p.difficult && <span className="chip warn">difficult</span>}
-      {p.attempts > 0 && <span className={`chip ${p.lastOverall === 'right' ? 'ok' : 'bad'}`}>{p.right} right · {p.wrong} not right</span>}
+      {p.attempts > 0 && <span className={`chip ${p.lastOverall === 'right' ? 'ok' : 'bad'}`}>{p.right} right Â· {p.wrong} not right</span>}
     </>
-  );
-}
-
-// The section drop-down: reads as underlined text; clicking it turns it into a search box with the matching sections listed below.
-function SectionPicker({ sections, current, onPick }) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [active, setActive] = useState(0);
-  const items = useMemo(() => sections.map((s) => ({ label: s.name, section: s })), [sections]);
-  const shown = useMemo(() => fuzzyFilter(items, query, items.length).map((r) => r.item.section), [items, query]);
-  const close = () => { setOpen(false); setQuery(''); };
-  const choose = (s) => { onPick(s.name); close(); };
-  const onKey = (e) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setActive((i) => Math.min(i + 1, shown.length - 1)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((i) => Math.max(i - 1, 0)); }
-    else if (e.key === 'Enter') { e.preventDefault(); if (shown[active]) choose(shown[active]); }
-    else if (e.key === 'Escape') close();
-  };
-  if (!open) {
-    return <button type="button" className="section-select" aria-haspopup="listbox" onClick={() => { setOpen(true); setActive(Math.max(0, sections.indexOf(current))); }}>{current.name} <span aria-hidden="true">▾</span></button>;
-  }
-  return (
-    <span className="section-combo">
-      <input className="section-select" autoFocus value={query} placeholder={current.name} role="combobox" aria-expanded="true" aria-controls="section-options" aria-label="Search sections"
-        onChange={(e) => { setQuery(e.target.value); setActive(0); }} onKeyDown={onKey} onBlur={close} />
-      <ul id="section-options" className="section-options" role="listbox">
-        {shown.length === 0 && <li className="muted empty-opt">No section matches</li>}
-        {shown.map((s, i) => (
-          <li key={s.name} role="option" aria-selected={i === active} className={i === active ? 'active' : ''}
-            onMouseDown={(e) => { e.preventDefault(); choose(s); }} onMouseEnter={() => setActive(i)}>
-            {s.name} <span className="muted">{s.questions.length}</span>
-          </li>
-        ))}
-      </ul>
-    </span>
   );
 }
 
@@ -172,6 +137,7 @@ export default function LibrarySet({ setId, theme }) {
 
   // The section shown: the one chosen, or the first when none is chosen or it no longer exists.
   const current = sections.find((s) => s.name === picked) || sections[0];
+  const sectionOptions = sections.map((s) => ({ value: s.name, label: s.name, count: s.questions.length }));
 
   // The title is edited in place: click it, type, Enter or clicking away saves, Escape cancels.
   const finishRename = async (save) => {
@@ -256,7 +222,7 @@ export default function LibrarySet({ setId, theme }) {
           : <input className="rename-input" autoFocus aria-label="Set name" value={renaming} maxLength={80} size={Math.max(8, renaming.length)} onChange={(e) => setRenaming(e.target.value)} onFocus={(e) => e.target.select()} onBlur={() => finishRename(true)}
             onKeyDown={(e) => { if (e.key === 'Enter') finishRename(true); else if (e.key === 'Escape') finishRename(false); }} />} <button type="button" className="btn ghost icon-only reveal" onClick={showHistory} title="Past sessions in this set" aria-label="Past sessions in this set"><Icon name="history" /><span className="label">History</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">
-          {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
+          {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' Â· ')}
         </p>
       </div>
 
@@ -272,7 +238,7 @@ export default function LibrarySet({ setId, theme }) {
         <section key={s.name}>
           <div className="section-pick">
             <span>Questions in</span>
-            <SectionPicker sections={sections} current={s} onPick={setPicked} />
+            <UnderlineSelect options={sectionOptions} value={s.name} onChange={setPicked} label="Section" />
             <button type="button" className="btn ghost icon-only reveal" onClick={() => markSectionCorrect(s)} title="Mark every question in this section as correct" aria-label={`Mark all of ${s.name} as correct`}><Icon name="check" /><span className="label">Mark all correct</span></button>
           </div>
           <div className="run-list">
@@ -290,7 +256,7 @@ export default function LibrarySet({ setId, theme }) {
                 </div>
                 <KebabMenu icon="move" label="Move to another section" items={[
                   ...sections.filter((x) => x.name !== q.section).map((x) => ({ label: x.name, onClick: () => moveQuestion(q, x.name) })),
-                  { label: 'New section…', icon: 'plus', onClick: () => newSection(q) },
+                  { label: 'New sectionâ€¦', icon: 'plus', onClick: () => newSection(q) },
                 ]} />
                 {(record.userOwned || q.own || (canSync(record) && q.stem.pdf)) && <button type="button" className="btn ghost sm" onClick={() => removeQuestion(q)} aria-label={`Delete ${q.title}`}>Delete</button>}
               </div>
