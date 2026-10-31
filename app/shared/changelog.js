@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.13';
+export const VERSION = '2.14';
 
 export const CHANGELOG = [
+  {
+    version: '2.14', date: '2026-10-31', title: 'Recent sessions beside the practice options',
+    items: [
+      'An imported set page now lists its latest practice sessions in the space beside the practice options, as many as fit, each opening its session or results. See all opens the window with every past session. The History button beside the title is gone, and the practice options block is a little narrower.',
+    ],
+  },
   {
     version: '2.13', date: '2026-10-31', title: 'Cleaner top bar in a session',
     items: [
@@ -31,14 +37,6 @@ export const CHANGELOG = [
     version: '2.10', date: '2026-10-31', title: 'Timer follows the theme',
     items: [
       'The timer note now uses the same colours as the rest of the page, so it is dark in the dark theme and light in the light theme.',
-    ],
-  },
-  {
-    version: '2.09', date: '2026-10-31', title: 'Question timers and a tidier Stats page',
-    items: [
-      'Questions now have a timer. Imported-set questions show a note at the top right (coding runs show it in the top bar): the time on this question and, in a practice session, the session total. It runs while you are on the question, pauses when you switch away or leave the window, and stops when you mark the question right or not right. Click a time to pause everything; the refresh button resets the question\'s time and takes it off the total.',
-      'Each right or not right mark (or counted Run in a coding run, where a run that fails keeps the timer going and a pass stops it) saves a time for that attempt. The Stats pages of imported and coding sets show the average time per question, a Time block, a "time consuming" filter, and a click-to-open list of every attempt\'s time.',
-      'Stats is reorganised into three blocks (Results, Progress, Time), and the questions are chosen with a sentence: Display (filter) questions, ranked by (measure) with a highest/lowest first button. The drop-downs search as you type. Worth another go and the By section table are gone, as the sentence covers them, and the coding Stats page loses its Compile errors and Crashes columns (compile errors now count as not passed).',
     ],
   },
 ];

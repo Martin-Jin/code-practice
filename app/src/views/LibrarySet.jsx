@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import UnderlineSelect from '../components/UnderlineSelect.jsx';
+import RecentSessions from '../components/RecentSessions.jsx';
 import { useStore } from '../lib/store.js';
 import { plural } from '../lib/format.js';
 import { removeSet, deleteOwnQuestion, renameSet } from '../lib/library.js';
@@ -122,6 +123,18 @@ export default function LibrarySet({ setId, theme }) {
   const [expanded, setExpanded] = useState([]);
   const [picked, setPicked] = useState(null);
   const [renaming, setRenaming] = useState(null);   // the title being edited in place, or null
+  const practiceRef = useRef(null);
+  const [fit, setFit] = useState(3);   // how many recent sessions fit beside the practice options
+  // The recent sessions list is as tall as the practice options beside it, so it shows as many rows as fit there.
+  useEffect(() => {
+    const box = practiceRef.current;
+    if (!box || typeof ResizeObserver === 'undefined') return undefined;
+    const measure = () => setFit(Math.max(2, Math.min(10, Math.floor((box.offsetHeight - 120) / 58))));
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(box);
+    return () => watch.disconnect();
+  }, [!!record]);
 
   if (!record) {
     return <Shell theme={theme} crumbs={[{ label: 'Unknown set' }]}><div className="empty">There is no imported set called "{setId}". <a href="#/">Back to the dashboard</a></div></Shell>;
@@ -147,7 +160,7 @@ export default function LibrarySet({ setId, theme }) {
     try { await (record.userOwned ? renameMine(setId, name) : renameSet(setId, name)); } catch (e) { toast(e.message, 'bad'); }
   };
 
-  // A window listing every session of this set, newest first (the page itself shows them beside the practice options too).
+  // A window listing every session of this set, newest first (the page shows the latest beside the practice options).
   const showHistory = () => open(({ close }) => (
     <Modal wide title={`Past sessions in ${record.title}`} onClose={close} footer={<button type="button" className="btn primary" onClick={close}>Close</button>}>
       {runs.length === 0
@@ -220,14 +233,17 @@ export default function LibrarySet({ setId, theme }) {
         <h1 className="title-with-icon">{renaming === null
           ? <span className="renamable" role="button" tabIndex={0} title="Click to rename this set" onClick={() => setRenaming(record.title)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRenaming(record.title); } }}>{record.title}</span>
           : <input className="rename-input" autoFocus aria-label="Set name" value={renaming} maxLength={80} size={Math.max(8, renaming.length)} onChange={(e) => setRenaming(e.target.value)} onFocus={(e) => e.target.select()} onBlur={() => finishRename(true)}
-            onKeyDown={(e) => { if (e.key === 'Enter') finishRename(true); else if (e.key === 'Escape') finishRename(false); }} />} <button type="button" className="btn ghost icon-only reveal" onClick={showHistory} title="Past sessions in this set" aria-label="Past sessions in this set"><Icon name="history" /><span className="label">History</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
+            onKeyDown={(e) => { if (e.key === 'Enter') finishRename(true); else if (e.key === 'Escape') finishRename(false); }} />} <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
       </div>
 
       {canSync(record) && <PdfBar record={record} />}
-      <div style={{ maxWidth: 820 }}><LibraryPracticePicker set={record} /></div>
+      <div className="practice-row">
+        <div className="practice-main" ref={practiceRef}><LibraryPracticePicker set={record} /></div>
+        <RecentSessions runs={runs} limit={fit} onAll={showHistory} />
+      </div>
 
       {sections.length > 0 && (
         <div className="section-title set-heading"><h2>Questions in this set</h2><span className="muted">{questions.length}</span></div>
