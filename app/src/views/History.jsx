@@ -1,57 +1,101 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../lib/store.js';
-import { plural, timeAgo } from '../lib/format.js';
+import { timeAgo } from '../lib/format.js';
+import { fuzzyFilter } from '../lib/fuzzy.js';
+import { LIB_MODE_LABELS } from '../../shared/librarymodes.js';
+import { MODE_LABELS } from '../../shared/modes.js';
 import Shell from '../components/Shell.jsx';
+import Icon from '../components/Icon.jsx';
 import { libraryRunSet } from '../lib/practice.js';
+import RunRow from '../components/RunRow.jsx';
+import { LibRunRow } from '../components/LibraryPractice.jsx';
 
-export const HISTORY_SIZE = 5;
+const ROW = 50;   // px per row, with its gap
 
-// The question sets (coding or imported) the user most recently ran, newest first, one entry per set.
-export function recentSets(st, size = HISTORY_SIZE) {
-  const latest = new Map();   // set key -> { key, title, href, runs, at, run }
-  const add = (kind, run, title, href) => {
-    if (!title) return;   // the set is gone (a session whose set was never imported here)
-    const key = `${kind}:${run.setId}`;
-    const e = latest.get(key) || { key, title, href, runs: 0, at: '', run: null };
-    e.runs++;
-    if (run.updatedAt > e.at) { e.at = run.updatedAt; e.run = run; }
-    latest.set(key, e);
-  };
+// Every run of every set (coding runs and imported-set sessions), newest first. The rows are the dashboard's run rows, in their thin form.
+function allRuns(st) {
   const codeName = (id) => (st.catalog.sets.find((s) => s.id === id) || {}).name;
-  for (const r of Object.values(st.runs)) add('code', r, codeName(r.setId), `#/set/${r.setId}`);
+  const out = [];
+  for (const r of Object.values(st.runs)) {
+    const title = codeName(r.setId);
+    if (title) out.push({ key: `code:${r.id}`, kind: 'code', run: r, title, name: r.name, mode: MODE_LABELS[r.mode] || '', at: r.updatedAt });
+  }
   for (const r of Object.values(st.libRuns)) {
     const set = libraryRunSet(r);
-    const href = r.folderRun ? `#/folder-practice/${r.folderId || 'root'}` : `#/lib/${encodeURIComponent(r.setId)}`;
-    add('lib', r, set && set.title, href);
+    if (set) out.push({ key: `lib:${r.id}`, kind: 'lib', run: r, title: set.title, name: r.name, mode: LIB_MODE_LABELS[r.mode] || '', at: r.updatedAt });   // else the set is gone (never imported here)
   }
-  return [...latest.values()].sort((a, b) => b.at.localeCompare(a.at)).slice(0, size)
-    .map((e) => ({ ...e, kind: e.key.startsWith('code:') ? 'code' : 'lib' }));
+  return out.sort((a, b) => b.at.localeCompare(a.at));
+}
+
+// A search box over the history: fuzzy over set, run name and mode, with the matching set and run names offered as you type
+// (arrow keys and Enter or Tab take one). The list below narrows and ranks as you type.
+function HistorySearch({ runs, query, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const names = useMemo(() => [...new Set(runs.flatMap((r) => [r.title, r.name]))].map((label) => ({ label })), [runs]);
+  const hints = useMemo(() => (query.trim() ? fuzzyFilter(names, query, 6).map((m) => m.item.label).filter((l) => l !== query) : []), [names, query]);
+  const take = (label) => { onChange(label); setOpen(false); };
+  const onKey = (e) => {
+    if (e.key === 'ArrowDown' && hints.length) { e.preventDefault(); setOpen(true); setActive((i) => Math.min(i + 1, hints.length - 1)); }
+    else if (e.key === 'ArrowUp' && hints.length) { e.preventDefault(); setActive((i) => Math.max(i - 1, 0)); }
+    else if ((e.key === 'Enter' || e.key === 'Tab') && open && hints[active] !== undefined) { e.preventDefault(); take(hints[active]); }
+    else if (e.key === 'Escape') { if (open) { e.preventDefault(); setOpen(false); } else if (query) { e.preventDefault(); onChange(''); } }
+  };
+  return (
+    <div className="hist-search section-combo">
+      <Icon name="search" />
+      <input type="text" value={query} placeholder="Search your history by set, run name or mode" aria-label="Search your history" role="combobox" aria-expanded={open && hints.length > 0} aria-autocomplete="list"
+        onChange={(e) => { onChange(e.target.value); setOpen(true); setActive(0); }} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={onKey} />
+      {query && <button type="button" className="btn ghost icon-only sm" onMouseDown={(e) => e.preventDefault()} onClick={() => onChange('')} aria-label="Clear the search"><Icon name="x" /></button>}
+      {open && hints.length > 0 && (
+        <ul className="section-options" role="listbox">
+          {hints.map((h, i) => (
+            <li key={h} role="option" aria-selected={i === active} className={i === active ? 'active' : ''} onMouseDown={(e) => { e.preventDefault(); take(h); }} onMouseEnter={() => setActive(i)}>{h}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 export default function History({ theme }) {
   const st = useStore();
-  const recent = recentSets(st);
+  const runs = allRuns(st);
+  const [query, setQuery] = useState('');
+  const [screens, setScreens] = useState(1);
+  // As many rows as fit the window; Show more adds another window's worth.
+  const [perScreen, setPerScreen] = useState(() => Math.max(6, Math.floor((window.innerHeight - 250) / ROW)));
+  useEffect(() => {
+    const size = () => setPerScreen(Math.max(6, Math.floor((window.innerHeight - 250) / ROW)));
+    window.addEventListener('resize', size);
+    return () => window.removeEventListener('resize', size);
+  }, []);
+  useEffect(() => setScreens(1), [query]);
+
+  const matches = useMemo(() => {
+    if (!query.trim()) return runs;
+    const byKey = new Map(runs.map((r) => [r.key, r]));
+    return fuzzyFilter(runs.map((r) => ({ label: r.title, sub: r.name, keywords: r.mode, key: r.key })), query, runs.length).map((m) => byKey.get(m.item.key));
+  }, [runs, query]);
+  const shown = matches.slice(0, perScreen * screens);
+  const rest = matches.length - shown.length;
+
   return (
     <Shell theme={theme}>
       <section>
-        <div className="section-title"><h2>History</h2><span className="muted">last {HISTORY_SIZE} question sets you ran</span></div>
-        {recent.length === 0 ? (
+        <div className="section-title"><h2>History</h2><span className="muted">{query.trim() ? `${matches.length} of ${runs.length}` : runs.length} runs, newest first</span></div>
+        {runs.length === 0 ? (
           <div className="empty">No runs yet. Start one from <a href="#/sets">Question sets</a>.</div>
         ) : (
-          <div className="explorer-grid">
-            {recent.map((e) => {
-              const resume = e.run.completedAt ? `${e.kind === 'lib' ? '#/practice/' : '#/run/'}${e.run.id}/summary` : `${e.kind === 'lib' ? '#/practice/' : '#/run/'}${e.run.id}`;
-              return (
-                <a key={e.key} className="card tile" href={e.href}>
-                  <h2>{e.title}</h2>
-                  <span className="muted">Last run {timeAgo(e.at)}: {e.run.name}</span>
-                  <div className="meta">
-                    <span className="chip">{plural(e.runs, 'run')}</span>
-                    <span className={`chip ${e.run.completedAt ? 'ok' : 'accent'}`}>{e.run.completedAt ? 'Last run finished' : 'Last run in progress'}</span>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
+          <>
+            <HistorySearch runs={runs} query={query} onChange={setQuery} />
+            {matches.length === 0 ? <div className="empty">No run matches that search.</div> : (
+              <div className="hist-list">
+                {shown.map((r) => (r.kind === 'lib' ? <LibRunRow key={r.key} run={r.run} compact /> : <RunRow key={r.key} run={r.run} compact />))}
+              </div>
+            )}
+            {rest > 0 && <button type="button" className="btn hist-more" onClick={() => setScreens(screens + 1)}>Show {Math.min(rest, perScreen)} more</button>}
+          </>
         )}
       </section>
     </Shell>

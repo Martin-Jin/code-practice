@@ -7,7 +7,7 @@ import Icon from './Icon.jsx';
 import { useDialogs } from './Dialogs.jsx';
 
 // One saved run: progress, mode and Resume / Abandon.
-export default function RunRow({ run, showSet = true }) {
+export default function RunRow({ run, showSet = true, compact = false }) {
   const { confirm } = useDialogs();
   const sum = runSummary(run);
   const pct = sum.total ? (sum.passed / sum.total) * 100 : 0;
@@ -25,7 +25,7 @@ export default function RunRow({ run, showSet = true }) {
   };
 
   return (
-    <div className="card run-row">
+    <div className={`card run-row${compact ? ' compact' : ''}`}>
       <div style={{ minWidth: 0 }}>
         <div className="title" title={run.name}>{run.name}</div>
         <div className="sub">

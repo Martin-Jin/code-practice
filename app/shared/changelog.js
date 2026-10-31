@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.16';
+export const VERSION = '2.17';
 
 export const CHANGELOG = [
+  {
+    version: '2.17', date: '2026-10-31', title: 'History as a searchable list of runs',
+    items: [
+      'History is now a list with one short row per run (set, run name, progress and when), newest first. It shows as many rows as fit the window, and Show more adds another window of them. Clicking a row opens that run, or its results if it is finished.',
+      'A search box at the top finds runs by set, run name or mode (fuzzy), and suggests set and run names as you type.',
+    ],
+  },
   {
     version: '2.16', date: '2026-10-31', title: 'Space under the session timer',
     items: [
@@ -30,12 +37,6 @@ export const CHANGELOG = [
     items: [
       'During a practice session the top bar keeps only the logo, the menu and the timer, which now sits in the middle. The page tabs and the search box are hidden, since the All button on the question strip searches the session.',
       'Fixed the question strip with a long session: it stretched the page instead of scrolling within one row.',
-    ],
-  },
-  {
-    version: '2.12', date: '2026-10-31', title: 'One-row question strip',
-    items: [
-      'In a practice session the numbered strip is now a single row that slides to keep the current question in view, so long sessions no longer fill the top of the page. The All button at its end opens a searchable list of every question.',
     ],
   },
 ];

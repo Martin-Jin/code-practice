@@ -140,7 +140,7 @@ export function LibraryPracticePicker({ set }) {
 }
 
 // One saved session over an imported set: progress, and Resume / Abandon.
-export function LibRunRow({ run, showSet = true }) {
+export function LibRunRow({ run, showSet = true, compact = false }) {
   const st = useStore();
   const { confirm } = useDialogs();
   const set = libraryRunSet(run);
@@ -158,7 +158,7 @@ export function LibRunRow({ run, showSet = true }) {
   };
 
   return (
-    <div className="card run-row">
+    <div className={`card run-row${compact ? ' compact' : ''}`}>
       <div style={{ minWidth: 0 }}>
         <div className="title" title={run.name}>{run.name}</div>
         <div className="sub">

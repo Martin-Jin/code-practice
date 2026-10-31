@@ -51,7 +51,7 @@ The sun, moon and half-circle button (top right of the dashboard, or **Theme** i
 - **Library** (on the dashboard): question sets from folders on your computer. See [Your own question sets](#your-own-question-sets), including how to ask an AI agent for hints.
 - **Run**: the workspace described below.
 - **Stats**: the same layout as an imported set's Stats page (see below): **Results** (passed against not passed; a compile error counts as not passed), **Progress** and **Time** blocks, then the questions under *Display ... questions, ranked by ...*. Click a question to see the time of each attempt. An *attempt* is one press of Run, so it counts compiles. Stats are lifetime counters: resetting or abandoning a run never changes them. Use **Reset stats** on the stats page to clear them.
-- **History**: past runs, including imported-set practice sessions. On narrow screens the top bar reduces the tabs to icons; the History icon remains available.
+- **History**: every past run, including imported-set practice sessions, as one short row each (set, run name, progress, when), newest first. It shows as many rows as fit the window and **Show more** adds another window of them; click a row to open that run (or its results if finished). The search box at the top is fuzzy over set, run name and mode, and suggests names as you type (arrow keys and Enter or Tab take one, Esc clears). On narrow screens the top bar reduces the tabs to icons; the History icon remains available.
 
 ## Drawing the questions you struggle with more often
 

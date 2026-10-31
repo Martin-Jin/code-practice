@@ -176,6 +176,22 @@ b.crumb-item { color: var(--text); font-weight: 600; }
 .recent-name { font-weight: 650; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recent-meta { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recent-row .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 0; }
+.hist-search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 560px; margin-bottom: 14px; padding: 0 10px; background: var(--surface); border: 1px solid var(--control-border); border-radius: 8px; }
+.hist-search:focus-within { border-color: var(--accent); }
+.hist-search .icon { flex: none; color: var(--muted); }
+.hist-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 9px 0; font: inherit; color: var(--text); }
+.hist-search .section-options { left: 0; right: 0; width: auto; }
+.hist-list { display: grid; gap: 8px; }
+.hist-more { margin-top: 14px; }
+/* The thin form of a run row (History). */
+.run-row.compact { padding: 5px 14px; gap: 14px; }
+.run-row.compact > div:first-child { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.run-row.compact .title { flex: 0 1 auto; max-width: 45%; }
+.run-row.compact .sub { margin-top: 0; flex-wrap: nowrap; min-width: 0; overflow: hidden; white-space: nowrap; font-size: 12.5px; }
+.run-row.compact .sub .chip { flex: none; }
+.run-row.compact .prog { gap: 3px; font-size: 11.5px; }
+.run-row.compact .btn { padding: 4px 12px; font-size: 13px; }
+.run-row.compact .btn.icon-only { padding: 4px 8px; }
 .run-row .btns { display: flex; gap: 6px; align-items: center; align-self: center; }
 @media (max-width: 760px) { .run-row { grid-template-columns: 1fr; } }
 
