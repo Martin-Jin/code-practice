@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.18';
+export const VERSION = '2.19';
 
 export const CHANGELOG = [
+  {
+    version: '2.19', date: '2026-10-31', title: 'Smaller Resume button in run rows',
+    items: [
+      'In the thin run rows (dashboard and History) the Resume and Results buttons are small outlined pills instead of solid red blocks.',
+    ],
+  },
   {
     version: '2.18', date: '2026-10-31', title: 'Thin run rows on the dashboard',
     items: [
@@ -30,12 +36,6 @@ export const CHANGELOG = [
     items: [
       'During a practice session the top bar is gone. A back arrow at the start of the location line exits to the question sets, and the timer floats at the top centre of the page.',
       'Phones: question pages no longer stretch wider than the screen, the coding run keeps its timer in a smaller top bar (the previous and next buttons are hidden there; use the Questions tab), and the new Stats, menus, question strip and recent sessions were checked at phone width.',
-    ],
-  },
-  {
-    version: '2.14', date: '2026-10-31', title: 'Recent sessions beside the practice options',
-    items: [
-      'An imported set page now lists its latest practice sessions in the space beside the practice options, as many as fit, each opening its session or results. See all opens the window with every past session. The History button beside the title is gone, and the practice options block is a little narrower.',
     ],
   },
 ];
