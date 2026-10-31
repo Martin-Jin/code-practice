@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
+import SlideText from './SlideText.jsx';
 
 // A three-dot button (or, with `text`, a labelled button of `buttonClass`) that opens a small menu. items: [{ label, icon, onClick, danger }]. `label` names it for screen readers.
 export default function KebabMenu({ items, label = 'More actions', icon = 'more', className = '', text = '', buttonClass = 'btn ghost icon-only' }) {
@@ -22,7 +23,7 @@ export default function KebabMenu({ items, label = 'More actions', icon = 'more'
         <div className="menu" role="menu" style={{ minWidth: 190, maxHeight: 320, overflowY: 'auto' }}>
           {items.map((it) => (
             <button key={it.label} type="button" role="menuitem" className={it.danger ? 'danger' : ''} onClick={() => { setOpen(false); it.onClick(); }}>
-              {it.icon && <Icon name={it.icon} />} {it.label}
+              {it.icon && <Icon name={it.icon} />}<SlideText>{it.label}</SlideText>
             </button>
           ))}
         </div>

@@ -6,7 +6,7 @@ import Icon from './Icon.jsx';
 
 // The timer note: time on this question and, in a practice session, the session's total. It counts while the question is open
 // and the window is showing and focused, stops when the question is marked (the time is saved with that attempt), and clicking
-// either time pauses every timer. Imported sets show it as a standing note at the top right, under the top bar, where the
+// either time pauses every timer. Imported sets show it as a standing note at the bottom right, where the
 // formula sheets cover it; the coding run shows it inline in its top bar (`inline`).
 //
 // `identity` names the question (the clocks restart when it changes) and `pauseKey` the session or context the pause belongs
@@ -35,12 +35,6 @@ export default function Timer({ identity, pauseKey, source, frozen = false, inli
     }, 250);
     return () => clearInterval(id);
   }, [identity, pauseKey, frozen]);
-
-  useEffect(() => {
-    if (inline) return undefined;
-    document.body.classList.add('timer-on');
-    return () => document.body.classList.remove('timer-on');
-  }, [inline]);
 
   const { ms, done } = source.read();
   const total = source.total();

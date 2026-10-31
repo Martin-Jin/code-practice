@@ -106,7 +106,7 @@ function progressChips(p) {
   return (
     <>
       {p.difficult && <span className="chip warn">difficult</span>}
-      {p.attempts > 0 && <span className={`chip ${p.lastOverall === 'right' ? 'ok' : 'bad'}`}>{p.right} right Â· {p.wrong} not right</span>}
+      {p.attempts > 0 && <span className={`chip ${p.lastOverall === 'right' ? 'ok' : 'bad'}`}>{p.right} right · {p.wrong} not right</span>}
     </>
   );
 }
@@ -222,7 +222,7 @@ export default function LibrarySet({ setId, theme }) {
           : <input className="rename-input" autoFocus aria-label="Set name" value={renaming} maxLength={80} size={Math.max(8, renaming.length)} onChange={(e) => setRenaming(e.target.value)} onFocus={(e) => e.target.select()} onBlur={() => finishRename(true)}
             onKeyDown={(e) => { if (e.key === 'Enter') finishRename(true); else if (e.key === 'Escape') finishRename(false); }} />} <button type="button" className="btn ghost icon-only reveal" onClick={showHistory} title="Past sessions in this set" aria-label="Past sessions in this set"><Icon name="history" /><span className="label">History</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">
-          {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' Â· ')}
+          {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
       </div>
 
@@ -256,7 +256,7 @@ export default function LibrarySet({ setId, theme }) {
                 </div>
                 <KebabMenu icon="move" label="Move to another section" items={[
                   ...sections.filter((x) => x.name !== q.section).map((x) => ({ label: x.name, onClick: () => moveQuestion(q, x.name) })),
-                  { label: 'New sectionâ€¦', icon: 'plus', onClick: () => newSection(q) },
+                  { label: 'New section…', icon: 'plus', onClick: () => newSection(q) },
                 ]} />
                 {(record.userOwned || q.own || (canSync(record) && q.stem.pdf)) && <button type="button" className="btn ghost sm" onClick={() => removeQuestion(q)} aria-label={`Delete ${q.title}`}>Delete</button>}
               </div>

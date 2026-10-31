@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '../../components/Icon.jsx';
+import SlideText from '../../components/SlideText.jsx';
 
 // The settings and run options menu (a cog). items: [{ label, icon, onClick, disabled, title, danger }] or 'sep'.
 // `side` opens it beside the button (for the icon strip) instead of below it.
@@ -29,7 +30,7 @@ export default function RunMenu({ items, side = false, className = '' }) {
             : (
               <button key={i} type="button" role="menuitem" className={it.danger ? 'danger' : ''} disabled={it.disabled} title={it.title}
                 onClick={() => { setOpen(false); it.onClick(); }}>
-                <Icon name={it.icon} /> {it.label}
+                <Icon name={it.icon} /><SlideText>{it.label}</SlideText>
               </button>
             )))}
         </div>

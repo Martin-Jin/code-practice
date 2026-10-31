@@ -3,9 +3,17 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.10';
+export const VERSION = '2.11';
 
 export const CHANGELOG = [
+  {
+    version: '2.11', date: '2026-10-31', title: 'Timer at the bottom right, one-line menus, symbols fixed',
+    items: [
+      'The timer note on imported-set questions moved from the top right to the bottom right, so it no longer sits over the page header and the notifications.',
+      'Fixed garbled symbols (the sparkle in the attempted-this-question window, the arrows in the shortcut hints, and the dots and ellipsis in a few labels) that appeared after the last update.',
+      'Items in the three-dot and cog menus now stay on one line. A long one slides sideways while you hover over it, so you can read the end.',
+    ],
+  },
   {
     version: '2.10', date: '2026-10-31', title: 'Timer follows the theme',
     items: [
@@ -30,12 +38,6 @@ export const CHANGELOG = [
     version: '2.06', date: '2026-10-31', title: 'Rename a question set from its page',
     items: [
       'The title on an imported set page is underlined: click it and type to rename the set in place (Enter saves, Esc cancels). The name is kept when you import the folder or re-index the PDF again, and Ctrl+Z undoes it.',
-    ],
-  },
-  {
-    version: '2.05', date: '2026-10-31', title: 'Struggling means not right last time',
-    items: [
-      'The Struggling filter on the Stats pages now lists questions you got wrong at least once and did not get right the last time, the same ones the Not right last time practice mode draws, for coding sets and imported sets alike.',
     ],
   },
 ];

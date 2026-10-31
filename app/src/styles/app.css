@@ -379,9 +379,12 @@ table.difftable tr.add td.t.g:empty::before, table.difftable tr.del td.t.e:empty
 
 /* menus, dialogs, toasts */
 .menu-wrap { position: relative; }
-.menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 230px; padding: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); display: grid; }
+.menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 230px; padding: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); display: grid; width: max-content; max-width: min(280px, calc(100vw - 24px)); }
 .menu.side { right: auto; left: calc(100% + 6px); top: auto; bottom: 0; }
 .menu button { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; background: none; color: var(--text); font: inherit; text-align: left; border-radius: 6px; cursor: pointer; }
+.menu button .icon { flex: none; }
+.slide-text { flex: 1; min-width: 0; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+.slide-text::-webkit-scrollbar { display: none; }
 .menu button:hover:not(:disabled) { background: var(--surface-2); }
 .menu button:disabled { opacity: .45; cursor: not-allowed; }
 .menu button.danger { color: var(--bad); }
@@ -412,9 +415,8 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 .toast:hover { animation-play-state: paused; }
 @keyframes toast-dismiss { 0%, 70% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
-/* The timer note: a standing note in the same corner as the toasts, in the page's own light or dark surface. Below the formula sheets (z-index 4), so they cover it. */
-.timer { position: fixed; right: 16px; top: 62px; z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px 4px; border-radius: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); }
-body.timer-on #toasts { top: 118px; }
+/* The timer note: a standing note at the bottom right, in the page's own light or dark surface. Below the formula sheets (z-index 4), so they cover it. */
+.timer { position: fixed; right: 16px; bottom: 16px; z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px 4px; border-radius: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); }
 .timer.inline { position: static; box-shadow: none; margin-right: 8px; }
 .timer-state { display: inline-flex; padding: 0 2px 0 6px; opacity: .8; }
 .timer button { border: 0; background: none; color: inherit; font: inherit; cursor: pointer; border-radius: 6px; }
