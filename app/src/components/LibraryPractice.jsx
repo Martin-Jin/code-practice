@@ -151,6 +151,8 @@ export function LibRunRow({ run, showSet = true, compact = false }) {
   const done = run.questions.filter((uid) => runStatus(run, uid)).length;
   const right = run.questions.filter((uid) => runStatus(run, uid) === 'right').length;
   const pct = run.questions.length ? (done / run.questions.length) * 100 : 0;
+  const href = set ? `#/practice/${run.id}${run.completedAt ? '/summary' : ''}` : undefined;
+  const progress = `${done} / ${run.questions.length} checked · ${right} right`;
 
   const abandon = async () => {
     const ok = await confirm({
@@ -164,20 +166,22 @@ export function LibRunRow({ run, showSet = true, compact = false }) {
   return (
     <div className={`card run-row${compact ? ' compact' : ''}`} ref={row}>
       <div style={{ minWidth: 0 }} ref={main}>
-        <div className="title" title={run.name}>{run.name}</div>
+        {compact && href
+          ? <a className="title row-link" href={href} title={run.name}>{run.name}</a>   // a thin row is one big link into the session
+          : <div className="title" title={run.name}>{run.name}</div>}
         <div className="sub">
           <span className="chip accent">{LIB_MODE_LABELS[run.mode]}</span>
           {showSet && <span className="chip">{set ? set.title : run.setId}</span>}
           <span className="muted">Updated {timeAgo(run.updatedAt)}</span>
         </div>
       </div>
-      <div className="prog">
+      <div className="prog" title={compact ? progress : undefined}>
         <div className={`bar${run.completedAt ? ' ok' : ''}`}><i style={{ width: `${pct}%` }} /></div>
-        <span>{done} / {run.questions.length} checked · {right} right</span>
+        <span>{compact ? `${done} / ${run.questions.length}` : progress}</span>
       </div>
       <div className="btns">
         {set
-          ? <a className="btn primary" href={`#/practice/${run.id}${run.completedAt ? '/summary' : ''}`}>{run.completedAt ? 'Results' : 'Resume'}</a>
+          ? !compact && <a className="btn primary" href={href}>{run.completedAt ? 'Results' : 'Resume'}</a>
           : <span className="muted">Set not imported</span>}
         <button type="button" className="btn ghost icon-only" onClick={abandon} aria-label={`Delete ${run.name}`} title="Delete"><span aria-hidden="true">×</span></button>
       </div>

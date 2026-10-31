@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.19';
+export const VERSION = '2.20';
 
 export const CHANGELOG = [
+  {
+    version: '2.20', date: '2026-10-31', title: 'Click a run row to open it',
+    items: [
+      'On the dashboard and in History the whole run row is a link into the run (or its results when finished), so the Resume button is gone. The progress is one slim bar with done / total across it, so the rows are shorter.',
+    ],
+  },
   {
     version: '2.19', date: '2026-10-31', title: 'Smaller Resume button in run rows',
     items: [
@@ -29,13 +35,6 @@ export const CHANGELOG = [
     version: '2.16', date: '2026-10-31', title: 'Space under the session timer',
     items: [
       'In a practice session the page now starts below the floating timer, so the timer no longer sits level with the location line.',
-    ],
-  },
-  {
-    version: '2.15', date: '2026-10-31', title: 'No top bar in a session',
-    items: [
-      'During a practice session the top bar is gone. A back arrow at the start of the location line exits to the question sets, and the timer floats at the top centre of the page.',
-      'Phones: question pages no longer stretch wider than the screen, the coding run keeps its timer in a smaller top bar (the previous and next buttons are hidden there; use the Questions tab), and the new Stats, menus, question strip and recent sessions were checked at phone width.',
     ],
   },
 ];

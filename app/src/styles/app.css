@@ -184,25 +184,31 @@ b.crumb-item { color: var(--text); font-weight: 600; }
 .hist-list { display: grid; gap: 8px; }
 .hist-more { margin-top: 14px; }
 /* The thin form of a run row (History). */
-.run-row.compact { padding: 5px 14px; gap: 14px; }
+.run-row.compact { position: relative; padding: 5px 14px; gap: 14px; grid-template-columns: minmax(0, 1fr) 190px auto; }
+.run-row.compact:hover { border-color: var(--accent); background: var(--surface-2); }
+.row-link { color: inherit; }
+.row-link:hover { text-decoration: none; }
+.run-row.compact .row-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.run-row.compact .row-link:focus-visible { outline: none; }
+.run-row.compact:has(.row-link:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
 .run-row.compact > div:first-child { display: flex; align-items: center; gap: 12px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .run-row.compact > div:first-child::-webkit-scrollbar { display: none; }
 .run-row.compact .title { flex: none; overflow: visible; text-overflow: clip; }
 .run-row.compact .sub { margin-top: 0; flex: none; flex-wrap: nowrap; white-space: nowrap; font-size: 12.5px; }
 .run-row.compact .sub .chip { flex: none; }
-.run-row.compact .prog { gap: 3px; font-size: 11.5px; }
-.run-row.compact .btn { height: 24px; min-height: 0; padding: 0 10px; font-size: 12px; line-height: 1; }
-/* In a thin row the main button is an outlined pill rather than a solid red block. */
-.run-row.compact .btn.primary { background: transparent; color: var(--accent); border-color: var(--accent); }
-.run-row.compact .btn.primary:hover { background: var(--accent-soft); filter: none; }
-.run-row.compact .btn.icon-only { padding: 0 6px; }
-/* Phones: two short lines (name and set, then progress) with the button beside them. */
+/* The progress is one slim bar with "done / total" across the middle of it. */
+.run-row.compact .prog { position: relative; display: block; font-size: 11px; }
+.run-row.compact .prog .bar { height: 18px; }
+.run-row.compact .prog .bar > i { background: color-mix(in srgb, var(--accent) 55%, var(--surface-3)); }
+.run-row.compact .prog .bar.ok > i { background: color-mix(in srgb, var(--ok) 60%, var(--surface-3)); }
+.run-row.compact .prog span { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 650; color: var(--text); text-shadow: 0 0 3px var(--surface), 0 0 3px var(--surface); }
+.run-row.compact .btns .btn { position: relative; z-index: 1; height: 24px; min-height: 0; padding: 0 6px; font-size: 12px; line-height: 1; }
+/* Phones: two short lines (name and set, then the progress bar) with the delete button beside them. */
 @media (max-width: 760px) {
-  .run-row.compact { grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; padding: 6px 12px; }
+  .run-row.compact { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 6px 12px; }
   .run-row.compact > div:first-child { grid-column: 1; grid-row: 1; }
   .run-row.compact .prog { grid-column: 1; grid-row: 2; }
   .run-row.compact .btns { grid-column: 2; grid-row: 1 / span 2; }
-  .run-row.compact .btns .btn { height: 26px; }
   .run-row.compact .sub .chip.accent, .run-row.compact .sub .muted { display: none; }
 }
 .run-row .btns { display: flex; gap: 6px; align-items: center; align-self: center; }

@@ -17,6 +17,8 @@ export default function RunRow({ run, showSet = true, compact = false }) {
   const sum = runSummary(run);
   const pct = sum.total ? (sum.passed / sum.total) * 100 : 0;
   const done = !!run.completedAt;
+  const href = `#/run/${run.id}${done ? '/summary' : ''}`;
+  const progress = `${sum.passed} / ${sum.total} passed · ${plural(sum.totalAttempts, 'attempt')}`;
 
   const abandon = async () => {
     const ok = await confirm({
@@ -32,19 +34,21 @@ export default function RunRow({ run, showSet = true, compact = false }) {
   return (
     <div className={`card run-row${compact ? ' compact' : ''}`} ref={row}>
       <div style={{ minWidth: 0 }} ref={main}>
-        <div className="title" title={run.name}>{run.name}</div>
+        {compact
+          ? <a className="title row-link" href={href} title={run.name}>{run.name}</a>   // a thin row is one big link into the run
+          : <div className="title" title={run.name}>{run.name}</div>}
         <div className="sub">
           <span className="chip accent">{MODE_LABELS[run.mode]}</span>
           {showSet && <span className="chip">{getSet(run.setId)?.name || run.setId}</span>}
           <span className="muted">{done ? `Finished ${timeAgo(run.completedAt)}` : `Updated ${timeAgo(run.updatedAt)}`}</span>
         </div>
       </div>
-      <div className="prog">
+      <div className="prog" title={compact ? progress : undefined}>
         <div className={`bar${done ? ' ok' : ''}`}><i style={{ width: `${pct}%` }} /></div>
-        <span>{sum.passed} / {sum.total} passed · {plural(sum.totalAttempts, 'attempt')}</span>
+        <span>{compact ? `${sum.passed} / ${sum.total}` : progress}</span>
       </div>
       <div className="btns">
-        <a className="btn primary" href={`#/run/${run.id}${done ? '/summary' : ''}`}>{done ? 'Results' : 'Resume'}</a>
+        {!compact && <a className="btn primary" href={href}>{done ? 'Results' : 'Resume'}</a>}
         <button type="button" className="btn ghost icon-only danger" onClick={abandon} title={done ? 'Delete run' : 'Abandon run'} aria-label={done ? 'Delete run' : 'Abandon run'}>
           <Icon name="trash" />
         </button>
