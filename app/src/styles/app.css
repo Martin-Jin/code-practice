@@ -431,7 +431,7 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 .timer.inline { position: static; box-shadow: none; margin-right: 8px; }
 .timer.top { right: auto; bottom: auto; top: 12px; left: 50%; transform: translateX(-50%); }
 body.no-nav .formula-side { top: 0; }
-@media (max-width: 900px) { body.no-nav .page { padding-top: 70px; } }
+body.no-nav .page { padding-top: 80px; }   /* the floating timer ends above the location line */
 .crumb-back { display: inline-flex; align-items: center; color: var(--muted); padding: 4px; margin: -4px 0 -4px -4px; border-radius: 6px; }
 .crumb-back:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
 .crumb-back .icon { width: 18px; height: 18px; }

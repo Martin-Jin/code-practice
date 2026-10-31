@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.15';
+export const VERSION = '2.16';
 
 export const CHANGELOG = [
+  {
+    version: '2.16', date: '2026-10-31', title: 'Space under the session timer',
+    items: [
+      'In a practice session the page now starts below the floating timer, so the timer no longer sits level with the location line.',
+    ],
+  },
   {
     version: '2.15', date: '2026-10-31', title: 'No top bar in a session',
     items: [
@@ -30,14 +36,6 @@ export const CHANGELOG = [
     version: '2.12', date: '2026-10-31', title: 'One-row question strip',
     items: [
       'In a practice session the numbered strip is now a single row that slides to keep the current question in view, so long sessions no longer fill the top of the page. The All button at its end opens a searchable list of every question.',
-    ],
-  },
-  {
-    version: '2.11', date: '2026-10-31', title: 'Timer at the bottom right, one-line menus, symbols fixed',
-    items: [
-      'The timer note on imported-set questions moved from the top right to the bottom right, so it no longer sits over the page header and the notifications.',
-      'Fixed garbled symbols (the sparkle in the attempted-this-question window, the arrows in the shortcut hints, and the dots and ellipsis in a few labels) that appeared after the last update.',
-      'Items in the three-dot and cog menus now stay on one line. A long one slides sideways while you hover over it, so you can read the end.',
     ],
   },
 ];
