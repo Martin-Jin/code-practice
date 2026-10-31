@@ -187,6 +187,13 @@ b.crumb-item { color: var(--text); font-weight: 600; }
 .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .two-col { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+/* Practice page: the right column (sessions, topics) is only as tall as the practice picker beside it and scrolls inside. */
+.two-col.fit { align-items: stretch; min-height: 380px; }
+.two-col.fit > .fit-col { height: 0; min-height: 100%; display: flex; flex-direction: column; min-width: 0; }
+.fit-col .run-list { flex: 0 1 auto; min-height: 60px; overflow-y: auto; }
+.fit-col .empty { flex: none; }
+.fit-col .topic-card { flex: 1 1 120px; min-height: 120px; overflow-y: auto; }
+@media (max-width: 900px) { .two-col.fit { min-height: 0; } .two-col.fit > .fit-col { height: auto; } .fit-col .topic-card { flex: none; max-height: 320px; } }
 
 /* stats */
 .tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }

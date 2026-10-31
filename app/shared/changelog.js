@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.01';
+export const VERSION = '2.02';
 
 export const CHANGELOG = [
+  {
+    version: '2.02', date: '2026-10-31', title: 'Topic list stays level with the practice options',
+    items: [
+      'On a set page the topic list now stops at the height of the practice options and scrolls, instead of pushing the page down, and its top lines up with them.',
+      'A new button beside Stats and Search in an imported set title opens a window listing every topic in the set.',
+    ],
+  },
   {
     version: '2.01', date: '2026-10-31', title: 'Customise a run by topic',
     items: [
@@ -29,12 +36,6 @@ export const CHANGELOG = [
     version: '1.98', date: '2026-10-31', title: 'Solutions with several pages',
     items: [
       'Adding or editing a solution now takes as many images as it needs, one per page, which you can reorder or remove. When editing, new pages can replace the existing ones or be added after them. Writing them into a PDF puts one image on each of its existing solution pages.',
-    ],
-  },
-  {
-    version: '1.97', date: '2026-10-31', title: 'Same practice modes for coding questions',
-    items: [
-      'Coding sets now offer the same modes as imported sets: Marked difficult, Not seen yet and Not right last time, alongside Practice test, Random, By topic and All. Tick topics to limit Random, All and those modes to them. Mark a question as difficult from its Task tab. Split evenly no longer fails when ticked.',
     ],
   },
 ];

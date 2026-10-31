@@ -42,20 +42,20 @@ export default function SetPage({ setId, theme }) {
         {set.description && <p className="muted">{set.description}</p>}
       </div>
 
-      <div className="two-col">
+      <div className="two-col fit">
         <section>
           <div className="section-title"><h2>Practise</h2>{st.prioritise && <span className="chip accent">Drawing hard questions more often</span>}</div>
           <ModePicker set={set} value={choice} onChange={setChoice} onStart={start} />
         </section>
 
-        <section>
+        <section className="fit-col">
           <div className="section-title"><h2>Your runs in this set</h2><span className="muted">{runs.length}</span></div>
           {runs.length === 0
             ? <div className="empty">No runs yet. Choose a mode and press Start.</div>
             : <div className="run-list">{runs.map((r) => <RunRow key={r.id} run={r} showSet={false} />)}</div>}
 
           <div className="section-title" style={{ marginTop: 28 }}><h2>Topics</h2></div>
-          <div className="card pad" style={{ display: 'grid', gap: 6 }}>
+          <div className="card pad topic-card" style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
             {set.categories.map((c) => (
               <div key={c.id} className="row" style={{ justifyContent: 'space-between' }}>
                 <span>{c.name}</span>

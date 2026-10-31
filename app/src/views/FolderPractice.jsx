@@ -34,16 +34,16 @@ export default function FolderPractice({ folderId, theme }) {
         <p className="muted">{plural(sourceSets.length, 'question set')} · {plural(set.manifest.questions.length, 'question')} from this folder and its subfolders</p>
       </div>
 
-      <div className="two-col">
+      <div className="two-col fit">
         <LibraryPracticePicker set={set} />
-        <section>
+        <section className="fit-col">
           <div className="section-title"><h2>Your runs in this folder</h2><span className="muted">{runs.length}</span></div>
           {runs.length === 0
             ? <div className="empty">No runs yet. Choose a mode and press Start.</div>
             : <div className="run-list">{runs.map((run) => <LibRunRow key={run.id} run={run} showSet={false} />)}</div>}
 
           <div className="section-title" style={{ marginTop: 28 }}><h2>Topics</h2></div>
-          <div className="card pad" style={{ display: 'grid', gap: 6 }}>
+          <div className="card pad topic-card" style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
             {topics.map((topic) => (
               <div key={topic} className="row" style={{ justifyContent: 'space-between' }}>
                 <span>{topic}</span>
