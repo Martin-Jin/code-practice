@@ -229,13 +229,14 @@ export default function QuestionView({ setId, uid, run, theme }) {
     </>
   );
   const difficult = !!(progress && progress.difficult);
+  const timer = <QuestionTimer recordSetId={recordSetId} recordUid={recordUid} uid={uid} run={run || null} inline={!!run} />;
   const banner = result && BANNER[result];
   const edited = hasCorrections(recordSetId, recordUid);
   const notes = (st.libEdits[keyOf(recordSetId, recordUid)] || {}).notes ?? question.notes ?? '';
 
   return (
-    <Shell theme={theme} crumbs={[...folderCrumbs(recordSetId), { label: set.title, href: `#/lib/${encodeURIComponent(recordSetId)}` }, { label: run ? run.name : question.section }]}>
-      <QuestionTimer recordSetId={recordSetId} recordUid={recordUid} uid={uid} run={run || null} />
+    <Shell theme={theme} crumbs={[...folderCrumbs(recordSetId), { label: set.title, href: `#/lib/${encodeURIComponent(recordSetId)}` }, { label: run ? run.name : question.section }]} center={run ? timer : null}>
+      {!run && timer}
       {run && (
         <QuestionStrip current={uid} href={go}
           items={questions.map((q) => ({ uid: q.uid, title: q.title, status: runStatus(run, q.uid), difficult: !!(getProgress(q.sourceSetId || setId, q.sourceUid || q.uid) || {}).difficult }))} />

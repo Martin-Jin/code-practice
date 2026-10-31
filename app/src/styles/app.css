@@ -418,6 +418,8 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 /* The timer note: a standing note at the bottom right, in the page's own light or dark surface. Below the formula sheets (z-index 4), so they cover it. */
 .timer { position: fixed; right: 16px; bottom: 16px; z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px 4px; border-radius: 8px; background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); }
 .timer.inline { position: static; box-shadow: none; margin-right: 8px; }
+.shell-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.shell-center .timer.inline { margin: 0; }
 .timer-state { display: inline-flex; padding: 0 2px 0 6px; opacity: .8; }
 .timer button { border: 0; background: none; color: inherit; font: inherit; cursor: pointer; border-radius: 6px; }
 .timer button:hover:not(:disabled) { background: var(--surface-3); }
@@ -591,8 +593,8 @@ label.choice input { margin-top: 4px; }
 .field.grow { flex: 1; min-width: 120px; }
 .small { font-size: 12.5px; }
 .notice.ok { background: var(--ok-soft); color: var(--ok); } .notice.bad { background: var(--bad-soft); color: var(--bad); }
-.qstrip-wrap { position: relative; margin-bottom: 14px; }
-.qstrip { display: flex; align-items: center; gap: 8px; }
+.qstrip-wrap { position: relative; margin-bottom: 14px; min-width: 0; }
+.qstrip { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .qstrip-row { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 1px 0 4px; }
 .qstrip-row::-webkit-scrollbar { display: none; }
 .qstrip-row .qdot { flex: none; }

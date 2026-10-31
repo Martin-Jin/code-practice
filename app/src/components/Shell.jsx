@@ -191,20 +191,22 @@ const TABS = [['dashboard', 'Dashboard', '#/', 'home'], ['sets', 'Question sets'
 const tabOfHash = () => (/^#\/(sets|set|lib|q)(\/|$)/.test(window.location.hash) ? 'sets' : /^#\/history(\/|$)/.test(window.location.hash) ? 'history' : /^#\/?$/.test(window.location.hash) ? 'dashboard' : null);
 
 // Top bar for the dashboard, set and stats pages. `hero` is a banner between the bar and the page (the landing page's).
-export default function Shell({ crumbs = [], theme, hero = null, children }) {
+// With `center` (a practice session) the bar is cut back to the logo, that content in the middle and the menu.
+export default function Shell({ crumbs = [], theme, hero = null, center = null, children }) {
   return (
     <>
       <nav className="shell-nav">
         <a className="brand" href="#/"><span className="logo"><Logo /></span><span className="brand-name">{APP_NAME}</span></a>
-        <div className="top-tabs" role="navigation" aria-label="Pages">
+        {!center && <div className="top-tabs" role="navigation" aria-label="Pages">
           {TABS.map(([id, label, href, icon]) => (
             <a key={id} href={href} title={label} aria-label={label} aria-current={tabOfHash() === id ? 'page' : undefined}>
               <Icon name={icon} /><span className="tab-label">{label}</span>
             </a>
           ))}
-        </div>
+        </div>}
         <span className="spacer" />
-        <GlobalSearch />
+        {center && <div className="shell-center">{center}</div>}
+        {!center && <GlobalSearch />}
         <NavMenu theme={theme} />
       </nav>
       {hero}

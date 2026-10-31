@@ -6,7 +6,7 @@ import Icon from './Icon.jsx';
 
 // The timer note: time on this question and, in a practice session, the session's total. It counts while the question is open
 // and the window is showing and focused, stops when the question is marked (the time is saved with that attempt), and clicking
-// either time pauses every timer. Imported sets show it as a standing note at the bottom right, where the
+// either time pauses every timer. Imported sets show it as a standing note at the bottom right (centred in the top bar during a practice session), where the
 // formula sheets cover it; the coding run shows it inline in its top bar (`inline`).
 //
 // `identity` names the question (the clocks restart when it changes) and `pauseKey` the session or context the pause belongs
@@ -63,7 +63,7 @@ export default function Timer({ identity, pauseKey, source, frozen = false, inli
 
 // The timer of an imported-set question. `uid` is the question's id here (in a session, its id in the session);
 // `recordSetId`/`recordUid` name its progress record.
-export function QuestionTimer({ recordSetId, recordUid, uid, run }) {
+export function QuestionTimer({ recordSetId, recordUid, uid, run, inline = false }) {
   const runId = run ? run.id : null;
   const source = {
     open: () => openClock(recordSetId, recordUid, runId, uid),
@@ -72,5 +72,5 @@ export function QuestionTimer({ recordSetId, recordUid, uid, run }) {
     reset: () => resetClock(recordSetId, recordUid, runId, uid),
     total: () => (run ? runTotal(run) : null),
   };
-  return <Timer identity={`${recordSetId}/${recordUid}/${runId}/${uid}`} pauseKey={runId || 'solo'} source={source} frozen={!!(run && run.completedAt)} />;
+  return <Timer identity={`${recordSetId}/${recordUid}/${runId}/${uid}`} pauseKey={runId || 'solo'} source={source} frozen={!!(run && run.completedAt)} inline={inline} />;
 }
