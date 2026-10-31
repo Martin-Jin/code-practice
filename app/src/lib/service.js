@@ -9,6 +9,7 @@ import { ACTIONS } from './shortcuts.js';
 import { fetchCatalog, getSet, getQuestion, getSupport } from './catalog.js';
 import { execute, detectLocal } from './runners.js';
 import { loadLibrary } from './library.js';
+import { undoable, recordUndo } from './undo.js';
 import { loadPractice } from './practice.js';
 import { loadFormulas } from './formulas.js';
 import { seedSample } from './sample.js';
@@ -170,13 +171,13 @@ export function createRun({ setId, mode, options, name }) {
   return run;
 }
 
-export function deleteRun(id) {
+export const deleteRun = (id) => undoable(`Abandoned ${state.runs[id] ? state.runs[id].name : 'a run'}`, ['runs'], () => {
   delete state.runs[id];
   clearTimeout(timers.get(id));
   timers.delete(id);
   db.remove('runs', id);
   notify();
-}
+});
 
 export function renameRun(id, name) {
   const run = state.runs[id];
@@ -297,13 +298,14 @@ export async function runQuestion(id, n, code) {
 export function setDifficult(setId, n, value) {
   const stats = statsFor(setId);
   const qs = (stats.questions[n] = stats.questions[n] || freshQuestionStats());
+  if (!!qs.difficult !== !!value) recordUndo(value ? `Marked Q${n} as difficult` : `Unmarked Q${n} as difficult`, () => setDifficult(setId, n, !value), () => setDifficult(setId, n, value));
   qs.difficult = !!value;
   saveStats(setId);
   notify();
 }
 
-export function resetStats(setId) {
+export const resetStats = (setId) => undoable('Reset the stats', ['stats'], () => {
   delete state.stats[setId];
   db.remove('stats', setId);
   notify();
-}
+});

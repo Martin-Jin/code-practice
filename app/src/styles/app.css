@@ -381,11 +381,16 @@ dialog.modal form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
 .modal .m-head { padding: 18px 22px 6px; }
 .modal .m-body { padding: 6px 22px 18px; overflow: auto; display: grid; gap: 12px; }
 .modal .m-foot { padding: 12px 22px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
-#toasts { position: fixed; right: 16px; bottom: 16px; z-index: 100; display: grid; gap: 8px; }
-.toast { padding: 10px 14px; border-radius: 8px; background: var(--text); color: var(--bg); box-shadow: var(--shadow); max-width: 380px; }
-.toast.bad { background: var(--bad); color: var(--status-ink); animation: toast-dismiss 5.2s ease forwards; }
-@keyframes toast-dismiss { 0%, 84% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(6px); } }
-@media (prefers-reduced-motion: reduce) { .toast.bad { animation: none; } }
+/* Top right, under the top bar (52px) so they never cover it or the add button at the bottom right. */
+#toasts { position: fixed; right: 16px; top: 64px; z-index: 100; display: grid; gap: 8px; justify-items: end; pointer-events: none; }
+.toast { pointer-events: auto; padding: 10px 14px; border-radius: 8px; background: var(--text); color: var(--bg); box-shadow: var(--shadow); max-width: 380px; border: 0; font: inherit; text-align: left; animation: toast-dismiss 3.5s ease forwards; }
+.toast.bad { background: var(--bad); color: var(--status-ink); animation-duration: 5.2s; }
+.toast.action { display: flex; gap: 12px; align-items: baseline; cursor: pointer; }
+.toast.action b { text-decoration: underline; }
+.toast.action:hover { filter: brightness(1.15); }
+.toast:hover { animation-play-state: paused; }
+@keyframes toast-dismiss { 0%, 70% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
 @media (prefers-reduced-motion: reduce) {
   dialog.modal.attempt-prompt[open], dialog.modal.attempt-prompt::backdrop, .attempt-spark { animation: none; }
 }

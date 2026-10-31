@@ -5,6 +5,7 @@ import { flushPracticeSaves } from './lib/practice.js';
 import useTheme from './components/useTheme.js';
 import { DialogProvider } from './components/Dialogs.jsx';
 import ToastHost, { validationError } from './components/Toasts.jsx';
+import { undoLast, redoLast } from './lib/undo.js';
 import { inputValidationMessage } from '../shared/validation.js';
 import CommandPalette from './components/CommandPalette.jsx';
 import { WelcomeOnStart } from './components/Welcome.jsx';
@@ -89,10 +90,15 @@ export default function App() {
     document.addEventListener('focusin', onFocus);
     return () => { document.removeEventListener('input', onInput); document.removeEventListener('focusin', onFocus); };
   }, []);
-  // Ctrl+S is muscle memory from VS Code; the app saves by itself, so stop the browser's save dialog.
+  // Ctrl+S is muscle memory from VS Code; the app saves by itself, so stop the browser's save dialog. Also Ctrl+Z / Ctrl+Shift+Z.
   useEffect(() => {
     const onKey = (e) => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 's') e.preventDefault();
+      // Ctrl+Z / Ctrl+Shift+Z undo and redo the app's changes, except while typing, where the text box has its own undo.
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.code === 'KeyZ' && !(e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"], .monaco-editor'))) {
+        e.preventDefault();
+        if (e.shiftKey) redoLast(); else undoLast();
+      }
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);

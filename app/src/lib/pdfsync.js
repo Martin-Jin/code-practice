@@ -13,6 +13,7 @@ import { loadPdfjs } from './pdfjs.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { indexPdf, importSet, getFile } from './library.js';
+import { undoBarrier } from './undo.js';
 
 export const canLink = typeof window !== 'undefined' && 'showOpenFilePicker' in window;
 export const canSync = (record) => !!record && !!record.generated && !!record.manifest.pdf;
@@ -49,6 +50,7 @@ async function refreshFrom(setId, file) {
   if (item.set.id !== setId) throw new Error('That PDF would make a different set, not update this one.');
   if (!item.set.questions.some((q) => q.stem.pdf)) throw new Error('No questions were found in that PDF, so the set was left as it was.');
   await importSet(item);
+  undoBarrier();   // the PDF and the set changed together, so earlier steps no longer match
   return item.merge;
 }
 

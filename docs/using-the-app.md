@@ -25,7 +25,9 @@ A welcome window (about two-thirds of the screen, in the middle) has two tabs: *
 
 The **?** button in the top bar of the dashboard, set and stats pages lists every keyboard shortcut. Inside a run, use **Keyboard shortcuts** in the cog menu.
 
-The shortcuts can be changed. Click one in that list, then press the new keys (`Esc` cancels); **Reset** puts one default back and **Reset all** puts them all back. The choices are saved in this browser.
+**Undo and redo.** Changes to folders, questions (edits, moves, deletes, new questions), sessions and runs you abandon, removed sets, stats resets and difficult marks show a note at the top right, below the top bar, for a second. Click it, or press Ctrl+Z, to undo; Ctrl+Shift+Z redoes. Up to three notes show at once, the newest replacing the oldest, and hovering keeps one on screen. Ctrl+Z inside a text box or the code editor undoes the typing instead. Typing answers and notes, starting a session and importing a folder are not undoable, and writing into a PDF clears the undo history because the file cannot be rolled back. These two shortcuts are fixed.
+
+The other shortcuts can be changed. Click one in that list, then press the new keys (`Esc` cancels); **Reset** puts one default back and **Reset all** puts them all back. The choices are saved in this browser.
 
 - A combination must include `Ctrl` or `Alt` (or be a function key, or `Esc` for going back), so ordinary typing is not affected.
 - One already used by another action is refused, and you are told which.

@@ -4,6 +4,7 @@
 // IndexedDB (store libFolders) and part of a backup.
 import * as db from './db.js';
 import { state, notify } from './store.js';
+import { undoable } from './undo.js';
 
 const now = () => new Date().toISOString();
 const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -46,13 +47,14 @@ const cleanName = (name, except = null) => {
   return clean;
 };
 
-export async function createFolder(name, parentId = null) {
+export const createFolder = (name, parentId = null) => undoable(`Created folder ${String(name || '').trim()}`, ['libFolders'], () => makeFolder(name, parentId));
+async function makeFolder(name, parentId) {
   const folder = { id: newId(), name: cleanName(name), items: [], parentId: parentId || null, updatedAt: now() };
   await save(folder);
   return folder;
 }
 
-export const renameFolder = (id, name) => save({ ...state.libFolders[id], name: cleanName(name, id) });
+export const renameFolder = (id, name) => undoable(`Renamed folder ${state.libFolders[id].name}`, ['libFolders'], () => save({ ...state.libFolders[id], name: cleanName(name, id) }));
 
 // Folders nest: `parentId` is the folder a folder sits in, or absent at the top level.
 export const foldersIn = (parentId) => foldersSorted().filter((f) => (f.parentId || null) === (parentId || null));
@@ -69,13 +71,15 @@ export function folderPath(id) {
   return path;
 }
 
-export async function moveFolder(id, parentId) {
+export const moveFolder = (id, parentId) => undoable(`Moved folder ${state.libFolders[id].name}`, ['libFolders'], () => relocateFolder(id, parentId));
+async function relocateFolder(id, parentId) {
   if (parentId === id || (parentId && descendantIds(id).includes(parentId))) throw new Error('A folder cannot go inside itself.');
   const folder = state.libFolders[id];
   if ((folder.parentId || null) !== (parentId || null)) await save({ ...folder, parentId: parentId || null });
 }
 
-export async function deleteFolder(id) {
+export const deleteFolder = (id) => undoable(`Deleted folder ${state.libFolders[id].name}`, ['libFolders'], () => dropFolder(id));
+async function dropFolder(id) {
   // Folders inside it move up one level rather than being lost.
   for (const child of foldersIn(id)) await save({ ...child, parentId: state.libFolders[id].parentId || null });
   await db.transact(['libFolders'], (t) => t.objectStore('libFolders').delete(id));
@@ -84,7 +88,8 @@ export async function deleteFolder(id) {
 }
 
 // Puts a set in a folder (taking it out of any other), or in none when folderId is null.
-export async function moveSet(setId, folderId) {
+export const moveSet = (setId, folderId) => undoable('Moved a question set', ['libFolders'], () => putSet(setId, folderId));
+async function putSet(setId, folderId) {
   for (const f of foldersSorted()) {
     const has = f.items.some((i) => i.setId === setId);
     if (f.id === folderId && !has) await save({ ...f, items: [...f.items, { setId }] });

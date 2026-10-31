@@ -8,6 +8,9 @@ import { FORMAT, VERSION, questionProblems } from '../../shared/questionset.js';
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { syncMine, MINE_ID } from './library.js';
+import { undoable, onRestore } from './undo.js';
+
+onRestore('libMine', syncMine);   // undo and redo change the records, so the sets list must follow
 
 const now = () => new Date().toISOString();
 
@@ -44,7 +47,8 @@ export function nameImages(question, uid, images) {
 
 // question: everything but the uid. images: { path: data URL } for the files it names. `set` is { id, title } of
 // the user's set to add to (a new one is made if it does not exist yet). Returns the new uid.
-export async function addMineQuestion(question, images, set = { id: MINE_ID, title: 'My questions' }) {
+export const addMineQuestion = (question, images, set = { id: MINE_ID, title: 'My questions' }) => undoable(`Added “${question.title}”`, ['libMine'], () => storeQuestion(question, images, set));
+async function storeQuestion(question, images, set) {
   const record = state.libMine[set.id] ? structuredClone(state.libMine[set.id]) : emptyRecord(set.id, set.title);
   const taken = new Set(record.manifest.questions.map((q) => q.uid));
   let uid = await uidFor(set.id, question.source || '', question.title);
@@ -57,16 +61,23 @@ export async function addMineQuestion(question, images, set = { id: MINE_ID, tit
 }
 
 export async function deleteMineQuestion(setId, uid) {
+  const title = ((state.libMine[setId] && state.libMine[setId].manifest.questions.find((q) => q.uid === uid)) || {}).title;
+  return undoable(`Deleted “${title}”`, ['libMine'], () => dropQuestion(setId, uid));
+}
+
+async function dropQuestion(setId, uid) {
   const record = structuredClone(state.libMine[setId]);
   const gone = record.manifest.questions.find((q) => q.uid === uid);
   if (!gone) return;
   record.manifest.questions = record.manifest.questions.filter((q) => q.uid !== uid);
   for (const path of [gone.stem.image, ...((gone.solution && gone.solution.images) || [])]) if (path) delete record.images[path];
-  if (!record.manifest.questions.length) await deleteMine(setId);
+  if (!record.manifest.questions.length) await dropSet(setId);
   else await save(record);
 }
 
-export async function deleteMine(setId = MINE_ID) {
+export const deleteMine = (setId = MINE_ID) => undoable(`Removed ${state.libMine[setId] ? state.libMine[setId].manifest.title : 'a question set'}`, ['libMine'], () => dropSet(setId));
+
+async function dropSet(setId) {
   await db.transact(['libMine'], (t) => t.objectStore('libMine').delete(setId));
   delete state.libMine[setId];
   syncMine();

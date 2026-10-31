@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.02';
+export const VERSION = '2.03';
 
 export const CHANGELOG = [
+  {
+    version: '2.03', date: '2026-10-31', title: 'Undo and redo',
+    items: [
+      'Changes to folders, questions, sessions, removed sets and difficult marks now show a note at the top right, under the top bar. Click it within a second to undo, or press Ctrl+Z; Ctrl+Shift+Z redoes. Up to three notes stack, and error messages moved there too.',
+      'Writing a change into a PDF, or restoring a backup, clears the undo history, because those cannot be rolled back.',
+    ],
+  },
   {
     version: '2.02', date: '2026-10-31', title: 'Topic list stays level with the practice options',
     items: [
@@ -30,12 +37,6 @@ export const CHANGELOG = [
     version: '1.99', date: '2026-10-31', title: 'No blank solution pages in the PDF',
     items: [
       'Changing a multi-page solution in the PDF with fewer images (or text) now removes the leftover solution pages instead of leaving them blank under a "Worked solution" header.',
-    ],
-  },
-  {
-    version: '1.98', date: '2026-10-31', title: 'Solutions with several pages',
-    items: [
-      'Adding or editing a solution now takes as many images as it needs, one per page, which you can reorder or remove. When editing, new pages can replace the existing ones or be added after them. Writing them into a PDF puts one image on each of its existing solution pages.',
     ],
   },
 ];

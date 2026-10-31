@@ -10,6 +10,7 @@ import { acknowledgeSolution as markSolutionAcknowledged, hasAcknowledgedSolutio
 import * as db from './db.js';
 import { state, notify } from './store.js';
 import { syncMine } from './library.js';
+import { undoable, recordUndo } from './undo.js';
 import { setsInFolder } from './folders.js';
 
 export const keyOf = (setId, uid) => `${setId}/${uid}`;
@@ -244,13 +245,15 @@ export function resetAnswers(setId, uid) {
 
 export function setDifficult(setId, uid, value) {
   const rec = ensure(setId, uid);
+  if (rec.difficult !== !!value) recordUndo(value ? 'Marked a question as difficult' : 'Unmarked a question as difficult', () => setDifficult(setId, uid, !value), () => setDifficult(setId, uid, value));
   rec.difficult = !!value;
   touch(rec, 0);
 }
 
 // ---- the user's corrections (answer keys) ----
 
-export function saveEdit(setId, uid, edit) {
+export const saveEdit = (setId, uid, edit) => undoable('Saved a change to a question', ['libEdits'], () => writeEdit(setId, uid, edit));
+function writeEdit(setId, uid, edit) {
   const key = keyOf(setId, uid);
   const record = { ...(state.libEdits[key] || {}), ...edit, key, setId, uid, updatedAt: now() };
   state.libEdits[key] = record;
@@ -259,7 +262,8 @@ export function saveEdit(setId, uid, edit) {
 }
 
 // Puts the imported version back. The user's notes are theirs rather than a correction, so they stay.
-export function clearEdit(setId, uid) {
+export const clearEdit = (setId, uid) => undoable('Reverted a question to the imported version', ['libEdits'], () => dropEdit(setId, uid));
+function dropEdit(setId, uid) {
   const key = keyOf(setId, uid);
   const old = state.libEdits[key];
   if (old && old.notes) {
@@ -274,7 +278,8 @@ export function clearEdit(setId, uid) {
 }
 
 // Drops one correction the user made (say a section they chose) without touching the others.
-export function clearEditField(setId, uid, field) {
+export const clearEditField = (setId, uid, field) => undoable('Reverted a change to a question', ['libEdits'], () => dropEditField(setId, uid, field));
+function dropEditField(setId, uid, field) {
   const key = keyOf(setId, uid);
   const old = state.libEdits[key];
   if (!old || !(field in old)) return;
@@ -335,11 +340,11 @@ export function createLibRun({ setId, folderId, sourceSetIds, mode, options = {}
   return run;
 }
 
-export function deleteLibRun(id) {
+export const deleteLibRun = (id) => undoable(`Abandoned ${state.libRuns[id] ? state.libRuns[id].name : 'a session'}`, ['libRuns'], () => {
   delete state.libRuns[id];
   db.remove('libRuns', id);
   notify();
-}
+});
 
 export function setLibCurrent(id, uid) {
   const run = state.libRuns[id];

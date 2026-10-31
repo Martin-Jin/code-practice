@@ -42,7 +42,7 @@ const SECTIONS = [
         </ol>
         <Shot file="set.jpg" alt="A coding set page with the practice mode dropdown and its options" />
         <p><b>Adding your own coding questions.</b> Coding sets are not imported through the app yet: they are C++ files in the project, in <code>sets/&lt;set-id&gt;/</code> (a <code>set.json</code>, one file per question with its task, starter code and tests, and the reference solutions). Adding one needs a copy of the project on your computer, so if you are only using the published page, first <b>clone the repo</b> (<code>git clone https://github.com/martin-jin/practice-questions.git</code>, then <code>cd app</code> and <code>npm install</code>; Node and a C++ compiler are needed to run it locally). Then copy <code>templates/example-set</code> (or <code>sets/sample</code>), edit it, then refresh the page if the local server is running (<code>app/start.ps1</code>), or run <code>npm run build</code> in the <code>app</code> folder. To share a set, send its folder. See the <Ext href={`${DOCS}/adding-questions.md`}>adding-questions guide</Ext> (sections 2 and 3) and the <Ext href={`${DOCS}/question-format.md`}>question format</Ext>. An agent can write the questions for you from that format.</p>
-        <p className="muted">Alt+T hides the task, Alt+O the output, Ctrl+P searches, Alt+K opens the command palette. The <b>?</b> or the three-dot menu lists every shortcut.</p>
+        <p className="muted">Alt+T hides the task, Alt+O the output, Ctrl+P searches, Alt+K opens the command palette, Ctrl+Z undoes the last change and Ctrl+Shift+Z redoes it. The <b>?</b> or the three-dot menu lists every shortcut.</p>
       </>
     ),
   },
@@ -120,6 +120,7 @@ const SECTIONS = [
           <li>Worked solution PDF pages scroll horizontally. Enlarge a page to switch between pages with the arrows without losing your zoom.</li>
           <li>Each set has a <b>Stats</b> page with attempts, right and wrong counts.</li>
           <li>Press Alt+K for the command palette: search sets and questions, add a question, move a set to a folder.</li>
+          <li>Every change you make (a folder, a moved or edited question, an abandoned session, a removed set) shows a note at the top right for a moment. Click it to undo, or press Ctrl+Z; Ctrl+Shift+Z redoes. Typing in a text box keeps its own Ctrl+Z.</li>
         </ul>
         <Shot file="library.jpg" alt="An imported set page with the practice mode dropdown and questions grouped by section" />
       </>

@@ -12,6 +12,7 @@ import * as db from './db.js';
 import { uidFor } from '../../shared/pdfindex.js';
 import { state, notify } from './store.js';
 import { loadPdfjs } from './pdfjs.js';
+import { recordUndo } from './undo.js';
 
 const lower = (path) => path.toLowerCase();
 const mb = (bytes) => `${(bytes / 1048576).toFixed(bytes < 10485760 ? 1 : 0)} MB`;
@@ -156,7 +157,18 @@ export async function importSet(item) {
   notify();
 }
 
-export async function removeSet(id) {
+// Puts a set's record back (with files to add or delete) in one step; the undo and redo of adding or deleting a question.
+async function writeSet(id, record, put = [], del = []) {
+  await db.transact(['libSets', 'libFiles'], (t) => {
+    t.objectStore('libSets').put(record);
+    for (const f of put) t.objectStore('libFiles').put(f);
+    for (const key of del) t.objectStore('libFiles').delete(key);
+  });
+  state.library.sets[id] = record;
+  notify();
+}
+
+async function deleteSet(id) {
   await db.transact(['libSets', 'libFiles', 'libFormulas'], (t) => {
     t.objectStore('libSets').delete(id);
     t.objectStore('libFiles').delete(db.prefixRange(`${id}/`));
@@ -165,6 +177,21 @@ export async function removeSet(id) {
   delete state.library.sets[id];
   delete state.libFormulas[id];
   notify();
+}
+
+// Removing a set keeps a copy of its record, files and formula sheets so that Undo can put it back (its folders only list its id).
+export async function removeSet(id) {
+  const record = state.library.sets[id];
+  const formulas = state.libFormulas[id];
+  const files = (await db.getAll('libFiles')).filter((f) => f.setId === id);
+  await deleteSet(id);
+  if (!record) return;
+  recordUndo(`Removed ${record.title}`, async () => {
+    await db.writeAll({ libSets: [record], libFiles: files, ...(formulas ? { libFormulas: [formulas] } : {}) });
+    state.library.sets[id] = record;
+    if (formulas) state.libFormulas[id] = formulas;
+    notify();
+  }, () => deleteSet(id));
 }
 
 // The set id of the user's own questions (see mine.js). No folder may use it.
@@ -211,8 +238,11 @@ export async function addToImportedSet(setId, question, images) {
     t.objectStore('libSets').put(record);
     for (const [path, blob] of Object.entries(blobs)) t.objectStore('libFiles').put({ key: `${setId}/${path}`, setId, path, size: blob.size, modified: record.files[path].modified, file: blob });
   });
+  const previous = state.library.sets[setId];
   state.library.sets[setId] = record;
   notify();
+  const added = Object.entries(blobs).map(([path, blob]) => ({ key: `${setId}/${path}`, setId, path, size: blob.size, modified: record.files[path].modified, file: blob }));
+  recordUndo(`Added “${named.title}”`, () => writeSet(setId, previous, [], added.map((f) => f.key)), () => writeSet(setId, record, added));
   return uid;
 }
 
@@ -223,13 +253,11 @@ export async function deleteOwnQuestion(setId, uid) {
   if (!gone) return;
   record.manifest.questions = record.manifest.questions.filter((q) => q.uid !== uid);
   const paths = imagesOf(gone);
+  const previous = state.library.sets[setId];
+  const files = (await Promise.all(paths.map((p) => db.get('libFiles', `${setId}/${p}`)))).filter(Boolean);
   for (const p of paths) delete record.files[p];
-  await db.transact(['libSets', 'libFiles'], (t) => {
-    t.objectStore('libSets').put(record);
-    for (const p of paths) t.objectStore('libFiles').delete(`${setId}/${p}`);
-  });
-  state.library.sets[setId] = record;
-  notify();
+  await writeSet(setId, record, [], paths.map((p) => `${setId}/${p}`));
+  recordUndo(`Deleted “${gone.title}”`, () => writeSet(setId, previous, files), () => writeSet(setId, record, [], paths.map((p) => `${setId}/${p}`)));
 }
 
 export async function loadLibrary() {

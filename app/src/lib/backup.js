@@ -10,6 +10,7 @@ import { getFile } from './library.js';
 import { formulaBlob } from './formulas.js';
 import { discardPendingSaves } from './service.js';
 import { discardPracticeSaves } from './practice.js';
+import { undoBarrier } from './undo.js';
 
 // When the last backup was made or restored, and how many attempts the data held then.
 // Bookkeeping for the reminder, so it is not part of a backup.
@@ -133,6 +134,7 @@ export async function downloadBackup({ files = false } = {}) {
   const backup = buildBackup({ stores: currentRecords(), settings: readSettings(), now, library: extra && extra.library });
   const name = await writeFile(backup, extra && extra.entries, backupFileName(now));
   remember(backup.createdAt);
+  undoBarrier();
   notify();
   return name;
 }
