@@ -9,7 +9,7 @@ export const CHANGELOG = [
   {
     version: '2.10', date: '2026-10-31', title: 'Timer follows the theme',
     items: [
-      'The timer note now uses the page's own colours, so it is dark in the dark theme and light in the light theme.',
+      'The timer note now uses the same colours as the rest of the page, so it is dark in the dark theme and light in the light theme.',
     ],
   },
   {
