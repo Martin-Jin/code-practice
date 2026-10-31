@@ -20,7 +20,7 @@ const empty = { attempts: 0, correct: 0, wrong: 0, compileErrors: 0, crashes: 0,
 
 function keep(filter, s) {
   if (filter === 'attempted') return s.attempts > 0;
-  if (filter === 'struggling') return s.wrong + s.compileErrors > s.correct;
+  if (filter === 'struggling') return s.attempts > 0 && s.lastStatus !== 'passed';   // as the Not right last time mode
   if (filter === 'new') return s.attempts === 0;
   return true;
 }

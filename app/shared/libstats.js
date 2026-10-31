@@ -59,7 +59,7 @@ export function questionRows(questions, progressOf) {
     const wrong = p.wrong || 0;
     return {
       uid: q.uid, title: q.title, section: q.section, right, wrong, attempts: right + wrong, difficult: !!p.difficult,
-      lastAt: p.lastAt || null, rate: rateOf(right, wrong), trouble: libraryTrouble(p),
+      lastAt: p.lastAt || null, lastOverall: p.lastOverall || null, rate: rateOf(right, wrong), trouble: libraryTrouble(p),
     };
   });
 }
@@ -69,7 +69,7 @@ export const ROW_FILTERS = [['all', 'All'], ['attempted', 'Attempted'], ['strugg
 
 export function keepRow(filter, row) {
   if (filter === 'attempted') return row.attempts > 0;
-  if (filter === 'struggling') return row.wrong > row.right;
+  if (filter === 'struggling') return row.wrong > 0 && row.lastOverall === 'wrong';   // as the Not right last time mode
   if (filter === 'new') return row.attempts === 0;
   if (filter === 'difficult') return row.difficult;
   return true;

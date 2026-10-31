@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.04';
+export const VERSION = '2.05';
 
 export const CHANGELOG = [
+  {
+    version: '2.05', date: '2026-10-31', title: 'Struggling means not right last time',
+    items: [
+      'The Struggling filter on the Stats pages now lists questions you got wrong at least once and did not get right the last time, the same ones the Not right last time practice mode draws, for coding sets and imported sets alike.',
+    ],
+  },
   {
     version: '2.04', date: '2026-10-31', title: 'Past sessions in a window',
     items: [
@@ -32,12 +38,6 @@ export const CHANGELOG = [
     items: [
       'A button beside the Practice mode dropdown opens a window listing every topic (or section): choose which to include and, for Random, how many questions from each. It replaces the topic tick boxes, and coding sets and imported sets now share the same layout, with the topic list beside the picker.',
       'The page location (for example / Question sets / Folder / This set) now sits above the page title instead of in the top bar. Run rows no longer wrap their progress text.',
-    ],
-  },
-  {
-    version: '2.00', date: '2026-10-31', title: 'Practice mode dropdown everywhere',
-    items: [
-      'Imported sets, library folders and coding sets all choose their practice mode from one dropdown, showing only the options for the chosen mode (question count, sections or topics to draw from), instead of a vertical list of every mode.',
     ],
   },
 ];

@@ -9,8 +9,8 @@ const qs = [
   { uid: 'd', title: 'Delta', section: 'Two' },
 ];
 const progress = {
-  a: { right: 3, wrong: 1, lastAt: '2026-10-01T00:00:00Z' },
-  b: { right: 0, wrong: 2, difficult: true, lastAt: '2026-10-03T00:00:00Z' },
+  a: { right: 3, wrong: 1, lastOverall: 'right', lastAt: '2026-10-01T00:00:00Z' },
+  b: { right: 0, wrong: 2, difficult: true, lastOverall: 'wrong', lastAt: '2026-10-03T00:00:00Z' },
   c: { right: 0, wrong: 0, difficult: true },                 // flagged but never checked
   // d: no record at all
 };
@@ -63,4 +63,13 @@ test('question rows can be filtered and ranked by trouble', () => {
   assert.deepEqual(rankRows(rows).map((r) => r.uid), ['b', 'c', 'a', 'd']);
   assert.equal(rows[0].rate, 0.75);
   assert.equal(rows[3].rate, null);
+});
+
+test('struggling means wrong at least once and not right the last time, even with more rights than wrongs', () => {
+  const row = (right, wrong, lastOverall) => ({ right, wrong, lastOverall });
+  assert.equal(keepRow('struggling', row(3, 1, 'wrong')), true);
+  assert.equal(keepRow('struggling', row(1, 1, 'wrong')), true);
+  assert.equal(keepRow('struggling', row(0, 2, 'right')), false);
+  assert.equal(keepRow('struggling', row(2, 0, 'right')), false);
+  assert.equal(keepRow('struggling', row(0, 0, null)), false);
 });
