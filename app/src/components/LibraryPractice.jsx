@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { plural, timeAgo } from '../lib/format.js';
 import { LIB_MODE_LABELS } from '../../shared/librarymodes.js';
@@ -7,6 +7,7 @@ import { createLibRun, deleteLibRun, runStatus, getQuestionProgress, libraryRunS
 import { useDialogs } from './Dialogs.jsx';
 import { toast, validationError } from './Toasts.jsx';
 import { backupNote } from '../lib/backup.js';
+import { useSlide } from './SlideText.jsx';
 import Icon from './Icon.jsx';
 import TopicDialog from './TopicDialog.jsx';
 
@@ -143,6 +144,9 @@ export function LibraryPracticePicker({ set }) {
 export function LibRunRow({ run, showSet = true, compact = false }) {
   const st = useStore();
   const { confirm } = useDialogs();
+  const row = useRef(null);
+  const main = useRef(null);
+  useSlide(main, row);   // a thin row cuts its text off and slides it on hover
   const set = libraryRunSet(run);
   const done = run.questions.filter((uid) => runStatus(run, uid)).length;
   const right = run.questions.filter((uid) => runStatus(run, uid) === 'right').length;
@@ -158,8 +162,8 @@ export function LibRunRow({ run, showSet = true, compact = false }) {
   };
 
   return (
-    <div className={`card run-row${compact ? ' compact' : ''}`}>
-      <div style={{ minWidth: 0 }}>
+    <div className={`card run-row${compact ? ' compact' : ''}`} ref={row}>
+      <div style={{ minWidth: 0 }} ref={main}>
         <div className="title" title={run.name}>{run.name}</div>
         <div className="sub">
           <span className="chip accent">{LIB_MODE_LABELS[run.mode]}</span>

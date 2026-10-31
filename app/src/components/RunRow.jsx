@@ -1,14 +1,19 @@
+import { useRef } from 'react';
 import { MODE_LABELS } from '../../shared/modes.js';
 import { getSet } from '../lib/catalog.js';
 import { deleteRun, runSummary } from '../lib/service.js';
 import { timeAgo, plural } from '../lib/format.js';
 import { backupNote } from '../lib/backup.js';
 import Icon from './Icon.jsx';
+import { useSlide } from './SlideText.jsx';
 import { useDialogs } from './Dialogs.jsx';
 
 // One saved run: progress, mode and Resume / Abandon.
 export default function RunRow({ run, showSet = true, compact = false }) {
   const { confirm } = useDialogs();
+  const row = useRef(null);
+  const main = useRef(null);
+  useSlide(main, row);   // a thin row cuts its text off and slides it on hover
   const sum = runSummary(run);
   const pct = sum.total ? (sum.passed / sum.total) * 100 : 0;
   const done = !!run.completedAt;
@@ -25,8 +30,8 @@ export default function RunRow({ run, showSet = true, compact = false }) {
   };
 
   return (
-    <div className={`card run-row${compact ? ' compact' : ''}`}>
-      <div style={{ minWidth: 0 }}>
+    <div className={`card run-row${compact ? ' compact' : ''}`} ref={row}>
+      <div style={{ minWidth: 0 }} ref={main}>
         <div className="title" title={run.name}>{run.name}</div>
         <div className="sub">
           <span className="chip accent">{MODE_LABELS[run.mode]}</span>

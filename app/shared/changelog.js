@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.17';
+export const VERSION = '2.18';
 
 export const CHANGELOG = [
+  {
+    version: '2.18', date: '2026-10-31', title: 'Thin run rows on the dashboard',
+    items: [
+      'The runs on the dashboard use the same thin rows as History, so more of them fit on screen, with a smaller Resume button. On a phone they take two short lines. When a row is too narrow for its name and set, the text is cut off and slides along while you hover over the row.',
+    ],
+  },
   {
     version: '2.17', date: '2026-10-31', title: 'History as a searchable list of runs',
     items: [
@@ -30,13 +36,6 @@ export const CHANGELOG = [
     version: '2.14', date: '2026-10-31', title: 'Recent sessions beside the practice options',
     items: [
       'An imported set page now lists its latest practice sessions in the space beside the practice options, as many as fit, each opening its session or results. See all opens the window with every past session. The History button beside the title is gone, and the practice options block is a little narrower.',
-    ],
-  },
-  {
-    version: '2.13', date: '2026-10-31', title: 'Cleaner top bar in a session',
-    items: [
-      'During a practice session the top bar keeps only the logo, the menu and the timer, which now sits in the middle. The page tabs and the search box are hidden, since the All button on the question strip searches the session.',
-      'Fixed the question strip with a long session: it stretched the page instead of scrolling within one row.',
     ],
   },
 ];

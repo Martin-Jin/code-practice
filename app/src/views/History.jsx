@@ -44,7 +44,7 @@ function HistorySearch({ runs, query, onChange }) {
   return (
     <div className="hist-search section-combo">
       <Icon name="search" />
-      <input type="text" value={query} placeholder="Search your history by set, run name or mode" aria-label="Search your history" role="combobox" aria-expanded={open && hints.length > 0} aria-autocomplete="list"
+      <input type="text" value={query} placeholder="Search by set, run name or mode" aria-label="Search your history" role="combobox" aria-expanded={open && hints.length > 0} aria-autocomplete="list"
         onChange={(e) => { onChange(e.target.value); setOpen(true); setActive(0); }} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={onKey} />
       {query && <button type="button" className="btn ghost icon-only sm" onMouseDown={(e) => e.preventDefault()} onClick={() => onChange('')} aria-label="Clear the search"><Icon name="x" /></button>}
       {open && hints.length > 0 && (

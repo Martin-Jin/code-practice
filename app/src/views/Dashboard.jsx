@@ -16,7 +16,7 @@ export default function Dashboard({ theme }) {
   // The hero offers to pick up the session touched last.
   const last = ongoing[0];
   const resume = last ? { label: `Resume ${last.r.name}`, href: last.kind === 'lib' ? `#/practice/${last.r.id}` : `#/run/${last.r.id}` } : null;
-  const row = ({ kind, r }) => (kind === 'lib' ? <LibRunRow key={r.id} run={r} /> : <RunRow key={r.id} run={r} />);
+  const row = ({ kind, r }) => (kind === 'lib' ? <LibRunRow key={r.id} run={r} compact /> : <RunRow key={r.id} run={r} compact />);
 
   return (
     <Shell theme={theme} hero={<Hero action={resume} />}>
