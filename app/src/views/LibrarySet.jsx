@@ -172,16 +172,12 @@ export default function LibrarySet({ setId, theme }) {
   // The section shown: the one chosen, or the first when none is chosen or it no longer exists.
   const current = sections.find((s) => s.name === picked) || sections[0];
 
-  // A window listing every topic (section) in the set with its question count.
-  const showTopics = () => open(({ close }) => (
-    <Modal title={`Topics in ${record.title}`} onClose={close} footer={<button type="button" className="btn primary" onClick={close}>Close</button>}>
-      <div style={{ display: 'grid', gap: 6 }}>
-        {sections.map((s) => (
-          <div key={s.name} className="row" style={{ justifyContent: 'space-between' }}>
-            <span>{s.name}</span><span className="muted">{plural(s.questions.length, 'question')}</span>
-          </div>
-        ))}
-      </div>
+  // A window listing every session of this set, newest first (the page itself shows them beside the practice options too).
+  const showHistory = () => open(({ close }) => (
+    <Modal wide title={`Past sessions in ${record.title}`} onClose={close} footer={<button type="button" className="btn primary" onClick={close}>Close</button>}>
+      {runs.length === 0
+        ? <div className="empty">No sessions yet. Choose a mode and press Start.</div>
+        : <div className="run-list" onClick={() => close()}>{runs.map((r) => <LibRunRow key={r.id} run={r} showSet={false} />)}</div>}
     </Modal>
   ));
   // The search palette (the same one as the quick search) over this set's questions; choosing one opens it.
@@ -246,32 +242,14 @@ export default function LibrarySet({ setId, theme }) {
   return (
     <Shell theme={theme} crumbs={[...folderCrumbs(setId), { label: record.title }]}>
       <div className="page-head">
-        <h1 className="title-with-icon">{record.title} <button type="button" className="btn ghost icon-only reveal" onClick={showTopics} title="Show the topics in this set" aria-label="Show the topics in this set"><Icon name="history" /><span className="label">Topics</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
+        <h1 className="title-with-icon">{record.title} <button type="button" className="btn ghost icon-only reveal" onClick={showHistory} title="Past sessions in this set" aria-label="Past sessions in this set"><Icon name="history" /><span className="label">History</span></button> <a className="btn ghost icon-only reveal" href={`#/lib/${encodeURIComponent(setId)}/stats`} title="View stats" aria-label="View stats"><Icon name="stats" /><span className="label">Stats</span></a> <button type="button" className="btn ghost icon-only reveal" onClick={search} title="Search this set's questions" aria-label="Search this set's questions"><Icon name="search" /><span className="label">Search</span></button></h1>
         <p className="muted">
           {[record.course, plural(questions.length, 'question'), plural(sections.length, 'section'), `from ${record.folder || 'the top of the folder you chose'}`].filter(Boolean).join(' · ')}
         </p>
       </div>
 
       {canSync(record) && <PdfBar record={record} />}
-      <div className="two-col fit">
-        <LibraryPracticePicker set={record} />
-        <section className="fit-col">
-          <div className="section-title"><h2>Your sessions in this set</h2><span className="muted">{runs.length}</span></div>
-          {runs.length === 0
-            ? <div className="empty">No sessions yet. Choose a mode and press Start.</div>
-            : <div className="run-list">{runs.map((r) => <LibRunRow key={r.id} run={r} showSet={false} />)}</div>}
-
-          <div className="section-title" style={{ marginTop: 28 }}><h2>Sections</h2></div>
-          <div className="card pad topic-card" style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
-            {sections.map((s) => (
-              <div key={s.name} className="row" style={{ justifyContent: 'space-between' }}>
-                <span>{s.name}</span>
-                <span className="muted">{plural(s.questions.length, 'question')}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+      <div style={{ maxWidth: 820 }}><LibraryPracticePicker set={record} /></div>
 
       {sections.length > 0 && (
         <div className="section-title set-heading"><h2>Questions in this set</h2><span className="muted">{questions.length}</span></div>

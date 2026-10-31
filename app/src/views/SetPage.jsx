@@ -54,15 +54,6 @@ export default function SetPage({ setId, theme }) {
             ? <div className="empty">No runs yet. Choose a mode and press Start.</div>
             : <div className="run-list">{runs.map((r) => <RunRow key={r.id} run={r} showSet={false} />)}</div>}
 
-          <div className="section-title" style={{ marginTop: 28 }}><h2>Topics</h2></div>
-          <div className="card pad topic-card" style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
-            {set.categories.map((c) => (
-              <div key={c.id} className="row" style={{ justifyContent: 'space-between' }}>
-                <span>{c.name}</span>
-                <span className="muted">{plural(c.questions.length, 'question')}{c.group !== 'core' ? ` · ${set.groups[c.group]}` : ''}</span>
-              </div>
-            ))}
-          </div>
         </section>
       </div>
     </Shell>

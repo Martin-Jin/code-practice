@@ -3,9 +3,16 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.03';
+export const VERSION = '2.04';
 
 export const CHANGELOG = [
+  {
+    version: '2.04', date: '2026-10-31', title: 'Past sessions in a window',
+    items: [
+      'On an imported set, the new history button beside Stats and Search opens a window with every past session of that set. The sessions and sections lists beside the practice options are gone; the topics are still chosen with the button beside the practice mode.',
+      'Coding sets and folders lose their topic list beside the practice options too.',
+    ],
+  },
   {
     version: '2.03', date: '2026-10-31', title: 'Undo and redo',
     items: [
@@ -31,12 +38,6 @@ export const CHANGELOG = [
     version: '2.00', date: '2026-10-31', title: 'Practice mode dropdown everywhere',
     items: [
       'Imported sets, library folders and coding sets all choose their practice mode from one dropdown, showing only the options for the chosen mode (question count, sections or topics to draw from), instead of a vertical list of every mode.',
-    ],
-  },
-  {
-    version: '1.99', date: '2026-10-31', title: 'No blank solution pages in the PDF',
-    items: [
-      'Changing a multi-page solution in the PDF with fewer images (or text) now removes the leftover solution pages instead of leaving them blank under a "Worked solution" header.',
     ],
   },
 ];

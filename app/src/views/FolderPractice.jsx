@@ -42,15 +42,6 @@ export default function FolderPractice({ folderId, theme }) {
             ? <div className="empty">No runs yet. Choose a mode and press Start.</div>
             : <div className="run-list">{runs.map((run) => <LibRunRow key={run.id} run={run} showSet={false} />)}</div>}
 
-          <div className="section-title" style={{ marginTop: 28 }}><h2>Topics</h2></div>
-          <div className="card pad topic-card" style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
-            {topics.map((topic) => (
-              <div key={topic} className="row" style={{ justifyContent: 'space-between' }}>
-                <span>{topic}</span>
-                <span className="muted">{plural(set.manifest.questions.filter((q) => q.section === topic).length, 'question')}</span>
-              </div>
-            ))}
-          </div>
         </section>
       </div>
       <p className="muted"><a href={folderId ? `#/sets/${folderId}` : '#/sets'}>Back to {folder ? folder.name : 'Your library'}</a></p>
