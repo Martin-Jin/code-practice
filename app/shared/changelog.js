@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.09';
+export const VERSION = '2.10';
 
 export const CHANGELOG = [
+  {
+    version: '2.10', date: '2026-10-31', title: 'Timer follows the theme',
+    items: [
+      'The timer note now uses the page's own colours, so it is dark in the dark theme and light in the light theme.',
+    ],
+  },
   {
     version: '2.09', date: '2026-10-31', title: 'Question timers and a tidier Stats page',
     items: [
@@ -30,13 +36,6 @@ export const CHANGELOG = [
     version: '2.05', date: '2026-10-31', title: 'Struggling means not right last time',
     items: [
       'The Struggling filter on the Stats pages now lists questions you got wrong at least once and did not get right the last time, the same ones the Not right last time practice mode draws, for coding sets and imported sets alike.',
-    ],
-  },
-  {
-    version: '2.04', date: '2026-10-31', title: 'Past sessions in a window',
-    items: [
-      'On an imported set, the new history button beside Stats and Search opens a window with every past session of that set. The sessions and sections lists beside the practice options are gone; the topics are still chosen with the button beside the practice mode.',
-      'Coding sets and folders lose their topic list beside the practice options too.',
     ],
   },
 ];
