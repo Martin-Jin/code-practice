@@ -3,9 +3,15 @@
 // `${1 + floor(N / 100)}.${N % 100, two digits}` (the 73rd push is 1.72). Every change a user can see adds an entry at the top,
 // sets VERSION to it and drops the oldest, so the window opens on the change log after an update. A new feature also needs
 // its place in the tutorial in Welcome.jsx.
-export const VERSION = '2.11';
+export const VERSION = '2.12';
 
 export const CHANGELOG = [
+  {
+    version: '2.12', date: '2026-10-31', title: 'One-row question strip',
+    items: [
+      'In a practice session the numbered strip is now a single row that slides to keep the current question in view, so long sessions no longer fill the top of the page. The All button at its end opens a searchable list of every question.',
+    ],
+  },
   {
     version: '2.11', date: '2026-10-31', title: 'Timer at the bottom right, one-line menus, symbols fixed',
     items: [
@@ -32,12 +38,6 @@ export const CHANGELOG = [
     version: '2.07', date: '2026-10-31', title: 'Search and menu at the top right',
     items: [
       'The search box and the three-dot menu in the top bar now sit at the right edge instead of next to the page tabs.',
-    ],
-  },
-  {
-    version: '2.06', date: '2026-10-31', title: 'Rename a question set from its page',
-    items: [
-      'The title on an imported set page is underlined: click it and type to rename the set in place (Enter saves, Esc cancels). The name is kept when you import the folder or re-index the PDF again, and Ctrl+Z undoes it.',
     ],
   },
 ];

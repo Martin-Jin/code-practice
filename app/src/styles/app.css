@@ -591,7 +591,20 @@ label.choice input { margin-top: 4px; }
 .field.grow { flex: 1; min-width: 120px; }
 .small { font-size: 12.5px; }
 .notice.ok { background: var(--ok-soft); color: var(--ok); } .notice.bad { background: var(--bad-soft); color: var(--bad); }
-.qstrip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.qstrip-wrap { position: relative; margin-bottom: 14px; }
+.qstrip { display: flex; align-items: center; gap: 8px; }
+.qstrip-row { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 1px 0 4px; }
+.qstrip-row::-webkit-scrollbar { display: none; }
+.qstrip-row .qdot { flex: none; }
+.qstrip-all { flex: none; }
+.qstrip-all[aria-expanded="true"] .icon { transform: rotate(180deg); }
+.qlist-panel { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20; padding: 10px; display: grid; gap: 8px; }
+.qlist { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow-y: auto; display: grid; }
+.qlist li { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border-radius: 6px; cursor: pointer; }
+.qlist li.active { background: var(--accent-soft); }
+.qlist li.empty-opt { cursor: default; }
+.qlist .qdot { flex: none; pointer-events: none; }
+.qlist-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qdot { min-width: 34px; height: 30px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; }
 .qdot:hover { text-decoration: none; background: var(--surface-2); }
 .qdot.cur { background: var(--strong); border-color: var(--strong); color: var(--strong-ink); }

@@ -8,6 +8,7 @@ import { Stem, Solution } from '../components/Question.jsx';
 import { PartAnswer, SelfMark, AnswerKeyEditor } from '../components/Parts.jsx';
 import { knownTags } from '../components/TagInput.jsx';
 import FormulaSidebar from '../components/FormulaSidebar.jsx';
+import QuestionStrip from '../components/QuestionStrip.jsx';
 import { QuestionTimer } from '../components/QuestionTimer.jsx';
 import EditContent from '../components/EditContent.jsx';
 import { Modal, useDialogs } from '../components/Dialogs.jsx';
@@ -236,16 +237,8 @@ export default function QuestionView({ setId, uid, run, theme }) {
     <Shell theme={theme} crumbs={[...folderCrumbs(recordSetId), { label: set.title, href: `#/lib/${encodeURIComponent(recordSetId)}` }, { label: run ? run.name : question.section }]}>
       <QuestionTimer recordSetId={recordSetId} recordUid={recordUid} uid={uid} run={run || null} />
       {run && (
-        <nav className="qstrip" aria-label="Questions in this session">
-          {questions.map((q, i) => {
-            const status = runStatus(run, q.uid);
-            const p = getProgress(q.sourceSetId || setId, q.sourceUid || q.uid);
-            return (
-              <a key={q.uid} href={go(i)} title={q.title} aria-current={q.uid === uid ? 'step' : undefined}
-                className={`qdot${q.uid === uid ? ' cur' : ''}${status ? ` ${status}` : ''}${p && p.difficult ? ' diff' : ''}`}>{i + 1}</a>
-            );
-          })}
-        </nav>
+        <QuestionStrip current={uid} href={go}
+          items={questions.map((q) => ({ uid: q.uid, title: q.title, status: runStatus(run, q.uid), difficult: !!(getProgress(q.sourceSetId || setId, q.sourceUid || q.uid) || {}).difficult }))} />
       )}
       <div className="qview">
         <article className="card pad qmain">
